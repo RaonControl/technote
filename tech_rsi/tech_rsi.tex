@@ -208,9 +208,48 @@ Where the contract involves the development of an \Gls{epics} interface to the c
   \item All equipment protection instrumentation and logic shall be designed to be fail safe. Circumstances to be considered include, but are not limited to, electrical power failure, compressed air failure, and cable breakage. 
   \item Software-based equipment protection solutions may only be used in addition to a hardware solution.
   \item For motions control, limit switches shall be directly connected to the limit switch inputs of the motion controller.
-  \item 
+  \item All components, particularly those exposed to high heat loads, shall have sufficient instrumentation to allow monitoring the integrity of the equipment. This instrumentation will be interfaced to an interlock system which will take action to prevent any permanent damage to the component.
+  \item The Contractor shall define the safe operating range for each component based on the instrumentation provided for that component.
+  \item The Contractor shall define the required interlock actions when equipment is outside the safe operating range.
+  \item The Contractor shall define the length of time required for protective action to occur.
+  \item Where the Contractor implements the complete equipment protection system, it shall be a PLC based system. 
 \end{itemize}
 
+
+\section{Power Supplies}
+\begin{itemize}
+\item All equipment supplied by the Contractor shall be supplied with appropriate power supplies. These power supplies shall accept a standard 220 VAC supply as input.
+\end{itemize}
+
+
+\chapter{Control System Interface Definitions}
+
+\section{Controls Network}
+\begin{itemize}
+  \item Network-attached devices shall be compatible with a 1 Gb/s network.
+  \item Network-attached devices shall operate at a minimum network speed of 100 Mb/s.
+  \item Network-attached devices shall obtain their network address either through static address configuration or DHCP.
+  \item Network-attached devices shall include a Standard RJ-45 modular connector.
+  \item Standardized cables for Gigabit Ethernet shall be used the Category 6 one.
+  \item The Cat 6 should be terminated using the T568B pin/pair assignment.
+\end{itemize}
+
+
+
+\section{Serial Devices}
+\begin{itemize}
+  \item Any device that provides a serial communication interface to the accelerator control system shall be interfaced by a terminal server.
+  \item The serial connection from the device to the terminal server shall be RS232, 422, or 485.
+  \item The use of USB to connect a device to the control system shall be avoided, as far as practicable.
+  \item Applications that are requiring high voltage isolation (e.g., vacuum gauge and pump controllers) shall use a Moxa CN2650I series terminal server, or equivalent with more than 2 kV optical isolation for the serial line protection.
+  \item Applications that do not require high voltage isolation shall use a Moxa NPort 6650 series terminal server, or equivalent with data transmission integrity with support of EDS, 3DES, and AES encryption algorithms.
+\end{itemize}
+
+\section{Triggers}
+\begin{itemize}
+  \item All generated triggers shall be TTL signal levels.
+  \item All trigger inputs shall accept TTL signal levels.
+\end{itemize}
 
 \chapter{Acknowledgment}
 The document is re-compiled by the author based on the original NSLS-II XFD RSI for the Controls and DAQ Systems \cite{LT-C-XFD-RSI-CO-001} in order to use it for the RAON accelerator control system. I owe much to Bob Dalesio and Wayne Lewis for fruitful discussions about the requirements, specifications, and interface for controls systems.
