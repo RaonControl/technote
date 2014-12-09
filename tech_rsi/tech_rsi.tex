@@ -115,7 +115,7 @@ The Control team has selected the \Gls{epics} \cite{EPICS3.14.12.3} as a main fr
 \section{EPICS Support}
 Where the contract involves the development of an \Gls{epics} interface to the equipment and any devices, the following itemized list shall apply.
 
-\section{\Gls{ioc} platform}
+\subsection{\Gls{ioc} platform}
 \begin{itemize}
   \item The standard \Gls{ioc} hardware platform is an 1U rack mountable server.
   \item All \Gls{ioc} hardware shall be installed into the standard 19-in. rack by the Contractor.
@@ -123,17 +123,24 @@ Where the contract involves the development of an \Gls{epics} interface to the e
 \end{itemize}
 
 
-\section{Database development}
+\subsection{Database development}
 \begin{itemize}
   \item The Contractor shall provide \Gls{epics} databases with layout information compatible with the \Gls{vdct} \Gls{epics} database development tool \cite{vdct}.
 \end{itemize}
 
 
-\section{Device support}
+\subsection{Device support}
 \begin{itemize}
-\item The Contractor shall supply \Gls{epics} device drivers and device support for any hardware delivered as part of this contract.
+\item The Contractor shall supply \Gls{epics} device drivers and devce support for any hardware delivered as part of this contract.
 \item Where the Contractor provides a motion controller, the \Gls{epics} interface shall be the standard Motor record, or a set of records that provides equivalent functionality.
 \end{itemize}
+
+\subsection{Time Synchronization}
+
+
+\subsection{Preserve of PV values through an ioc reboot}
+
+
 
 \section{\Gls{ract} Supplied Items}
 \begin{itemize}
@@ -142,6 +149,8 @@ Where the contract involves the development of an \Gls{epics} interface to the e
 \item A naming convention document for the control system.
 \item A specification for the file structure to be used for software development. \textbf{Need to be a section in this document}
 \end{itemize}
+
+
 
 \section{\Gls{opi}}
 Where the contract involves the development of an \Gls{epics} interface to the components, the following shall apply.
