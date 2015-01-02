@@ -15,7 +15,7 @@
 
 \newcommand{\technumber}{
   RAON Control-Document Series\\
-  Revision : v1.0,   Release : a fixed date}
+  Revision : v1.0,   Release : Jan. 02. 2015}
 \title{\textbf{SNMP 메뉴얼}}
 
 \author{박미정\thanks{mijoy0909@ibs.re.kr} \\
@@ -50,7 +50,7 @@ SNMP(Simple Network Management Protocol)는 IP네트워크 상의 장비들을 �
 \hfil\break
 \hfil\break
 
-SNMP는 v1/2c/3의 세가지 버전이 있으며, 각 버전들은 인증과 암호화에 따른 차이점이 있다. SNMPv1/2c는 community string을 통해 사용자 인증을 하며, v3는 noAuthNoPriv, authNoPriv, authPrive의 세 종류의 보안 레벨에 따라 username, 암호화 일고리즘인 MD5, SHA로 사용자 인증을 하며, DES, AES 알고리즘을 통해 사용자가 지정한 패스워드 또한 암호화한다. 따라서 인증 및 암호화가 강화되는 v3의 경우 응답시간이 v1/2c에 비해 크다. 이러한 차이점은 표 \ref{table:conparision}\citep{comparison}에서 알 수 있다.
+SNMP는 v1/2c/3의 세가지 버전이 있으며, 각 버전들은 인증과 암호화에 따른 차이점이 있다. SNMPv1/2c는 community string을 통해 사용자 인증을 하며, v3는 noAuthNoPriv, authNoPriv, authPrive의 세 종류의 보안 레벨에 따라 username, 암호화 알고리즘인 MD5, SHA로 사용자 인증을 하며, DES, AES 알고리즘을 통해 사용자가 지정한 패스워드 또한 암호화한다. 따라서 인증 및 암호화가 강화되는 v3의 경우 응답시간이 v1/2c에 비해 크다. 이러한 차이점은 표 \ref{table:conparision}\citep{comparison}에서 알 수 있다.
 
 \begin{table}[h!]
 \begin{center}
@@ -182,7 +182,7 @@ PowerNet-MIB::sPDUIdentModelNumber.0 = STRING: "AP7921"
 
 \clearpage
 
-snmp.conf파일에는 MIB파일을 등록해주어야한다. 이 과정을 거치 OID번호가 아닌 Object의 이름으로 장비의 정보를 읽고 쓸 수 있다. 아래는 그 예이다.
+snmp.conf파일에는 MIB파일을 등록해주어야한다. 이 과정을 거치면 OID번호가 아닌 Object의 이름으로 장비의 정보를 읽고 쓸 수 있다. 아래는 그 예이다.
 
 \begin{lstlisting}[style=termstyle]
 mijoy0909@mjpark:~$ snmpwalk -v 3 -u mijoy -l authPriv -a MD5 -A PASSWORD -x DES -X PASSWORD -m +PowerNet-MIB 10.1.5.142 sPDUIdentModelNumber
@@ -614,12 +614,11 @@ SNMPv1/2c/3의 응답시간 측정에는 GNU Bash를 이용하여 만든 script�
   \label{fig:linear}   
 \end{figure}
 
-
 \clearpage
 
 \subsection{3.3.2 회귀분석을 통한 분석 및 예측}
 
-본 연구에서는 하나나 그 이상의 독립변수(x)의 종속변수(y)에 대한 영향의 추정을 할 수 있는 통계기법인 회귀분석을 사용하여 데이터를 분석하였다\citep{analysis}. 회귀분석에서 독립변수는 다른 변수에 영향을 미치는 변수이고, 종속변수는 독립변수에 의해 영향을 받는 변수이다. 따라서 본 연구에서의 독립변수는 케이블 길이이고, 종속변수는 응답시간이다. 회귀분석은 최소 하나 이상의 독립변수의 값에 근거하여 종속변수의 값을 예측하거나 독립변수가 종속변수에 미치는 영향력의 크기를 설명하는데 유용하다. 종속변수가 독립변수에 어떻게 관련되어 있는가를 나타내는 방정식은 회귀모델이며, 실험의 회귀모델은 식(1)과 같다. 
+본 연구에서는 하나 또는 그 이상의 독립변수(x)의 종속변수(y)에 대한 영향의 추정을 할 수 있는 통계기법인 회귀분석을 사용하여 데이터를 분석하였다\citep{analysis}. 회귀분석에서 독립변수는 다른 변수에 영향을 미치는 변수이고, 종속변수는 독립변수에 의해 영향을 받는 변수이다. 따라서 본 연구에서의 독립변수는 케이블 길이이고, 종속변수는 응답시간이다. 회귀분석은 최소 하나 이상의 독립변수의 값에 근거하여 종속변수의 값을 예측하거나 독립변수가 종속변수에 미치는 영향력의 크기를 설명하는데 유용하다. 종속변수가 독립변수에 어떻게 관련되어 있는가를 나타내는 방정식은 회귀모델이며, 실험의 회귀모델은 식(1)과 같다. 
 
 y=α+βx　　　　　　　　 ······(1)
 
