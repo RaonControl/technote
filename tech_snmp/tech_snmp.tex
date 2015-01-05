@@ -37,7 +37,7 @@ SNMP는 IP 네트워크들에서 장치를 관리하기 위한 공식 인터넷 
 \end{abstract}
 
 \chapter{SNMP란?}
-SNMP(Simple Network Management Protocol)는 IP네트워크 상의 장비들을 관리하고 모니터링하기 위한 인터넷 표준 프로토콜이다. SNMP는 Manger와 Agent로 구성되어있으며, Manager는 Agent에게 장비의 필요한 정보를 요청하거나, 장비의 정보를 변경한다. Manager는 NMS(Network Management Stations)로 표현되기도 한다. Agent는 Manager가 요청한 정보를 제공하고, 시스템 충돌이나 재부팅 등의 장비에 영향을 미치거나 발생한 Event를 비동기적으로 알리기 위해 Trap 메시지를 보낸다. 이들의 관계는 그림 \ref{fig:relationship_m_a}과 같다. 그림 \ref{fig:relationship_m_a}은 원래 NMS와 Agent의 관계이지만 본 연구에서는 Manager와 Agent의 관계로 재구성하였다.
+SNMP(Simple Network Management Protocol)는 IP네트워크 상의 장비들을 관리하고 모니터링하기 위한 인터넷 표준 프로토콜이다. SNMP는 Manger와 Agent로 구성되어있으며, Manager는 Agent에게 장비의 필요한 정보를 요청하거나, 장비의 정보를 변경한다. Manager는 NMS(Network Management Stations)로 표현되기도 한다. Agent는 Manager가 요청한 정보를 제공하고, 시스템 충돌이나 재부팅 등의 장비에 영향을 미치거나 발생한 Event를 비동기적으로 알리기 위해 Trap 메시지를 보낸다. 이들의 관계는 그림 \ref{fig:relationship_m_a}\citep{essential_snmp}과 같다. 이는 원래 NMS와 Agent의 관계이지만 본 연구에서는 Manager와 Agent의 관계로 재구성하였다.
 \begin{figure}[h!]
   \centering
   \includegraphics[width=0.65\textwidth]{./images/relationship_m_a.eps}
@@ -50,7 +50,7 @@ SNMP(Simple Network Management Protocol)는 IP네트워크 상의 장비들을 �
 \hfil\break
 \hfil\break
 
-SNMP는 v1/2c/3의 세가지 버전이 있으며, 각 버전들은 인증과 암호화에 따른 차이점이 있다. SNMPv1/2c는 community string을 통해 사용자 인증을 하며, v3는 noAuthNoPriv, authNoPriv, authPrive의 세 종류의 보안 레벨에 따라 username, 암호화 알고리즘인 MD5, SHA로 사용자 인증을 하며, DES, AES 알고리즘을 통해 사용자가 지정한 패스워드 또한 암호화한다. 따라서 인증 및 암호화가 강화되는 v3의 경우 응답시간이 v1/2c에 비해 크다. 이러한 차이점은 표 \ref{table:conparision}\citep{comparison}에서 알 수 있다.
+SNMP는 v1/2c/3의 세가지 버전이 있으며, 각 버전들은 인증과 암호화에 따른 차이점이 있다. SNMPv1/2c는 community string을 통해 사용자 인증을 하며, v3는 noAuthNoPriv, authNoPriv, authPrive의 세 종류의 보안 레벨에 따라 username, 암호화 알고리즘인 MD5, SHA로 사용자 인증을 하며, DES, AES 알고리즘을 통해 사용자가 지정한 패스워드 또한 암호화한다. 따라서 인증 및 암호화가 강화되는 v3의 경우 응답시간이 v1/2c에 비해 크다. 버전별 차이점은 표 \ref{table:conparision}\citep{comparison}에서 알 수 있다.
 
 \begin{table}[h!]
 \begin{center}
@@ -68,7 +68,7 @@ v3 & authNoPriv & MD5 or SHA & No \\ \cline{2-4}
 \end{table} 
 
 \section{MIB 파일}
-SNMP를 사용하기 위해서는 MIB(Manangement Information Base)파일이 필요하며, 일반적인 TCP/IP관리정보는 MIB-2(RFC 1213)에 포함되어 있으며 특정 장비 관련 정보는 장비제조업체에서 제공한다. 이 MIB파일은 장비에 대한 정보 값 OID(Object Identifiers)를 계층구조로 모아놓은 것으로 앞서 언급된 Manager가 요청하는 정보에 대해 Agent가 제공하는 정보이기도 하다. 
+SNMP를 사용하기 위해서는 MIB(Manangement Information Base)파일이 필요하며, 일반적인 TCP/IP관리정보는 MIB-2(RFC 1213)에 포함되어 있고, 특정 장비 관련 정보는 장비제조업체에서 제공한다. 이 MIB파일은 장비에 대한 정보 값 OID(Object Identifiers)를 계층구조로 모아놓은 것으로 앞서 언급된 Manager가 요청하는 정보에 대해 Agent가 제공하는 정보이기도 하다. 
 
 \begin{figure}[h!]
   \centering
@@ -78,7 +78,7 @@ SNMP를 사용하기 위해서는 MIB(Manangement Information Base)파일이 필
 \end{figure}
 
 
-그림 \ref{fig:oid_tree}의 OID tree는 ROOT-Node에서 시작하고 밑으로 branch node와 leaf leaf node로 이루어져있다. 예를 들어 apc사의 제품의 OID는 1.3.6.1.4.1.318(iso.org.dod.internet\\.private.enterprises.apc)이다. 이러한 트리구조의 MIB는 파일 안에서 그림 \ref{fig:ex_mib}과 같은 포맷을 가진다. MIB파일의 access정도에 따라 장비에 값을 읽고, 쓸 수 있다.
+그림 \ref{fig:oid_tree}의 OID tree는 ROOT-Node에서 시작하고 밑으로 branch node와 leaf node로 이루어져있다. 예를 들어 apc사의 제품의 OID는 1.3.6.1.4.1.318(iso.org.dod.internet\\.private.enterprises.apc)이다. 이러한 트리구조의 MIB는 파일 안에서 그림 \ref{fig:ex_mib}과 같은 포맷을 가진다. MIB파일의 access정도(read-only, read-write, etc...)에 따라 장비에 값을 읽고, 쓸 수 있다.
 
 \begin{figure}[h!]
   \centering
@@ -89,12 +89,12 @@ SNMP를 사용하기 위해서는 MIB(Manangement Information Base)파일이 필
 
 \chapter{SNMP 사용 방법}
 \section{설치}
-SNMP를 사용하기 위해서는 아래의 패키지가 설치 되어야 한다. 본 문서에서는 NET-SNMP\citep{net_snmp} v5.4.3을 사용하고 있다.
+SNMP를 사용하기 위해서는 아래의 패키지가 설치되어야 한다. 본 문서에서는 NET-SNMP\citep{net_snmp} v5.4.3을 사용하고 있다.
 \begin{itemize}
-\item NET-SNMP
-\item snmp
+\item NET-SNMP\footnote{* NET-SNMP는 패키지가 아닌 http://www.net-snmp.org/download.html에서 다운받을 수 있다.}
+\item snmp snmpd
 \item snmp-mibs-downloader
-\item libsnmp-dev
+\item libsnmp-dev libsnmp-base libsnmp-perl libsnmp15 
 \end{itemize}
 
 
@@ -107,42 +107,28 @@ SNMP를 사용하기 위해서는 SNMP명령어\citep{snmp_command}가 필요하
 \item walk : manager가 agnet의 모든 정보를 요청할 때 사용
 \item set : manager가 agent의 값을 설정할 때 사용
 \item trap : agent에서 비동기적 사건을 manager에게 알리기 위해 사용
-\item etc...
+\item etc\footnote{* http://www.net-snmp.org/wiki/index.php/Tutorials를 참조하기 바란다.}...
 \end{itemize}
 
-아래는 snmpwalk를 이용하여 장비의 정보를 읽은 예이다.
-
-\begin{lstlisting}[style=termstyle]
-mijoy0909@mjpark:~$ snmpwalk localhost
-RFC1213-MIB::sysDescr.0 = STRING: "Linux mjpark 3.2.0-4-amd64 #1 SMP Debian 3.2.60-1+deb7u3 x86_64"
-RFC1213-MIB::sysObjectID.0 = OID: SNMPv2-SMI::enterprises.8072.3.2.10
-RFC1213-MIB::sysUpTime.0 = Timeticks: (1684759) 4:40:47.59
-RFC1213-MIB::sysContact.0 = STRING: "Me <me@example.org>"
-RFC1213-MIB::sysName.0 = STRING: "mjpark"
-.
-.
-.
-\end{lstlisting}
-
 \section{SNMP 사용}
-SNMP명령어를 사용하여 장비의 정보를 읽어오는 방법은 버전에 따라 다르다.
+SNMP명령어를 사용하여 장비의 정보를 읽어오는 방법은 버전에 따라 달라진다.
 
 \begin{itemize}
 \item SNMP v1/2c 일 때
 \end{itemize}
 
 \begin{lstlisting}[style=termstyle]
-snmp(get,set,trap...) -v (v1/2c) -c (Community String) (HostAddress) (OID) 
+snmp(walk, get, trap...) -v (v1/2c) -c (Community String) (HostAddress) (OID) 
 \end{lstlisting}
 
-보통 v1/2c의 community string은 제조사에서 public/privacy로 지정해두는데 public은 read-only, privacy는 read-write가 가능하다. 따라서 public에서는 snmpset을 사용할 수 없으며, commnuity string은 사용자가 임의로 설정할 수 있다. v1/2c는 community string을 사용한 사용자 인증 외에는 특별한 보안이 없어 보안에 취약하다는 것을 알 수 있다. 아래는 xerox 프린터의 정보를 읽어오는 SNMP 명령어이다. 
-
+보통 v1/2c의 community string은 제조사에서 public/privacy로 지정해두는데 public은 read-only, privacy는 read-write가 가능하다. 따라서 public에서는 snmpset을 사용할 수 없으며, commnuity string은 사용자가 임의로 설정할 수 있다. v1/2c는 community string을 사용한 사용자 인증 외에는 특별한 보안이 없어 보안에 취약하다는 것을 알 수 있다. 아래는 SNMPv1을 이용해 읽은 localhost의 정보이다.
 \begin{lstlisting}[style=termstyle]
-mijoy0909@mjpark:~$ snmpwalk -v 1 -c public 10.1.4.182 1.3.6.1.4
-SNMPv2-SMI::enterprises.253.8.51.1.2.1.2.1 = INTEGER: 1
-SNMPv2-SMI::enterprises.253.8.51.1.2.1.3.1 = INTEGER: 10
-SNMPv2-SMI::enterprises.253.8.51.1.2.1.4.1 = INTEGER: 3839
-SNMPv2-SMI::enterprises.253.8.51.1.2.1.5.1 = INTEGER: 1536
+mijoy0909@mjpark:~$ snmpwalk -v 1 -c public localhost
+RFC1213-MIB::sysDescr.0 = STRING: "Linux mjpark 3.2.0-4-amd64 #1 SMP Debian 3.2.63-2+deb7u2 x86_64"
+RFC1213-MIB::sysObjectID.0 = OID: SNMPv2-SMI::enterprises.8072.3.2.10
+RFC1213-MIB::sysUpTime.0 = Timeticks: (49138) 0:08:11.38
+RFC1213-MIB::sysContact.0 = STRING: "Me <me@example.org>"
+RFC1213-MIB::sysName.0 = STRING: "mjpark"
 .
 .
 .
@@ -153,23 +139,104 @@ SNMPv2-SMI::enterprises.253.8.51.1.2.1.5.1 = INTEGER: 1536
 \end{itemize}
 
 \begin{lstlisting}[style=termstyle]
-snmp(get,set,trap...) -v 3 -u (Username) -l {Security Level(noAuthNoPriv/authNoPriv/authPrive)} -a {Authentication Protocol(MD5/SHA)} -A (PASSWORD) -x {Privacy Protocol(DES/AES)} -X (PASSWORD) (HostAddress) (OID) 
+snmp(walk, get, trap...) -v 3 -u (Username) -l {Security Level(noAuthNoPriv/authNoPriv/authPrive)} -a {Authentication Protocol(MD5/SHA)} -A (PASSWORD) -x {Privacy Protocol(DES/AES)} -X (PASSWORD) (HostAddress) (OID) 
 \end{lstlisting}
 
-v3의 명령어가 v1/2c에 비해 긴 것을 알 수 있다. 이는 v3에서는 v1/2c와 달리 사용자인증 및 암호를 요구하고 이를 암호화하기때문이다. 아래는 APC사의 Power Distribution Unit의 정보를 읽어오는 명령어의 예이다.
+다음과 같이 v3의 명령어가 v1/2c에 비해 긴 것을 알 수 있다. 이는 v3에서는 v1/2c와 달리 사용자인증 및 암호를 요구하고 이를 암호화 하기 때문이다. 
+SNMPv3를 사용하기 위해서는 Username 및 암호화에 대한 정보를 설정하여야 한다. 장비에 대한 정보 설정은 장비제조업체에서 제공하는 프로그램이나 사이트를 이용하거나 시리얼 통신을 통해 설정 할 수 있다. localhost는 net-snmp의 snmpd를 이용 할 수 있으며, net-snmp의 snmpd를 이용한 localhost의 v3 설정 방법은 다음과 같다. 이 때, 패스워드는 적어도 8자 이상이여야 한다.
 
 \begin{lstlisting}[style=termstyle]
-mijoy0909@mjpark:~$ snmpwalk -v 3 -u mijoy -l authPriv -a MD5 -A PASSWORD -x DES -X PASSWORD 10.1.5.142 1.3.6.1.4
-PowerNet-MIB::sPDUIdentHardwareRev.0 = STRING: "B2"
-PowerNet-MIB::sPDUIdentFirmwareRev.0 = STRING: "v3.7.4"
-PowerNet-MIB::sPDUIdentDateOfManufacture.0 = STRING: "04/06/2013"
-PowerNet-MIB::sPDUIdentModelNumber.0 = STRING: "AP7921"
+mijoy0909@mjpark:~$ su                                     
+root@mjpark:~# service snmpd stop
+Stopping network management services: snmpd snmptrapd.
+root@mjpark:~# net-snmp-config --create-snmpv3-user
+Enter a SNMPv3 user name to create: 
+mijoy
+Enter authentication pass-phrase: 
+[password]
+Enter encryption pass-phrase: 
+  [press return to reuse the authentication pass-phrase]
+[password]
+adding the following line to /var/lib/snmp/snmpd.conf:
+   createUser test MD5 "[password]" DES [password]
+adding the following line to /usr/share/snmp/snmpd.conf:
+   rwuser mijoy
+root@mjpark:~# service snmpd start
+Starting network management services: snmpd.
+\end{lstlisting}
+
+위와 같이 net-snmp snmpd를 설정한 후 /usr/share/snmp/snmpd.conf에서 확인하면 아래와 같이 Username이 등록된 것을 알 수 있으며 또한 localhost가 SNMPv3로 읽어지는 것을 확인할 수 있다.\footnote{* http://www.net-snmp.org/docs/README.snmpv3.html 참조 바람}
+
+\begin{lstlisting}[style=termstyle]
+rwuser mijoy
+\end{lstlisting}
+
+\begin{lstlisting}[style=termstyle]
+mijoy0909@mjpark:~$ snmpwalk -v 3 -u mijoy -l authPriv -a MD5 -A  [PASSWORD]  -x DES -X  [PASSWORD]  localhost
+RFC1213-MIB::sysDescr.0 = STRING: "Linux mjpark 3.2.0-4-amd64 #1 SMP Debian 3.2.63-2+deb7u2 x86_64"
+RFC1213-MIB::sysObjectID.0 = OID: SNMPv2-SMI::enterprises.8072.3.2.10
+RFC1213-MIB::sysUpTime.0 = Timeticks: (32928) 0:05:29.28
+RFC1213-MIB::sysContact.0 = STRING: "Me <me@example.org>"
+RFC1213-MIB::sysName.0 = STRING: "mjpark"
 .
 .
 .
 \end{lstlisting}
 
-추가로 OID번호대신 Object의 이름을 사용하여 장비의 정보를 읽어올 수 있다. 이 때, 사용하고자하는 장비의 MIB파일과  .snmp/snmp.conf파일(그림 \ref{fig:snmp_conf})을 수정하여야한다.
+지금까지 snmpwalk를 이용하여 장비의 모든 정보를 읽어보았다. SNMPv1과 v3의 결과 값이 동일하다는 것을 알 수 있다. snmpwalk와 달리 snmpget을 이용하면 아래와 같이 원하는 정보 값만 읽을 수 있다.
+\begin{lstlisting}[style=termstyle]
+mijoy0909@mjpark:~$ snmpget -v 1 -c public 10.1.4.182 1.3.6.1.2.1.43.16.5.1.2.1.1
+Printer-MIB::prtConsoleDisplayBufferText.1.1 = STRING: "Scan-User Action"
+\end{lstlisting}
+
+다음은 snmpset을 이용하여 장비에 원하는 값을 쓰는 방법이다. set역시 walk/get과 마찬가지로 버전에 따른 명령어의 차이가 있다.
+
+\begin{itemize}
+\item SNMP v1/2c 일 때
+\end{itemize}
+
+\begin{lstlisting}[style=termstyle]
+mijoy0909@mjpark:~$ snmpset -v (v1/2c) -c (Community String) (HostAddress) (OID) (datatypes) (value)
+\end{lstlisting}
+
+\begin{itemize}
+\item SNMP v3 일 때
+\end{itemize}
+
+\begin{lstlisting}[style=termstyle]
+mijoy0909@mjpark:~$ snmpset -v 3 -u (Username) -l {Security Level(noAuthNoPriv/authNoPriv/authPrive)} -a {Authentication Protocol(MD5/SHA)} -A (PASSWORD) -x {Privacy Protocol(DES/AES)} -X (PASSWORD) (HostAddress) (OID) (datatypes) (value)
+\end{lstlisting}
+
+여기서 datatypes은 장비의 정보가 가진 datatypeds을 의미하며 snmpset에서 datatypes 옵션은 아래와 같이 정의된다.
+
+\begin{lstlisting}[style=termstyle]
+ i: INTEGER 
+ u: unsigned INTEGER 
+ t: TIMETICKS
+ a: IPADDRESS
+ o: OBJID
+ s: STRING
+ x: HEX STRING
+ d: DECIMAL STRING
+ U: unsigned int64
+ I: signed int64
+ F: float
+ D: double
+\end{lstlisting}
+
+APC사의 Power Distribution Unit을 이용한 SNMPv3set 명령어에 대한 예는 아래와 같다. 이 때, 여러 값을 쓸 수 있다.
+
+\begin{lstlisting}[style=termstyle]
+snmpset -v 3 -u mijoy -l authPriv -a MD5 -A [PASSWORD] -x DES -X [PASSWORD] 10.1.5.142 sPDUOutletCtl.8 i 2
+PowerNet-MIB::sPDUOutletCtl.8 = INTEGER: outletOff(2)
+.
+.
+snmpset -v 3 -u mijoy -l authPriv -a MD5 -A [PASSWORD] -x DES -X [PASSWORD] 10.1.5.142 sPDUOutletCtl.7 i 1 sPDUOutletCtl.8 i 1
+PowerNet-MIB::sPDUOutletCtl.7 = INTEGER: outletOn(1)
+PowerNet-MIB::sPDUOutletCtl.8 = INTEGER: outletOn(1)
+\end{lstlisting}
+
+여기서 지금까지와 달리 OID번호를 이용하지 았다는 것을 알 수 있다. SNMP에서는 OID번호 대신 MIB파일 내의 Object의 이름을 사용하여 장비의 정보를 읽고, 쓸 수 있다. 이 때, 사용하고자하는 장비의 MIB파일과 .snmp/snmp.conf파일(그림 \ref{fig:snmp_conf})을 수정하여야한다.
 예를 들어 그림 \ref{fig:pdu_mib}는 APC사 PDU의 MIB파일의 일부분이다. 여기서 MIB파일의 DEFINITIONS ::= BEGIN에서 MIB파일의 이름을 정의해주고, MIB파일도 똑같은 이름으로 저장해야한다. 따라서 이 MIB파일의 이름은 PowerNet-MIB이다. 
 
 \begin{figure}[h]
@@ -182,17 +249,12 @@ PowerNet-MIB::sPDUIdentModelNumber.0 = STRING: "AP7921"
 
 \clearpage
 
-snmp.conf파일에는 MIB파일을 등록해주어야한다. 이 과정을 거치면 OID번호가 아닌 Object의 이름으로 장비의 정보를 읽고 쓸 수 있다. 아래는 그 예이다.
-
-\begin{lstlisting}[style=termstyle]
-mijoy0909@mjpark:~$ snmpwalk -v 3 -u mijoy -l authPriv -a MD5 -A PASSWORD -x DES -X PASSWORD -m +PowerNet-MIB 10.1.5.142 sPDUIdentModelNumber
-PowerNet-MIB::sPDUIdentModelNumber.0 = STRING: "AP7921"
-\end{lstlisting}
+snmp.conf파일에는 MIB파일을 등록해주어야한다. 이 과정을 거치면 OID번호가 아닌 Object의 이름으로 장비의 정보를 읽고 쓸 수 있다. 
 
 SNMPv1/2c와 달리 v3의 명령어가 긴 문제를 해결하기 위해서 그림 \ref{fig:snmp_conf}와 같이 snmp.conf파일에 미리 v3에 대한 보안레벨과 암호화 프로토콜을 설정하고 패스워드정보를 저장해둔다면 아래와 같이 간단하게 SNMPv3를 사용할 수 있다.\footnote{* 여러가지 장비의 정보를 설정한 후 사용해봤지만 첫 번째로 저장된 정보에만 간단하게 SNMPv3 사용이 가능하였다. 이는 추가적인 확인이 필요하다. 만약 첫 번째로 저된 정보에만 가능하다면 v3를 사용하고자 하는 장비의 보안레벨, 암호화 프로토콜, 그리고 패스워드를 통일해야 할 것 같다....}
 
 \begin{lstlisting}[style=termstyle]
-mijoy0909@mjpark:~$ snmpwalk 10.1.5.142 sPDUIdentModelNumber
+mijoy0909@mjpark:~$ snmpget 10.1.5.142 sPDUIdentModelNumber
 PowerNet-MIB::sPDUIdentModelNumber.0 = STRING: "AP7921"
 \end{lstlisting}
 
