@@ -37,7 +37,7 @@ SNMP는 IP 네트워크들에서 장치를 관리하기 위한 공식 인터넷 
 \end{abstract}
 
 \chapter{SNMP란?}
-SNMP(Simple Network Management Protocol)는 IP네트워크 상의 장비들을 관리하고 모니터링하기 위한 인터넷 표준 프로토콜이다. SNMP는 Manger와 Agent로 구성되어있으며, Manager는 Agent에게 장비의 필요한 정보를 요청하거나, 장비의 정보를 변경한다. Manager는 NMS(Network Management Stations)로 표현되기도 한다. Agent는 Manager가 요청한 정보를 제공하고, 시스템 충돌이나 재부팅 등의 장비에 영향을 미치거나 발생한 Event를 비동기적으로 알리기 위해 Trap 메시지를 보낸다. 이들의 관계는 그림 \ref{fig:relationship_m_a}\citep{essential_snmp}과 같다. 이는 원래 NMS와 Agent의 관계이지만 본 연구에서는 Manager와 Agent의 관계로 재구성하였다.
+SNMP(Simple Network Management Protocol)는 IP네트워크 상의 장비들을 관리하고 모니터링하기 위한 인터넷 표준 프로토콜이다. SNMP는 Manager와 Agent로 구성되어있으며, Manager는 Agent에게 장비의 필요한 정보를 요청하거나, 장비의 정보를 변경한다. Manager는 NMS(Network Management Stations)로 표현되기도 한다. Agent는 Manager가 요청한 정보를 제공하고, 시스템 충돌이나 재부팅 등의 장비에 영향을 미치거나 발생한 Event를 비동기적으로 알리기 위해 Trap 메시지를 보낸다. 이들의 관계는 그림 \ref{fig:relationship_m_a}\citep{essential_snmp}과 같다. 이는 원래 NMS와 Agent의 관계이지만 본 연구에서는 Manager와 Agent의 관계로 재구성하였다.
 \begin{figure}[h!]
   \centering
   \includegraphics[width=0.65\textwidth]{./images/relationship_m_a.eps}
@@ -50,7 +50,7 @@ SNMP(Simple Network Management Protocol)는 IP네트워크 상의 장비들을 �
 \hfil\break
 \hfil\break
 
-SNMP는 v1/2c/3의 세가지 버전이 있으며, 각 버전들은 인증과 암호화에 따른 차이점이 있다. SNMPv1/2c는 community string을 통해 사용자 인증을 하며, v3는 noAuthNoPriv, authNoPriv, authPrive의 세 종류의 보안 레벨에 따라 username, 암호화 알고리즘인 MD5, SHA로 사용자 인증을 하며, DES, AES 알고리즘을 통해 사용자가 지정한 패스워드 또한 암호화한다. 따라서 인증 및 암호화가 강화되는 v3의 경우 응답시간이 v1/2c에 비해 크다. 버전별 차이점은 표 \ref{table:conparision}\citep{comparison}에서 알 수 있다.
+SNMP는 v1/2c/3의 세가지 버전이 있으며, 각 버전들은 인증과 암호화에 따른 차이점이 있다. SNMPv1/2c는 community string을 통해 사용자 인증을 하며, v3는 noAuthNoPriv, authNoPriv, authPriv의 세 종류의 보안 레벨에 따라 username, 암호화 알고리즘인 MD5, SHA로 사용자 인증을 하며, DES, AES 알고리즘을 통해 사용자가 지정한 패스워드 또한 암호화한다. 따라서 인증 및 암호화가 강화되는 v3의 경우 응답시간이 v1/2c에 비해 크다. 버전별 차이점은 표 \ref{table:conparision}\citep{comparison}에서 알 수 있다.
 
 \begin{table}[h!]
 \begin{center}
@@ -91,7 +91,7 @@ SNMP를 사용하기 위해서는 MIB(Manangement Information Base)파일이 필
 \section{설치}
 SNMP를 사용하기 위해서는 아래의 패키지가 설치되어야 한다. 본 문서에서는 NET-SNMP\citep{net_snmp} v5.4.3을 사용하고 있다.
 \begin{itemize}
-\item NET-SNMP\footnote{* NET-SNMP는 패키지가 아닌 http://www.net-snmp.org/download.html에서 다운받을 수 있다.}
+\item NET-SNMP\footnote{* NET-SNMP는 http://www.net-snmp.org/download.html에서 다운받을 수 있다.}
 \item snmp snmpd
 \item snmp-mibs-downloader
 \item libsnmp-dev libsnmp-base libsnmp-perl libsnmp15 
@@ -107,7 +107,7 @@ SNMP를 사용하기 위해서는 SNMP명령어\citep{snmp_command}가 필요하
 \item walk : manager가 agnet의 모든 정보를 요청할 때 사용
 \item set : manager가 agent의 값을 설정할 때 사용
 \item trap : agent에서 비동기적 사건을 manager에게 알리기 위해 사용
-\item etc\footnote{* http://www.net-snmp.org/wiki/index.php/Tutorials를 참조하기 바란다.}...
+\item etc\footnote{* http://www.net-snmp.org/wiki/index.php/Tutorials를 참조 바람}...
 \end{itemize}
 
 \section{SNMP 사용}
@@ -251,7 +251,7 @@ PowerNet-MIB::sPDUOutletCtl.8 = INTEGER: outletOn(1)
 
 snmp.conf파일에는 MIB파일을 등록해주어야한다. 이 과정을 거치면 OID번호가 아닌 Object의 이름으로 장비의 정보를 읽고 쓸 수 있다. 
 
-SNMPv1/2c와 달리 v3의 명령어가 긴 문제를 해결하기 위해서 그림 \ref{fig:snmp_conf}와 같이 snmp.conf파일에 미리 v3에 대한 보안레벨과 암호화 프로토콜을 설정하고 패스워드정보를 저장해둔다면 아래와 같이 간단하게 SNMPv3를 사용할 수 있다.\footnote{* 여러가지 장비의 정보를 설정한 후 사용해봤지만 첫 번째로 저장된 정보에만 간단하게 SNMPv3 사용이 가능하였다. 이는 추가적인 확인이 필요하다. 만약 첫 번째로 저된 정보에만 가능하다면 v3를 사용하고자 하는 장비의 보안레벨, 암호화 프로토콜, 그리고 패스워드를 통일해야 할 것 같다....}
+SNMPv1/2c와 달리 v3의 명령어가 긴 문제를 해결하기 위해서 그림 \ref{fig:snmp_conf}와 같이 snmp.conf파일에 미리 v3에 대한 보안레벨과 암호화 프로토콜을 설정하고 패스워드정보를 저장해둔다면 아래와 같이 간단하게 SNMPv3를 사용할 수 있다.\footnote{* 여러가지 장비의 정보를 설정한 후 사용해봤지만 첫 번째로 저장된 정보에만 간단하게 SNMPv3 사용이 가능하였다. 이는 추가적인 확인이 필요하다. 만약 첫 번째로 저장된 정보에만 가능하다면 v3를 사용하고자 하는 장비의 보안레벨, 암호화 프로토콜, 그리고 패스워드를 통일해야 할 것 같다....}
 
 \begin{lstlisting}[style=termstyle]
 mijoy0909@mjpark:~$ snmpget 10.1.5.142 sPDUIdentModelNumber
@@ -542,7 +542,7 @@ outletOff
 mean & 2.863 & 2.852 & 4.101 & 4.138 \\ \hline
 sample deviation & 0.867 & 0.840 & 0.814 & 0.864 \\ \hline
 \end{tabular}
-\caption{속도실험}
+\caption{SNMP 버전에 따른 응답시간(wall-clock time response)의 차이 (단위: ms)}
   \label{table:test}  
 \end{center}
 \end{table}
