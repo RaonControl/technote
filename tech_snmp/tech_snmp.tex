@@ -33,7 +33,7 @@
 \maketitle
 
 \begin{abstract}
-SNMP는 IP 네트워크들에서 장치를 관리하기 위한 공식 인터넷 표준 프로토콜(Official Internet Standards Protocol)\citep{oisp}이다. 본 문서는 SNMP설정 및 SNMP를 이용한 모니터링 및 다양한 네트워크 환경에서 SNMP의 버전별 응답시간에 관해 설명한다. 
+SNMP는 IP 네트워크에서 장치를 관리하기 위한 공식 인터넷 표준 프로토콜(Official Internet Standards Protocol)\citep{oisp}이다. 본 문서는 SNMP설정 및 SNMP를 이용한 모니터링 및 다양한 네트워크 환경에서 SNMP의 버전별 응답시간에 관해 설명한다. 
 \end{abstract}
 
 \chapter{SNMP란?}
@@ -68,7 +68,7 @@ v3 & authNoPriv & MD5 or SHA & No \\ \cline{2-4}
 \end{table} 
 
 \section{MIB 파일}
-SNMP를 사용하기 위해서는 MIB(Manangement Information Base)파일이 필요하며, 일반적인 TCP/IP관리정보는 MIB-2(RFC 1213)에 포함되어 있고, 특정 장비 관련 정보는 장비제조업체에서 제공한다. 이 MIB파일은 장비에 대한 정보 값 OID(Object Identifiers)를 계층구조로 모아놓은 것으로 앞서 언급된 Manager가 요청하는 정보에 대해 Agent가 제공하는 정보이기도 하다. 
+SNMP를 사용하기 위해서는 MIB(Management Information Base)파일이 필요하며, 일반적인 TCP/IP관리정보는 MIB-2(RFC 1213)에 포함되어 있고, 특정 장비 관련 정보는 장비제조업체에서 제공한다. 이 MIB파일은 장비에 대한 정보 값 OID(Object Identifiers)를 계층구조로 모아놓은 것으로 앞서 언급된 Manager가 요청하는 정보에 대해 Agent가 제공하는 정보이기도 하다. 
 
 \begin{figure}[h!]
   \centering
@@ -78,7 +78,7 @@ SNMP를 사용하기 위해서는 MIB(Manangement Information Base)파일이 필
 \end{figure}
 
 
-그림 \ref{fig:oid_tree}의 OID tree는 ROOT-Node에서 시작하고 밑으로 branch node와 leaf node로 이루어져있다. 예를 들어 apc사의 제품의 OID는 1.3.6.1.4.1.318(iso.org.dod.internet\\.private.enterprises.apc)이다. 이러한 트리구조의 MIB는 파일 안에서 그림 \ref{fig:ex_mib}과 같은 포맷을 가진다. MIB파일의 access정도(read-only, read-write, etc...)에 따라 장비에 값을 읽고, 쓸 수 있다.
+그림 \ref{fig:oid_tree}의 OID tree는 ROOT-Node에서 시작하고 밑으로 branch node와 leaf node로 이루어져있다. 예를 들어 apc사의 OID는 1.3.6.1.4.1.318(iso.org.dod.internet\\.private.enterprises.apc)이다. 이러한 트리구조의 MIB는 파일 안에서 그림 \ref{fig:ex_mib}과 같은 포맷을 가진다. MIB파일의 access정도(read-only, read-write, etc...)에 따라 장비에 값을 읽고, 쓸 수 있다.
 
 \begin{figure}[h!]
   \centering
@@ -121,7 +121,7 @@ SNMP명령어를 사용하여 장비의 정보를 읽어오는 방법은 버전�
 snmp(walk, get, trap...) -v (v1/2c) -c (Community String) (HostAddress) (OID) 
 \end{lstlisting}
 
-보통 v1/2c의 community string은 제조사에서 public/privacy로 지정해두는데 public은 read-only, privacy는 read-write가 가능하다. 따라서 public에서는 snmpset을 사용할 수 없으며, commnuity string은 사용자가 임의로 설정할 수 있다. v1/2c는 community string을 사용한 사용자 인증 외에는 특별한 보안이 없어 보안에 취약하다는 것을 알 수 있다. 아래는 SNMPv1을 이용해 읽은 localhost의 정보이다.
+보통 v1/2c의 community string은 제조사에서 public/privacy로 지정해두는데 public은 read-only, privacy는 read-write가 가능하다. 따라서 public에서는 snmpset을 사용할 수 없으며, community string은 사용자가 임의로 설정할 수 있다. v1/2c는 community string을 사용한 사용자 인증 외에는 특별한 보안이 없어 보안에 취약하다는 것을 알 수 있다. 아래는 SNMPv1을 이용해 읽은 localhost의 정보이다.
 \begin{lstlisting}[style=termstyle]
 mijoy0909@mjpark:~$ snmpwalk -v 1 -c public localhost
 RFC1213-MIB::sysDescr.0 = STRING: "Linux mjpark 3.2.0-4-amd64 #1 SMP Debian 3.2.63-2+deb7u2 x86_64"
@@ -183,7 +183,7 @@ RFC1213-MIB::sysName.0 = STRING: "mjpark"
 .
 \end{lstlisting}
 
-지금까지 snmpwalk를 이용하여 장비의 모든 정보를 읽어보았다. SNMPv1과 v3의 결과 값이 동일하다는 것을 알 수 있다. snmpwalk와 달리 snmpget을 이용하면 아래와 같이 원하는 정보 값만 읽을 수 있다.
+지금까지 snmpwalk를 이용하여 장비의 모든 정보를 읽어보았고, SNMPv1과 v3의 결과 값이 동일하다는 것을 알 수 있다. snmpwalk와 달리 snmpget을 이용하면 아래와 같이 원하는 정보 값만 읽을 수 있다.
 \begin{lstlisting}[style=termstyle]
 mijoy0909@mjpark:~$ snmpget -v 1 -c public 10.1.4.182 1.3.6.1.2.1.43.16.5.1.2.1.1
 Printer-MIB::prtConsoleDisplayBufferText.1.1 = STRING: "Scan-User Action"
@@ -207,7 +207,7 @@ mijoy0909@mjpark:~$ snmpset -v (v1/2c) -c (Community String) (HostAddress) (OID)
 mijoy0909@mjpark:~$ snmpset -v 3 -u (Username) -l {Security Level(noAuthNoPriv/authNoPriv/authPrive)} -a {Authentication Protocol(MD5/SHA)} -A (PASSWORD) -x {Privacy Protocol(DES/AES)} -X (PASSWORD) (HostAddress) (OID) (datatypes) (value)
 \end{lstlisting}
 
-여기서 datatypes은 장비의 정보가 가진 datatypeds을 의미하며 snmpset에서 datatypes 옵션은 아래와 같이 정의된다.
+여기서 datatypes는 장비의 정보가 가진 datatypes을 의미하며 snmpset에서 datatypes 옵션은 아래와 같이 정의된다.
 
 \begin{lstlisting}[style=termstyle]
  i: INTEGER 
@@ -237,7 +237,7 @@ PowerNet-MIB::sPDUOutletCtl.8 = INTEGER: outletOn(1)
 \end{lstlisting}
 
 여기서 지금까지와 달리 OID번호를 이용하지 았다는 것을 알 수 있다. SNMP에서는 OID번호 대신 MIB파일 내의 Object의 이름을 사용하여 장비의 정보를 읽고, 쓸 수 있다. 이 때, 사용하고자하는 장비의 MIB파일과 .snmp/snmp.conf파일(그림 \ref{fig:snmp_conf})을 수정하여야한다.
-예를 들어 그림 \ref{fig:pdu_mib}는 APC사 PDU의 MIB파일의 일부분이다. 여기서 MIB파일의 DEFINITIONS ::= BEGIN에서 MIB파일의 이름을 정의해주고, MIB파일도 똑같은 이름으로 저장해야한다. 따라서 이 MIB파일의 이름은 PowerNet-MIB이다. 
+예를 들어 그림 \ref{fig:pdu_mib}는 APC사 PDU의 MIB파일의 일부분이다. MIB파일의 DEFINITIONS ::= BEGIN에서 MIB파일의 이름을 정의해주고, MIB파일도 똑같은 이름으로 저장해야한다. 따라서 이 MIB파일의 이름은 PowerNet-MIB이다. 
 
 \begin{figure}[h]
   \centering
@@ -533,7 +533,6 @@ outletOff
 \chapter{SNMP 응답시간 테스트}
 
 가속기 제어 시스템에서 시설의 복잡성과 장비의 다양성, 그리고 안전한 장비 접근성을 만족하며, 동시에 장비의 안정된 응답시간을 만족시키는 설치위치를 선정하는 것은 어렵기 때문에 장비의 응답시간을 고려하여 제어 네트워크 토폴로지 설계 및 네트워크 보안에 따른 SNMP의 응답시간 최적화 설계가 필요하다. 따라서 실험 당시 SNMP의 모든 버전(v1/2c/3)을 지원하는 장비인 APC PDU 7921을 사용하여 모니터링 및 제어를 하는데 걸리는 응답시간에 대한 테스트를 진행했다.
-표 \ref{table:test}은 버전별 응답시간을 측정한 결과이다. 이 테스트에서는 암호화 및 복호화에 걸리는 시간, 케이블 딜레이, 하드웨어 자체의 속도 및 사용된 Linux OS에 대한 응답시간 차이가 동일하다는 가정을 하였다. 이러한 가정 하에서 SNMPv1/2c는 서로 비교할 수 없는 오차 범위에 있으며, v3는 읽기(R)와 쓰기(W)에서 타 버전에 비해 1.5배 정도의 시간이 더 소모됨을 확인 할 수 있다.
 
 \begin{table}[h!]
 \begin{center}
@@ -546,6 +545,8 @@ sample deviation & 0.867 & 0.840 & 0.814 & 0.864 \\ \hline
   \label{table:test}  
 \end{center}
 \end{table}
+
+표 \ref{table:test}은 버전별 응답시간을 측정한 결과이다. 이 테스트에서는 암호화 및 복호화에 걸리는 시간, 케이블 딜레이, 하드웨어 자체의 속도 및 사용된 Linux OS에 대한 응답시간 차이가 동일하다는 가정을 하였다. 이러한 가정 하에서 SNMPv1/2c는 서로 비교할 수 없는 오차 범위에 있으며, v3는 읽기(R)와 쓰기(W)에서 타 버전에 비해 1.5배 정도의 시간이 더 소모됨을 확인 할 수 있다.
 
 \section{실험 목적}
 앞서 언급했듯이 장비의 응답시간은 제어 네트워크에서 중요하다. 가속기 제어 네트워크 토폴로지 설계에 필요한 물리적인 구성요소는 Layer 2 스위치와 UTP 케이블의 길이이므로 이러한 요소들로 토폴로지 내에서 가능하고, 이상적인 장비의 응답시간과 구성요소들 간의 상관관계를 측정하는 것이 필요하다. 이렇게 측정된 결과들은 네트워크 토폴로지 설계 및 장비의 최적화된 설치위치 선정에 도움이 될 것이다.
@@ -652,7 +653,7 @@ SNMPv1/2c/3의 응답시간 측정에는 GNU Bash를 이용하여 만든 script�
   \label{fig:switch}   
 \end{figure}
 
-그림  \ref{fig:switch}은 스위치 5개를 연결 했을 때의 실험 배치도이다. 길이가 1m인 케이블을 이용하여 응답시간을 측정하고자 할 때, 컴퓨터, PDU, 스위치를 네트워크 케이블로 연결한 후 script를 실행하여 응답시간을 측정한다. 이 후 1m 케이블로 스위치의 개수를 증가시키면서 테스트를 진행한다. 이 때, 컴퓨터는 첫 번째 스위치에 계속해 연결되어있고, 스위치의 개수를 5개까지 추가하면서 마지막 스위치에 PDU를 연결한다. 다른 길이의 케이블도 각 각 위의 과정을 테스트한다. 
+그림  \ref{fig:switch}은 스위치 5개를 연결 했을 때의 실험 배치도이다. 길이가 1m인 케이블을 이용하여 응답시간을 측정하고자 할 때, 컴퓨터, PDU, 스위치를 네트워크 케이블로 연결한 후 script를 실행하여 응답시간을 측정한다. 이 후 1m 케이블로 스위치의 개수를 증가시키면서 테스트를 진행한다. 이 때, 컴퓨터는 첫 번째 스위치에 계속해 연결되어있고, 스위치의 개수를 5개까지 추가하면서 마지막 스위치에 PDU를 연결한다. 다른 길이의 케이블도 각각 위의 과정을 테스트한다. 
 
 \begin{figure}[!htb]
   \centering
