@@ -26,7 +26,13 @@
 	- IOC 구성시 사용된 siteLibs에 대한 리스트
 	- 시각동기화 방법(Timing system 이용 또는 NTP 설정)
 	- 타시스템과의 연계시 초기화 방법(PLC, RS232, ...) 
-	  : IOC와 제어시스템이 별도로 구성시.
-	- Timing system의 trigger 입력이 필요한 경우 입력요구사항 및 event 
+	  : IOC와 제어시스템이 별도로 구성시 IOC 재부팅에 의한 초기화 문제.
+	- 연계시스템
+	  - Timing system의 trigger 입력이 필요한 경우 입력요구사항 및 event 
+	  - Interlock 시스템과의 연계 요구사항(Fast:MPS, Slow:??)
+	    : Hard wiring 신호 제공
+	- Emergency 상태 정의(이중화의 필요여부)
+	  : Emergency 상태시 최소 동작하여야 할 시스템에 대한 list 작성(Emergency PV list)
 	- Software list 및 시스템 구성에 사용된 관련 SW 코드 제공
+	- Library 사용에 대한 Doxygenfile 제공
 
