@@ -74,10 +74,69 @@ Raspberry Pi전원을 연결 하면 NOOBS Install Manager가 나오는데 Raspbi
 누르면 설치가 진행된다. 설치가 완료되고 재부팅을 하면 Raspberry Pi Software Configuration Tool이 
 나타나는데 Finish를 누르면 기본적인 Raspbian 설치는 완료된다.
 \section{Configuration}
-\subsection{Host Name 및 Password 변경}
+\subsection{Password}
+Raspbian의 기본 ID 및 Password는 각각 pi와 raspberry로 설정되어 있으며 passwd 명령을 통해 Password
+변경이 가능하다.
+\begin{lstlisting}[style=termstyle]
+pi@raspberry# passwd
+Changing password for pi.
+(current) UNIX password:
+Enter new UNIX password:
+Retype new UNIX password:
+passwd: password updated successfully
+\end{lstlisting}
 
 \subsection{Networking}
+네트워크는 기본적으로 DHCP로 설정되어 있다. 고정 IP로 변경할 경우 /etc/network/interface 파일을 수정한다
+.
+\begin{lstlisting}[style=termstyle]
+auto lo
 
+iface lo inet loopback
+
+allow-hotplug eth0
+iface eth0 inet static
+        address 10.1.4.206
+        netmask 255.255.255.0
+        broadcast 10.1.4.255
+        gateway 10.1.4.254
+        dns-nameservers 10.1.2.240
+\end{lstlisting}
+무선 네트워크를 사용할 경우 다음과 같이 무선 네트워크 정보를 추가해 준다.
+\begin{lstlisting}[style=termstyle]
+auto lo
+
+iface lo inet loopback
+
+allow-hotplug wlan0
+iface wlan0 inet static
+	address 10.1.4.207
+	netmask 255.255.255.0
+	network 10.1.4.0
+	broadcast 10.1.4.255
+	gateway 10.1.4.254
+	dns-nameservers 10.1.2.240
+	wpa-scan-ssid 1
+	wpa-ap-ssid 1
+	wpa-key-mgmt WPA-PSK
+	wpa-proto RSN WPA
+	wpa-pairwise CCMP TKIP
+	wpa-group CCMP TKIP
+	wpa-ssid "CTRLTEAM"
+	wpa-psk "asdf12345"
+\end{lstlisting}
+여기서 wpa-ssid와 wpa-psk는 사용하고자 하는 무선네트워크 ssid와 password를 넣으면 된다. 
+만약 DHCP로 무선을 설정 할 경우 다음과 같이 wpa-ssid와 wpa-psk만 설정해 주면 된다.
+\begin{lstlisting}[style=termstyle]
+auto lo
+
+iface lo inet loopback
+
+allow-hotplug wlan0
+	iface wlan0 inet dhcp
+	wpa-ssid "CTRLTEAM"
+	wpa-psk "asdf12345"
+\end{lstlisting}
 \section{Library}
 \subsection{wiringPi}
 WiringPi는 Arduino에서 사용되는 Wiring Library를 RPi에 맞게 변경한 것으로 GPIO access를 포함하여 
@@ -253,7 +312,7 @@ pi@raspberrypi# cd mjpg-streamer/mjpg-streamer-experimental
 pi@raspberrypi:/mjpg-streamer/mjpg-streamer-experimental# make
 \end{lstlisting}
 make가 완료되면 다음과 같은 실행 스크립트를 만든다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
+\begin{lstlisting}[style=termstyle]
 export STREAMER_PATH=$HOME/mjpg-streamer/mjpg-streamer-experimental
 export LD_LIBRARY_PATH=$STREAMER_PATH
 $STREAMER_PATH/mjpg_streamer -i "input_raspicam.so -x 640 -y 480 -fps 30" -o "output_http.so -w $STREAMER_PATH/www"
@@ -309,7 +368,7 @@ wget을 이용하며 Web Streaming으로 부터 이미지를 저장할 수 있�
 scwook@scwook# wget http://10.1.5.194:8080/?action=snapshot -O image.jpg
 \end{lstlisting}
 Script를 만들면 주기적으로 이미지를 저장할 수 있다. 다음은 2초 간격으로 이미지를 저장하는 script이다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
+\begin{lstlisting}[style=termstyle]
 while :
 do
 	DATE=$(date +"%Y-%m-%d_%H%M%S")
@@ -345,7 +404,7 @@ scwook@scwook# mencoder -nosound -ovc lavc -lavcopts vcodec=mpeg4:aspect=4/3:vbi
 \label{fig:gpio_in_out}
 \end{figure}
 소스코드는 다음과 같다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
+\begin{lstlisting}[style=termstylenumber, caption={gpio.c}, label={list:gpioTestCode}]
 #include <stdio.h>
 #include <wiringPi.h>
 
@@ -391,7 +450,7 @@ PIR Motion 센서를 이용하여 동작을 감지해 보자. 그림\ref{fig:pir
 \label{fig:pir_test}
 \end{figure}
 소스코드는 다음과 같다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
+\begin{lstlisting}[style=termstylenumber, caption={pri.c}, label={list:priTestCode}]
 #include <stdio.h>
 #include <wiringPi.h>
 
@@ -433,7 +492,7 @@ DHT11 센서를 이용하여 온도와 습도를 읽어 보자. 그림\ref{fig:d
 \label{fig:dht11_test}
 \end{figure}
 소스코드는 다음과 같다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
+\begin{lstlisting}[style=termstylenumber, caption={dht11.c}, label={list:dhtTestCode}]
 #include <wiringPi.h>  
 #include <stdio.h>  
 #include <stdlib.h>  
@@ -526,7 +585,7 @@ DS1820 센서를 이용하여 온도를 읽어 보자.
 \label{fig:ds1820_test}
 \end{figure}
 소스코드는 다음과 같다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
+\begin{lstlisting}[style=termstylenumber, caption={ds1820.c}, label={list:ds1820TestCode}]
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -753,60 +812,16 @@ pi@raspberrypi# sudo ./ds1820
 \subsection{PM1001}
 \section{Motor}
 \subsection{L298 Dual H-Brdge}
-Step Motor은 모터 종류에 따라 구동 방식이 다르다. 여기서는 Raspberry Pi와 
-L298 Dual H-Bridge Motor Driver를 이용 하여 4 Wire 2Phase Step Motor를 작동하는 테스트를 하였다.
-테스트는 다음 사이트를 참고 하였다.\\
-http://www.geekonfire.com/wiki/index.php?title=Dual\_H-Bridge\_Motor\_Driver\\
-http://www.raspberrypi.org/forums/viewtopic.php?f=49\&t=55580\\
-사용된 하드웨어와 구성은 다음과 같다.
-\begin{itemize}
-\item Raspberry Pi Model B+
-\item L298 Dual H-Bridge Motor Driver
-\item 5V Power Supply
-\item 스텝모터 (42HS40-1704A05)
-\end{itemize}
+L298 Dual H-Bridge를 이용하여 2Phase Motor를 작동시켜 보자.
+그림\ref{fig:dht11_test}와 같은 회로를 구성한다.
 \begin{figure}[!htb]
 \centering
 \includegraphics[width=1\textwidth]{./images/raspberry/L298Test.png}
-\caption{2Phase Motor Test}
-\label{fig:l298_test}
+\caption{L298 Dual H-Bridge 2Phase Step Motor}
+\label{fig:dht11_test}
 \end{figure}
-코드 작성에 앞서 기본적인 작동 방식을 알아보자. 
-4wire 2Phase Step Motor의 경우 다음과 같이 4개의 코일로 구성되어 있으며 2개의 코일이 같은 wire로 연결되다.
-따라서 전류가 흐를 때 2개의 코일은 항상 반대 극성을 만들어 낸다.
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=1\textwidth]{./images/raspberry/stepMotor4wire2phase1.png}
-\caption{2Phase Motor}
-\label{fig:2phase_principle1}
-\end{figure}
-보통 스텝모터의 회전축은 영구자석으로 되어있으므로 다음과 같이 극성을 만들어 주면 모터가 회전하게 된다. 
-그림에는 한 step당 90도 회전을 하지만 코일의 수를 늘이고 영구자석을 톱니모양으로 만들면 좀더 미세한 
-각도로 회전한다. 일반적으로 많이 쓰이는 Step Motor의 Step 각도는 1.8도이다.
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=1\textwidth]{./images/raspberry/stepMotor4wire2phase2.png}
-\caption{2Phase Motor Basic Principle}
-\label{fig:2phase_principle2}
-\end{figure}
-참고로 실제 모터 구조와 작동 방법은 다음 그림에 가깝다.\\
-그림 출처: http://www.orientalmotor.com/technology/articles/2phase-v-5phase.html
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=1\textwidth]{./images/raspberry/2-ph-fullstep.jpg}
-\caption{Real Motion}
-\label{fig:2phase_principle3}
-\end{figure}
-실제로 위 그림과 같이 극성을 만들기 위해서는 코일에 전류를 순차적으로 흘러줘야 하는데 Motor Driver가 
-외부 입력에 따라 모터에 전류를 공급한다. L298 Dual H-Bridge Motor Driver는 2개의 DC Motor 제어가 가능하다.
-간단히 설명하면 총 6개의 입력신호 중 EA, IN1, IN2가 첫 번째 모터를, EB, IN3, IN4가 두 번째 모터를 
-제어한다. EA, EB는 모터를 Enable 시키는 신호이며, IN1 ~ IN4는 모터의 전류 방향을 결정한다. 
-즉, IN1과 IN2신호에 따라 전류 방향이 바뀌며 IN3와 IN4도 마찬가지 이다.
-이걸 이용하면 4Wire 2Phase Step Motor에 순차적으로 전류를 흘러줄 수 있다. 
-참고로 Step Motor의 경우 L298 Motor Driver에 있는 2개의 Motor 출력핀에 직접 연결해도 되고 Step Motor 
-출력핀에 바로 연결해도 동일하게 동작한다.\\
-이제 위 조건에 맞게 신호를 만드는 코드를 다음과 같이 작성한다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
+소스코드는 다음과 같다.
+\begin{lstlisting}[style=termstylenumber, caption={l298.c}, label={list:l298TestCode}]
 #include <stdio.h>
 #include <wiringPi.h>
 
@@ -892,39 +907,16 @@ int main(void)
 1.8ms(대략 167rpm)보다 짧은 경우 불규칙적인 회전을 보인다. Step신호를 반대로 주면 순서가 반대로 
 작용하므로 모터 방향이 바뀐다. 모터의 방향은 Step순서를 반대로 하면 된다.
 \subsection{MD5-DH14}
- 여기서는 Raspberry Pi와 MD-DH14 Motor Driver를 이용하여 5Phase Pentagon방식의 Step Motor작동 테스트를 
-하였다. 사용된 하드웨어와 구성은 다음과 같다.
+MD-DH14 Motor Driver를 이용하여 5Phase Pentagon방식의 Step Motor를 작동시켜 보자.
+그림\ref{fig:5phase_test}과 같이 회로를 구성한다.
 \begin{figure}[!htb]
 \centering
 \includegraphics[width=1\textwidth]{./images/raspberry/md5dh14Test.png}
 \caption{5Phase Motor Test}
 \label{fig:5phase_test}
 \end{figure}
-\begin{itemize}
-\item Raspberry Pi Model B+
-\item MD5-HD14 Motor Driver
-\item 24V Power Supply
-\item 스텝모터 (A15K-S545-G10)
-\end{itemize}
-5Phase Step Motor는 작동 방식이 복잡한데 사실 Motor Driver가 알아서 구동시키므로 크게 고려할 필요는 없다.
-참고로 대략적인 작동 방식은 다음 그림과 같다.\\
-그림 출처: http://www.orientalmotor.com/technology/articles/2phase-v-5phase.html
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=1\textwidth]{./images/raspberry/5-ph-fullstep.jpg}
-\caption{5Phase Motor Principle}
-\label{fig:5phase_principle1}
-\end{figure}
-MD5-HD14 Motor Driver를 이용한 Step Motor 작동은 간단하다. 외부에서 Pulse 신호를 주면 Driver는 1Pulse당
-1Step씩 Motor를 움직인다. 여기서 Step 각도는 연결된 Motor에 따라 다른데 테스트에 사용된 스텝모터는 
-1Step당 0.072도씩 움직인다. 따라서 한바퀴를 돌리기 위해서는 5000Pulse가 필요하다. 
-모터 방향을 바꾸는 방법은 2가지가 있는데 Driver에 있는 1/2 CLK 스위치에 따라 1Pulse방식과 2Pulse방식이 
-있다. 1Pulse 방식은 CW 입력핀을 Pulse로 주고 CCW 입력핀에 따라 회전 방향을 결정하는 방식이다. 
-2Pulse방식은 CW 입력핀과 CCW 입력핀에 각각 Pulse를 주는 방식이다. 이 경우 동시에 Pulse가 입력되면 
-Motor가 작동 되지 않는다. 2Pulse 방식은 2개의 Pulse를 만들어야 하므로 테스트에는 1Pulse 방식을 
-사용하였다. 이제 Motor 구동에 필요한 Pulse를 만드는 코드를 다음과 같이 작성한다. Pulse를 만드는 방법에 
-대한 자세한 설명은 다음 페이지를 참고한다. 여기서는 GPIO를 이용하여 Pulse를 만들었다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
+소스코드는 다음과 같다.
+\begin{lstlisting}[style=termstylenumber, caption={md5dh14.c}, label={list:md5dh14TestCode}]
 #include <stdio.h>
 #include <wiringPi.h>
 
