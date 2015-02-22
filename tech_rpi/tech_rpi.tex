@@ -137,6 +137,101 @@ allow-hotplug wlan0
 	wpa-ssid "CTRLTEAM"
 	wpa-psk "asdf12345"
 \end{lstlisting}
+\subsection{UART}\label{subsec:uartConfig}
+Raspberry Pi의 UART(Universal asynchronous receiver/transmitter)는 일반적으로 RS-232와 같은 
+시리얼 통신을 5V Level의 TTL신호로 전송한다. 따라서 Raspberry Pi나 Arduino와 같이 UART를 지원하는 
+보드에서는 바로 연결하여 사용이 가능하다. 여기서 주의할 사항은 PC와 같이 Serial 통신의 전압 Level이 다른
+센서를 사용할 경우 MAX232와 같은 Level Convert를 사용하여 사용하려는 센서의 전압 Level에 맞게 변경해야 
+한다.\\ 
+기본적으로 Raspberry Pi의 UART는 Consol접속용으로 설정되어 있다. 따라서 일반적인 UART 통신을 하기 
+위해서는 다음과 같이 /boot/cmdline.txt 파일과 /etc/inittab 파일을 수정해야 한다.\\
+/boot/cmdline.txt 파일을 열어 "console=ttyAMA0,115200" 부분을 삭제 한다.
+\begin{lstlisting}[style=termstyle]
+dwc_otg.lpm_enable=0 console=ttyAMA0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 elevator=de$
+\end{lstlisting}
+/etc/inittab 파일을 열어 마지막 라인에 있는 "T0:23:respawn:/sbin/getty -L ttyAMA0 115200 vt100"
+앞에 '\#'을 넣어 주석 처리한다
+\begin{lstlisting}[style=termstyle]
+# /etc/inittab: init(8) configuration.
+# $Id: inittab,v 1.91 2002/01/25 13:35:21 miquels Exp $
+
+# The default runlevel.
+id:2:initdefault:
+
+# Boot-time system configuration/initialization script.
+# This is run first except when booting in emergency (-b) mode.
+si::sysinit:/etc/init.d/rcS
+
+# What to do in single-user mode.
+~~:S:wait:/sbin/sulogin
+
+# /etc/init.d executes the S and K scripts upon change
+# of runlevel.
+#
+# Runlevel 0 is halt.
+# Runlevel 1 is single-user.
+# Runlevels 2-5 are multi-user.
+# Runlevel 6 is reboot.
+
+l0:0:wait:/etc/init.d/rc 0
+l1:1:wait:/etc/init.d/rc 1
+l2:2:wait:/etc/init.d/rc 2
+l3:3:wait:/etc/init.d/rc 3
+l4:4:wait:/etc/init.d/rc 4
+l5:5:wait:/etc/init.d/rc 5
+l6:6:wait:/etc/init.d/rc 6
+# Normally not reached, but fallthrough in case of emergency.
+z6:6:respawn:/sbin/sulogin
+
+# What to do when CTRL-ALT-DEL is pressed.
+ca:12345:ctrlaltdel:/sbin/shutdown -t1 -a -r now
+
+# Action on special keypress (ALT-UpArrow).
+#kb::kbrequest:/bin/echo "Keyboard Request--edit /etc/inittab to let this work."
+
+# What to do when the power fails/returns.
+pf::powerwait:/etc/init.d/powerfail start
+pn::powerfailnow:/etc/init.d/powerfail now
+po::powerokwait:/etc/init.d/powerfail stop
+
+# /sbin/getty invocations for the runlevels.
+#
+# The "id" field MUST be the same as the last
+# characters of the device (after "tty").
+#
+#
+# Format:
+#  <id>:<runlevels>:<action>:<process>
+#
+# Note that on most Debian systems tty7 is used by the X Window System,
+# so if you want to add more getty's go ahead but skip tty7 if you run X.
+#
+1:2345:respawn:/sbin/getty --noclear 38400 tty1
+2:23:respawn:/sbin/getty 38400 tty2
+3:23:respawn:/sbin/getty 38400 tty3
+4:23:respawn:/sbin/getty 38400 tty4
+5:23:respawn:/sbin/getty 38400 tty5
+6:23:respawn:/sbin/getty 38400 tty6
+
+# Example how to put a getty on a serial line (for a terminal)
+#
+#T0:23:respawn:/sbin/getty -L ttyS0 9600 vt100
+#T1:23:respawn:/sbin/getty -L ttyS1 9600 vt100
+
+# Example how to put a getty on a modem line.
+#
+#T3:23:respawn:/sbin/mgetty -x0 -s 57600 ttyS3
+
+
+#Spawn a getty on Raspberry Pi serial line
+#T0:23:respawn:/sbin/getty -L ttyAMA0 115200 vt100
+\end{lstlisting}
+설정을 마쳤으면 재부팅 한다.
+\begin{lstlisting}[style=termstyle]
+pi@raspberrypi~$ sudo reboot
+\end{lstlisting}
+재부팅이 완료되면 UART를 사용할 수 있다. 참고로 Raspberry Pi의 UART device는 /etc/ttyAMA0에 할당되어
+있으며 8번 Pin을 Transmit, 10번 Pin을 Receive로 사용한다.
 \section{Library}
 \subsection{wiringPi}
 WiringPi는 Arduino에서 사용되는 Wiring Library를 RPi에 맞게 변경한 것으로 GPIO access를 포함하여 
@@ -394,7 +489,7 @@ mencoder를 이용하여 이미지들을 동영상으로 변환 한다.
 \begin{lstlisting}
 scwook@scwook# mencoder -nosound -ovc lavc -lavcopts vcodec=mpeg4:aspect=4/3:vbitrate=8000000 -vf scale=640:480 -o timelapse.avi -mf type=jpeg:fps=24 mf://@stills.txt
 \end{lstlisting}
-\section{GPIO}
+\section{GPIO}\label{sec:gpioApp}
 \subsection{LED and Button Test}
 버튼을 누르면 LED가 켜지는 테스트를 해보자. 그림\ref{fig:gpio_in_out}과 같은 회로를 구성한다.
 \begin{figure}[!htb]
@@ -809,7 +904,84 @@ pi@raspberrypi# sudo ./ds1820
 \end{lstlisting}
 온도 값이 출력되면 성공
 \section{Dust Sensor}
-\subsection{PM1001}
+\subsection{PM1001}\label{subsec:pm1001Test}
+PM1001의 경우 UART 통신을 통해 데이터를 전송하므로 Raspberry Pi의 UART 포트와 연결이 가능하다.
+센서에 연결하기 전에 \ref{subsec:uartConfig}를 참고하여 UART Consol 설정을 해제한다.
+테스트 회로는 그림\ref{fig:pm1001_test}와 같다.
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=1\textwidth]{./images/epics/PM1001Test.png}
+\caption{PM1001 Dust Sensor}
+\label{fig:pm1001_test}
+\end{figure}
+소스코드는 다음과 같다.
+\begin{lstlisting}[style=termstylenumber, caption={pm1001.c}, label={list:pm1001TestCode}]
+#include <stdio.h>
+#include <wiringPi.h>
+#include <wiringSerial.h>
+
+int main(void)
+{
+  int fd;
+
+  if((fd = serialOpen("/dev/ttyAMA0", 9600)) < 0)
+  {
+    printf("Unable to open serial device\n");
+    return 1;
+  }
+
+  if(wiringPiSetup() == -1)
+  {
+    printf("Unable to start wiringPi\n");
+    return 1;
+  }
+
+  serialFlush(fd);
+
+  unsigned char c;
+  int df[4];
+  int dust;
+
+  c = 0x11;
+  serialPutchar(fd, c);
+
+  c = 0x01;
+  serialPutchar(fd, c);
+  serialPutchar(fd, c);
+
+  c = 0xED;
+  serialPutchar(fd, c);
+
+  printf("%d ", serialGetchar(fd));
+  printf("%d ", serialGetchar(fd));
+  printf("%d ", serialGetchar(fd));
+
+  int i=0, j;
+  for(i; i<3; i++)
+  {
+    j=0;
+    for(j; j<4; j++)
+      df[j] = serialGetchar(fd);
+
+    dust = df[0]*256*256*256 + df[1]*256*256 + df[2]*256 + df[3];
+    printf("%d ", dust);
+  }
+
+  printf("%d\n", serialGetchar(fd));
+  printf("%d %d %d %d\n", df[0], df[1], df[2], df[3]);
+
+  serialFlush(fd);
+  serialClose(fd);
+
+  return 0;
+}
+\end{lstlisting}
+컴파일 후 실행한다.
+\begin{lstlisting}[style=termstyle]
+pi@raspberrypi# gcc -o pm1001 pm1001.c -lwiringPi
+pi@raspberrypi# sudo ./pm1001
+\end{lstlisting}
+먼지 값이 출력되면 성공
 \section{Motor}
 \subsection{L298 Dual H-Brdge}
 L298 Dual H-Bridge를 이용하여 2Phase Motor를 작동시켜 보자.
@@ -958,10 +1130,36 @@ int main(void)
 
 \end{lstlisting}
 \chapter{EPICS Integration}
+여기서는 앞서 테스트한 Sensor 및 Device를 EPICS에 Integration하고 Channel Access를 통해 값을 Monitoring
+또는 Control하는 방법에 대하여 기술하였다. 본 Chapter에서 사용된 EPICS는 3.14.12.4 버전이며 전체적으로
+다음과 같은 구조를 바탕으로 하고 있다.
+
+\section{Installation}
+위 구조에 맞게 EPICS를 설치하기 위해 git으로 부터 script파일을 받는다.
+\begin{lstlisting}[style=termstyle]
+pi@raspberrypi# git clone https://github.com/jeonghanlee/scripts_for_epics
+\end{lstlisting}
+\section{Library}
+\subsection{synApps}
+
 \section{GPIO}
-Raspberry Pi는 40개의 입출력 Pin을 가지고 있는데(Model B의 경우 26개) 여기에서는 GPIO를 EPICS 에서 
-사용하기 위한 방법과 테스트 과정에 대하여 설명하였다.\\
-EPICS Application 폴더를 생성한다. 
+section\ref{sec:gpioApp}에서 진행하였던 GPIO 테스트를 EPICS로 Integration 하여 테스트해 본다. 최종 목표는
+그림\ref{fig:gpio_in_out}과 같이 회로를 구성하고 다음 epics db를 통해 GPIO를 제어하는 것이다.
+\begin{lstlisting}[style=termstyle]
+record(bi, "inp1")
+{
+  field(DTYP, "GPIO")
+  field(SCAN, "1 second")
+  field(INP, "@1")
+}
+
+record(bo, "out4")
+{
+  field(DTYP, "GPIO")
+  field(OUT, "@4")
+}
+\end{lstlisting}
+코드 작성에 앞서 테스트 할 기본 폴더 및 EPICS Application 구조를 생성한다.
 \begin{lstlisting}[style=termstyle]
 pi@ctrlpi3 cd ../epics/R3.14.12.4/siteApps
 pi@ctrlpi3 ~/epics/R3.14.12.4/siteApps# mkdir gpio
@@ -978,8 +1176,8 @@ Application name? gpio
 pi@ctrlpi3 ~/epics/R3.14.12.4/siteApps/gpio# ls
 conigure  gpioApp  iocBoot Makefile
 \end{lstlisting}
-gpioApp/src 폴더로 이동한 후 devGPIO.c 파일을 만들어 기본 코드를 작성한다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
+gpioApp/src 폴더로 이동한 후 devGPIO.c 파일을 만들어 다음과 같이 코드를 작성한다.
+\begin{lstlisting}[style=termstylenumber, caption={devGPIO.c}, label={list:gpioDevCode}]
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -997,20 +1195,72 @@ static long bi_init_record(biRecord *pbi);
 static long write_bo(boRecord *pbo);
 static long read_bi(biRecord *pbi);
 
+struct Pin_Info
+{
+  int pin_num;
+};
+
 static long bo_init_record(boRecord *pbo)
 {
+  struct Pin_Info *pin_info = malloc(sizeof(struct Pin_Info));
+
+  if(wiringPiSetup() == -1)
+    return 1;
+
+  int pin_num = 0;
+  pin_num = atoi(pbo->out.value.instio.string);
+
+  pinMode(pin_num, OUTPUT);
+
+  pin_info->pin_num = pin_num;
+
+  pbo->dpvt = pin_info;
+
+  return 0;
 }
 
 static long bi_init_record(biRecord *pbi)
 {
+  struct Pin_Info *pin_info = malloc(sizeof(struct Pin_Info));
+
+  if(wiringPiSetup() == -1)
+    return 1;
+
+  int pin_num = 0;
+  pin_num = atoi(pbi->inp.value.instio.string);
+
+  pinMode(pin_num, INPUT);
+
+  pin_info->pin_num = pin_num;
+
+  pbi->dpvt = pin_info;
+
+  return 0;
 }
+
 
 static long write_bo(boRecord *pbo)
 {
+  struct Pin_Info *pin_info = pbo->dpvt;
+
+  int pin = pin_info->pin_num;
+  int val = pbo->rval;
+
+  digitalWrite(pin, val);
+
+  return 0;
 }
 
 static long read_bi(biRecord *pbi)
 {
+  struct Pin_Info *pin_info = pbi->dpvt;
+
+  int pin = pin_info->pin_num;
+  int val = digitalRead(pin);
+
+  pbi->rval = val;
+
+  return 0;
 }
 
 struct
@@ -1054,235 +1304,12 @@ struct
 epicsExportAddress(dset,devBoGpioAsync);
 epicsExportAddress(dset,devBiGpioAsync);
 \end{lstlisting}
-
-\section{Humidity and Temperature Sensor}
-Record는 출력을, biRecord는 입력을 위한 Record이며, 각각의 Record에 대한 초기화 함수와 GPIO를 
-읽고 쓰기 위한 함수로 구성되어 있다. dset을 devBoGpioAsync와 devBiGpioAsync로 설정 하였으므로 
-devGPIO.dbd 파일을 만들어 다음과 같이 작성한다. 
+코드 작성이 완료되면 devGPIO.dbd 파일을 만든다.
 \begin{lstlisting}[style=termstyle]
 device(bo, INST_IO, devBoGpioAsync, "GPIO")
 device(bi, INST_IO, devBiGpioAsync, "GPIO")
 \end{lstlisting}
-기본 구조가 완성되었으면 실제 코드를 작성하도록 한다. 우선 초기화 함수를 다음과 같이 작성한다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
-static long bo_init_record(boRecord *pbo)
-{
-  struct Pin_Info *pin_info = malloc(sizeof(struct Pin_Info));
-
-  if(wiringPiSetup() == -1)
-    return 1;
-
-  int pin_num = 0;
-  pin_num = atoi(pbo->out.value.instio.string);
-
-  pinMode(pin_num, OUTPUT);
-
-  pin_info->pin_num = pin_num;
-
-  pbo->dpvt = pin_info;
-
-  return 0;
-}
-
-static long bi_init_record(biRecord *pbi)
-{
-  struct Pin_Info *pin_info = malloc(sizeof(struct Pin_Info));
-
-  if(wiringPiSetup() == -1)
-    return 1;
-
-  int pin_num = 0;
-  pin_num = atoi(pbi->inp.value.instio.string);
-
-  pinMode(pin_num, INPUT);
-
-  pin_info->pin_num = pin_num;
-
-  pbi->dpvt = pin_info;
-
-  return 0;
-}
-\end{lstlisting}
-핀 번호를 저장하기 위한 구조체를 함수 선언 아래에 해준다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
-...
-...
-static long write_bo(boRecord *pbo);
-static long read_bi(biRecord *pbi);
-
-struct Pin_Info
-{
-  int pin_num;
-}; 
-\end{lstlisting}
-bo와 bi초기화 코드는 거의 동일하며 차이는 bo의 경우 Link를 out에서, bi의 경우 Link를 inp에서 가져온다. 
-또한 bo는 출력이므로 pinMode를 OUTPUT으로 설정하며 bi는 입력 모드인 INPUT로 설정한다.\\
-초기화 함수가 완료되었으면 실제 값을 읽고 쓰는 함수를 작성한다. 우선 write\_bo 함수를 작성한다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
-static long write_bo(boRecord *pbo)
-{
-  struct Pin_Info *pin_info = pbo->dpvt;
-
-  int pin = pin_info->pin_num;
-  int val = pbo->rval;
-
-  digitalWrite(pin, val);
-
-  return 0;
-}
-\end{lstlisting}
-GPIO 출력을 위해 wiringPi Library에 있는 digitalWrite 함수를 사용하는데 이 함수는 출력하고자 
-하는 핀 번호와 출력값을 함수 인자로 받는다. 핀 번호는 앞서 dpvt 포인터에 저장된 구조체를 이용하여 
-읽어온다. 출력 값은 boRecord 구조체 안에있는 rval변수로 부터 알 수 있다. 즉, 사용자가 다음과 같이 
-값을 설정하면 그 값이 rval에 저장된다. 
-\begin{lstlisting}[style=termstyle]
-scwook@scwook:# caput out4 1
-\end{lstlisting}
-다음은 read\_bi 함수를 작성한다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
-static long read_bi(biRecord *pbi)
-{
-  struct Pin_Info *pin_info = pbi->dpvt;
-
-  int pin = pin_info->pin_num;
-  int val = digitalRead(pin);
-
-  pbi->rval = val;
-
-  return 0;
-}
-\end{lstlisting}
-read\_bi함수는 write\_bo함수와 구조는 같으며 핀 값을 읽어들이는 digitalRead함수를 사용한다. 
-이 함수는 핀 번호를 함수 인자로 받아 현재 핀 상태가 HIGH면 1, LOW면 0값을 리턴한다.\\
-전체 코드는 다음과 같다.
-\begin{lstlisting}[style=termstylenumber, caption={Editing \texttt{/etc/fai/NFSROOT}}, label={list:nfsroot-file}]
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-#include <epicsExport.h>
-#include <devSup.h>
-#include <boRecord.h>
-#include <biRecord.h>
-
-#include <wiringPi.h>
-
-static long bo_init_record(boRecord *pbo);
-static long bi_init_record(biRecord *pbi);
-
-static long write_bo(boRecord *pbo);
-static long read_bi(biRecord *pbi);
-
-struct Pin_Info
-{
-  int pin_num;
-};
-
-static long bo_init_record(boRecord *pbo)
-{
-  struct Pin_Info *pin_info = malloc(sizeof(struct Pin_Info));
-
-  if(wiringPiSetup() == -1)
-    return 1;
-
-  int pin_num = 0;
-  pin_num = atoi(pbo->out.value.instio.string);
-
-  pinMode(pin_num, OUTPUT);
-
-  pin_info->pin_num = pin_num;
-
-  pbo->dpvt = pin_info;
-
-  return 0;
-}
-
-static long bi_init_record(biRecord *pbi)
-{
-  struct Pin_Info *pin_info = malloc(sizeof(struct Pin_Info));
-
-  if(wiringPiSetup() == -1)
-    return 1;
-
-  int pin_num = 0;
-  pin_num = atoi(pbi->inp.value.instio.string);
-
-  pinMode(pin_num, INPUT);
-
-  pin_info->pin_num = pin_num;
-
-  pbi->dpvt = pin_info;
-
-  return 0;
-}
-
-
-static long write_bo(boRecord *pbo)
-{
-  struct Pin_Info *pin_info = pbo->dpvt;
-
-  int pin = pin_info->pin_num;
-  int val = pbo->rval;
-
-  digitalWrite(pin, val);
-
-  return 0;
-}
-
-static long read_bi(biRecord *pbi)
-{
-  struct Pin_Info *pin_info = pbi->dpvt;
-
-  int pin = pin_info->pin_num;
-  int val = digitalRead(pin);
-
-  pbi->rval = val;
-
-  return 0;
-}
-
-struct
-{
-  long num;
-  DEVSUPFUN     report;
-  DEVSUPFUN     init;
-  DEVSUPFUN     init_record;
-  DEVSUPFUN     get_ioint_info;
-  DEVSUPFUN     write_bo;
-  DEVSUPFUN     special_linconv;
-} devBoGpioAsync = {
-  6,
-  NULL,
-  NULL,
-  bo_init_record,
-  NULL,
-  write_bo,
-  NULL
-};
-
-struct
-{
-  long num;
-  DEVSUPFUN     report;
-  DEVSUPFUN     init;
-  DEVSUPFUN     init_record;
-  DEVSUPFUN     get_ioint_info;
-  DEVSUPFUN     read_bi;
-  DEVSUPFUN     special_linconv;
-} devBiGpioAsync = {
-  6,
-  NULL,
-  NULL,
-  bi_init_record,
-  NULL,
-  read_bi,
-  NULL
-};
-
-epicsExportAddress(dset,devBoGpioAsync);
-epicsExportAddress(dset,devBiGpioAsync);
-\end{lstlisting}
-코드 작성이 완료되면 Makefile에 다음과 같이 추가한다.
+앞서 작성한 코드를 Build하기 위해 Makefile에 다음과 같이 추가한다.
 \begin{lstlisting}[style=termstyle]
 TOP=../..
 
@@ -1333,8 +1360,7 @@ include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
 \end{lstlisting}
- 이제 코드작성은 완료되었으므로 테스트를 위한 db파일을 만든다. gpioApp/Db 폴더로 이동한 후 gpio.db 
-파일을 만든다. 
+db파일을 만들기 위해 gpioApp/Db 폴더로 이동한 후 다음과 같은 gpio.db 파일을 만든다. 
 \begin{lstlisting}[style=termstyle]
 record(bi, "inp1")
 {
@@ -1349,13 +1375,13 @@ record(bo, "out4")
   field(OUT, "@4")
 }
 \end{lstlisting}
-gpio.db에서는 GPIO 1번을 입력으로 4번을 출력으로 설정했음을 알 수있다. Makefile에 db파일을 추가해 준다.
-이제 컴파일을 하기 위해 gpio폴더로 이동한 후 make를 실행한다.
+gpio.db에서는 GPIO 1번을 입력으로 4번을 출력으로 설정했음을 알 수있다. Makefile에 db파일을 추가해 준다.\\마지막으로 앞서 작성한 파일들을 컴파일 하기 위해 gpio폴더로 이동한 후 make를 실행한다.
 \begin{lstlisting}[style=termstyle]
 pi@ctrlpi3 ~/epics/R3.14.12.4/siteApps/gpio# make
 \end{lstlisting}
 make가 완료되면 bin/linux-arm 폴더에 gpio 파일과 db 폴더에 gpio.db 파일이 만들어 진다.
-이제 ioc를 실행시키기 위해 iocBoot/iocgpio 폴더로 이동 후 st.cmd파일에 gpio.db를 추가해 준다.
+이제 ioc를 실행시키기 위해 iocBoot/iocgpio 폴더로 이동 후 st.cmd파일에 gpio.db를 Load하는 코드를 
+추가해 준다.
 \begin{lstlisting}[style=termstyle]
 #!../../bin/linux-arm/gpio
 
@@ -1392,200 +1418,29 @@ iocInit
 pi@ctrlpi3 ~/epics/R3.14.12.4/siteApps/gpio/iocBoot/iocdht11 $ chmod 755 st.cmd
 pi@ctrlpi3 ~/epics/R3.14.12.4/siteApps/gpio/iocBoot/iocdht11 $ sudo ./st.cmd
 \end{lstlisting}
-out4 출력값을 1로 했을 때 LED에 불이오면 성공!
+output 테스트를 위해 다음과 같이 out4 출력값을 1로 하고 LED에 불이 들어오는지 확인한다.
 \begin{lstlisting}[style=termstyle]
 epics> dbpf out4 1
 \end{lstlisting}
-버튼을 누른 상태에서 inp1 값이 1이면 성공!
+input 테스트는 버튼을 눌렀을 때 inp1 값을 읽어 확인한다.
 \begin{lstlisting}[style=termstyle]
 epics> dbpr inp1
 ASG:                DESC:               DISA: 0             DISP: 0             
 DISV: 1             NAME: gpio:inp1     RVAL: 0             SEVR: NO_ALARM      
 STAT: NO_ALARM      SVAL: 0             TPRO: 0             VAL: 1
 \end{lstlisting}
-\subsection{Library}
-지금까지 만든 코드를 Library로 만들어 보자.
-siteLibs 폴더로 이동한 후 raspGPIOLib 폴더를 하나 만든다.
-\begin{lstlisting}[style=termstyle]
-pi@ctrlpi3 ~/epics/R3.14.12.4/siteLibs $ mkdir raspGPIOLib
-pi@ctrlpi3 ~/epics/R3.14.12.4/siteLibs $ cd raspGPIOLibs
-pi@ctrlpi3 ~/epics/R3.14.12.4/siteLibs/raspGPIOLibs $
-\end{lstlisting}
-rsapGPIOLib 폴더안에 Db, src폴더를 만들고 Makefile을 생성한 후 다음과 같이 작성한다.
-\begin{lstlisting}[style=termstyle]
-TOP = ..
-include $(TOP)/configure/CONFIG
-DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard *src*))
-DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard *Src*))
-DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard *db*))
-DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard *Db*))
-include $(TOP)/configure/RULES_DIRS
-\end{lstlisting}
-src 폴더로 이동 후 지금까지 만든 devGPIO.c와 devGPIO.dbd 파일을 복사한다.
-\begin{lstlisting}[style=termstyle]
-pi@ctrlpi3 ~/epics/R3.14.12.4/siteLibs/raspGPIOLibs/src $ cp /home/pi/epics/R3.14.12.4/siteApps/gpio/gpioApp/src/devGPIO.c ./
-pi@ctrlpi3 ~/epics/R3.14.12.4/siteLibs/raspGPIOLibs/src $ cp /home/pi/epics/R3.14.12.4/siteApps/gpio/gpioApp/src/devGPIO.dbd ./
-\end{lstlisting}
-Makefile 만들고 다음과 같이 작성한다.
-\begin{lstlisting}[style=termstyle]
-TOP = ../..
-include $(TOP)/configure/CONFIG
-
-LIBRARY_IOC += raspGPIO
-DBD         += devGPIO.dbd
-raspGPIO_SRCS += devGPIO.c
-
-include $(TOP)/configure/RULES
-\end{lstlisting}
- src 폴더안에서 make를 실행한다. make가 완료되면 siteLibs/lib/linux-arm 폴더안에 libraspGPIO.so 파일이 
-만들어 진다. Library에 대한 db파일 제공을 위해 raspGPIOLibs/Db폴더로 이동한 후 다음과 같은 
-gpio.db파일만든다.
-\begin{lstlisting}[style=termstyle]
-record(bi, "inp1")
-{
-  field(DTYP, "GPIO")
-  field(SCAN, "1 second")
-  field(INP, "@1")
-}
-
-record(bo, "out4")
-{
-  field(DTYP, "GPIO")
-  field(OUT, "@4")
-}
-\end{lstlisting}
-Makefile을 만들어 다음과 같이 작성한다.
-\begin{lstlisting}[style=termstyle]
-TOP =../..
-include $(TOP)/configure/CONFIG
-DB += gpio.db
-include $(TOP)/configure/RULES
-\end{lstlisting}
-make를 실행하면 siteLibs/db 폴더안에 gpio.db파일이 생성된다.
-Library를 이용한 GPIO 테스트는 EPICS Application에 있는 GPIO Input/Output Test with LED and 
-Button을 참고하기 바란다.
 \section{Dust Sensor}
-PM1001 먼지 센서는 1um이상의 먼지를 감지하여 수량PCS/L값 으로 출력해 주는 센서이다. 센서에 대한 자세한 
-사양은 다음 홈페이지를 참고하기 바란다.\\
-http://www.diwellshop.com/product/detail.html?product\_no=172\&cate\_no=36\&display\_group=1\\
-테스트에 사용된 하드웨어 구성은 다음과 같다.
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=1\textwidth]{./images/epics/PM1001Test.png}
-\caption{PM1001 Dust Sensor Test}
-\label{fig:pm1001_epics_test}
-\end{figure}
- PM1001의 경우 UART 통신을 통해 데이터를 전송하므로 Raspberry Pi의 UART 포트와 연결이 가능하다. 
-참고로 UART(Universal asynchronous receiver/transmitter)는 일반적으로 RS-232와 같은 시리얼 통신을 
-5V Level의 TTL신호로 전송한다. 따라서 Raspberry Pi나 Arduino와 같이 UART를 지원하는 보드에서는 바로 
-연결하여 사용이 가능하다. 여기서 주의할 사항은 PC의 경우 Serial 통신의 전압 Level이 -12 ~ 12v이므로 
-센서와 바로 연결해서는 안되며 MAX232와 같은 Level Convert를 사용하여 전압 Level을 맞춰야 한다. 여기서는 
-Raspberry Pi에 바로 연결하여 테스트 하였으므로 별도의 Convert를 사용하지 않았다.\\
-Raspberry Pi에서 UART는 기본적으로 콘솔출력용으로 지정되어 있다. 
-따라서 일반적인 목적으로 사용하기 위해서는 /boot/cmdline.txt와 /etc/inittab 파일을 수정해야 한다.\\
-/boot/cmdline.txt 파일을 열어 "console=ttyAMA0,115200" 부분을 삭제 한다.
+section\ref{subsec:pm1001Test}에서 진행하였던 PM1001 Sensor를 EPICS로 Integration 하여 테스트해 본다.
+최종 목표는 그림\ref{fig:pm1001_test}와 같이 회로를 구성하고 다음 epics db를 통해 먼지값을 읽는것이다.
 \begin{lstlisting}[style=termstyle]
-dwc_otg.lpm_enable=0 console=ttyAMA0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 elevator=de$
+record(ai,"PI:DUST")
+{
+  field(DTYP, "stream")
+  field(INP, "@sensor.proto get_dust UART")
+  field(SCAN, "1 second")
+}
 \end{lstlisting}
-/etc/inittab 파일을 열어 마지막 라인에 있는 "T0:23:respawn:/sbin/getty -L ttyAMA0 115200 vt100" 
-앞에 '\#'을 넣어 주석 처리한다
-\begin{lstlisting}[style=termstyle]
-# /etc/inittab: init(8) configuration.
-# $Id: inittab,v 1.91 2002/01/25 13:35:21 miquels Exp $
-
-# The default runlevel.
-id:2:initdefault:
-
-# Boot-time system configuration/initialization script.
-# This is run first except when booting in emergency (-b) mode.
-si::sysinit:/etc/init.d/rcS
-
-# What to do in single-user mode.
-~~:S:wait:/sbin/sulogin
-
-# /etc/init.d executes the S and K scripts upon change
-# of runlevel.
-#
-# Runlevel 0 is halt.
-# Runlevel 1 is single-user.
-# Runlevels 2-5 are multi-user.
-# Runlevel 6 is reboot.
-
-l0:0:wait:/etc/init.d/rc 0
-l1:1:wait:/etc/init.d/rc 1
-l2:2:wait:/etc/init.d/rc 2
-l3:3:wait:/etc/init.d/rc 3
-l4:4:wait:/etc/init.d/rc 4
-l5:5:wait:/etc/init.d/rc 5
-l6:6:wait:/etc/init.d/rc 6
-# Normally not reached, but fallthrough in case of emergency.
-z6:6:respawn:/sbin/sulogin
-
-# What to do when CTRL-ALT-DEL is pressed.
-ca:12345:ctrlaltdel:/sbin/shutdown -t1 -a -r now
-
-# Action on special keypress (ALT-UpArrow).
-#kb::kbrequest:/bin/echo "Keyboard Request--edit /etc/inittab to let this work."
-
-# What to do when the power fails/returns.
-pf::powerwait:/etc/init.d/powerfail start
-pn::powerfailnow:/etc/init.d/powerfail now
-po::powerokwait:/etc/init.d/powerfail stop
-
-# /sbin/getty invocations for the runlevels.
-#
-# The "id" field MUST be the same as the last
-# characters of the device (after "tty").
-#
-# Format:
-#  <id>:<runlevels>:<action>:<process>
-#
-# Note that on most Debian systems tty7 is used by the X Window System,
-# so if you want to add more getty's go ahead but skip tty7 if you run X.
-#
-1:2345:respawn:/sbin/getty --noclear 38400 tty1
-2:23:respawn:/sbin/getty 38400 tty2
-3:23:respawn:/sbin/getty 38400 tty3
-4:23:respawn:/sbin/getty 38400 tty4
-5:23:respawn:/sbin/getty 38400 tty5
-6:23:respawn:/sbin/getty 38400 tty6
-
-# Example how to put a getty on a serial line (for a terminal)
-#
-#T0:23:respawn:/sbin/getty -L ttyS0 9600 vt100
-#T1:23:respawn:/sbin/getty -L ttyS1 9600 vt100
-
-# Example how to put a getty on a modem line.
-#
-#T3:23:respawn:/sbin/mgetty -x0 -s 57600 ttyS3
-
-
-#Spawn a getty on Raspberry Pi serial line
-#T0:23:respawn:/sbin/getty -L ttyAMA0 115200 vt100
-\end{lstlisting}
-설정을 마쳤으면 재부팅 한다. 
-\begin{lstlisting}[style=termstyle]
-pi@raspberrypi~$ sudo reboot
-\end{lstlisting}
-재부팅이 완료되면 UART를 사용할 수 있다. 참고로 Raspberry Pi에서는 UART device는 /etc/ttyAMA0에 할당되어
-있다 PM1001 센서는 시리얼 통신을 사용하므로 EPICS Asyn과 StreamDevice Library를 설치한다.
-우선 stieLibs로 이동한다. siteLibs가 없다면 svn에서 내려 받는다.
-\begin{lstlisting}[style=termstyle]
-pi@raspberrypi ~/epics/R3.14.12.4 $ svn co svn://10.1.5.14/raon/trunk/siteLibs
-\end{lstlisting}
-siteLibs안에 있는 asyn-4-21과 stream2-6 폴더로 이동한 후 make를 실행한다.
-\begin{lstlisting}[style=termstyle]
-pi@raspberrypi ~/epics/R3.14.12.4 $ cd siteLibs/asyn-4-21
-pi@raspberrypi ~/epics/R3.14.12.4/siteLibs/asyn-4-21 $ make
-pi@raspberrypi ~/epics/R3.14.12.4/siteLibs/asyn-4-21 $ cd ../stream-2-6
-pi@raspberrypi ~/epics/R3.14.12.4/siteLibs/stream-2-6 $ make
-\end{lstlisting}
-make가 완료되면 siteLibs/lib/linux-arm 폴더에 libasyn.so와 libstream.so파일이 생성된다.
-이제 siteApps폴더로 이동한 후 App폴더를 만든다. siteApps폴더가 없다면 svn으로 부터 내려 받는다.
-\begin{lstlisting}[style=termstyle]
-pi@raspberrypi ~/epics/R3.14.12.4 $ svn co svn://10.1.5.14/raon/trunk/siteApps
-\end{lstlisting}
-siteApps 폴더안에 pm1001폴더를 생성한 다음 기본 ioc구조를 만든다.
+코드 작성에 앞서 기본 폴더 및 EPICS Application 구조를 생성한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberrypi ~/epics/R3.14.12.4 $ cd siteApps
 pi@raspberrypi ~/epics/R3.14.12.4/siteApps $ mkdir pm1001
