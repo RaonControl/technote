@@ -34,7 +34,7 @@
 \begin{abstract}
 본 기술문서는 Raspberry Pi에 대한 기본 설치 및 설정방법을 포함하여 다양한 센서들을 이용한 테스트 및 
 EPICS Integration 방법에 대하여 설명하였다. 기본적으로 사용된 Model은 Raspberry Pi Model B+ 이며  
-OS는 Raspbian을 사용하였다. \citep{FAI}
+OS는 Raspbian을 사용하였다.
 \end{abstract}
 
 \chapter{Introduction}
@@ -45,13 +45,13 @@ GPIO(General Purpose Inut Output)포트를 지원하는데 SPI, I2C, UART통신�
 Device 및 Sensor를 RPi를 통해 제어 및 모니터링 가능하다. 본 기술문서에서 다루고 있는 Device 및 Sensor는
 다음과 같다.
 \begin{itemize}
-\item PIR Motion Sensor
-\item PM1001 Dust Sensor
-\item DHT11 Temperature and Humidity Sensor
-\item DHT22 Temperature and Humidity Sensor
-\item DS1820 Temperature Sensor
-\item L298 Dual H-Bridge Motor Driver
-\item MD5-DH14 Motor Driver
+\item PIR Motion Sensor\citep{PIR}
+\item PM1001 Dust Sensor\cite{PM1001}
+\item DHT11 Temperature and Humidity Sensor\cite{DHT11}
+\item DHT22 Temperature and Humidity Sensor\cite{DHT22}
+\item DS1820 Temperature Sensor\cite{DS1820}
+\item L298 Dual H-Bridge Motor Driver\cite{L298}
+\item MD5-DH14 Motor Driver\cite{MD5DH14}
 \end{itemize}
 RPi는 ARM 아키텍쳐를 기반으로 하기 때문에 이를 지원하는 OS는 거의 설치가능하다. 현재 공식 홈페이지에서
 제공하는 OS는 5가지가 있으며, 이 중 Debian 계열의 Raspbian이 가장 많이 사용되고 있다.
@@ -236,9 +236,8 @@ pi@raspberrypi~$ sudo reboot
 \subsection{wiringPi}
 WiringPi는 Arduino에서 사용되는 Wiring Library를 RPi에 맞게 변경한 것으로 GPIO access를 포함하여 
 PiFace, GertBoard와 같은 확장 보드 및 HD44780U와 같은 Device Chip을 지원한다. 보다 자세한 사항은
-홈페이지를 참고하기 바란다.\\
-
-Wiring Pi 설치는 git 서버로 부터 파일을 복사한 후 빌드하면 된다.
+홈페이지\cite{WIRINGPI}를 참고하기 바란다.\\
+기본적인 설치는 git 서버로 부터 파일을 복사한 후 빌드하면 된다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberry# git clone git://git.drogon.net/wiringPi
 Cloning into 'wiringPi'...
@@ -282,7 +281,7 @@ pi@raspberrypi# gpio readall
  +-----+-----+---------+------+---+--B Plus--+---+------+---------+-----+-----+
 \end{lstlisting}
 
-\begin{figure}
+\begin{figure}[h]
   \centering
   \subbottom[Model B]
   {
@@ -301,14 +300,14 @@ pi@raspberrypi# gpio readall
 
 \chapter{Application}
 본 Chapter에서는 RPi에 연결 가능한 Device 및 Sensor를 이용한 테스트 설명한다. 테스트는 Model B+에서
-진행되었으며 기본적으로 Rasbian 과 wiringPi가 설치되어 있어야한다.
+진행되었으며 Rasbian 과 wiringPi가 기본적으로 설치되어 있어야한다.
 \section{Pi Camera}
 Raspberry Pi에서 제공하고 있는 카메라는 2종류가 있다. 하나는 일반적으로 사용하는 카메라로 기판 색이 
-초록색으로 되어 있다. 다른 하나는 NoIR(No Infrared) 카메라로 기판색이 검은색으로 되어 있다. 두 카메라는 
-기능적으로 완전 동일하나 NoIR 카메라는 적외선 필터가 없으므로 적외선 영역까지도 볼 수있다. 
-즉 적외선 LED와 함께 사용하면 어두운 장소에서도 촬영이 가능하다. 반면 낮에는 실제 색감 및 밝기가 일반
-카메라와 다르게 보이는 단점이 있다.
-\begin{figure}
+초록색으로 되어 있으며 가시광선 영역의 파장을 받는다. 다른 하나는 NoIR(No Infrared) 카메라로 기판색이 
+검은색이며 가시광선을 포함하여 적외선 영역의 파장까지 인식한다. 즉, NoIR 카메라의 경우 적외선 LED와 
+함께 사용하면 어두운 장소에서도 촬영이 가능하다. 반면 낮에는 실제 색감 및 밝기가 일반 카메라와 다르게 
+보이는 단점이 있다.
+\begin{figure}[h]
   \centering
   \subbottom[Normal Camera] 
   {
@@ -328,7 +327,7 @@ Raspberry Pi에서 제공하고 있는 카메라는 2종류가 있다. 하나는
 \subsection{Installation}
 RPi 카메라 모듈은 Figure \ref{fig:ist_cam}과 같이 Camera 전용 Port를 사용하며 RPi Configuration
 을 통해 Port를 활성화 시켜 준다.
-\begin{figure}[!htb]
+\begin{figure}[h]
 \centering
 \includegraphics[width=1\textwidth]{./images/raspberry/pi_camera_setting.png}
 \caption{Camera Installation}
@@ -337,7 +336,7 @@ RPi 카메라 모듈은 Figure \ref{fig:ist_cam}과 같이 Camera 전용 Port를
 \begin{lstlisting}[style=termstyle]
 pi@raspberry# sudo raspi-config
 \end{lstlisting}
-\begin{figure}[!htb]
+\begin{figure}
 \centering
 \includegraphics[width=1\textwidth]{./images/raspberry/enable_camera.png}
 \caption{Camera Installation}
@@ -354,12 +353,17 @@ pi@raspberry# sudo raspi-config
 pi@raspberry# sudo reboot
 \end{lstlisting}
 \subsection{Test}
-기본적인 카메라 사용방법은 다음과 같다.\\
+기본적인 카메라 작동은 Shell Command를 사용하며, 보다 다양한 기능의 작동은 Raspberry Pi홈페이지
+\cite{PICAM}를 참고하기 바란다.
 사진 캡쳐는 raspitill을 사용한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberry# raspistill -o cam.jpg
 \end{lstlisting}
 상하 좌우 반전을 하고 싶으면 vf, hf 옵션을 설정한다.
+\begin{lstlisting}[style=termstyle]
+pi@raspberry# raspivid -vf -hf -o cam2.jpg
+\end{lstlisting}
+동영상 촬영은 raspivid를 사용한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberry# raspivid -o vid.h264
 \end{lstlisting}
@@ -387,21 +391,20 @@ gpu_mem=128
 disable_camera_led=1
 \end{lstlisting}
 \subsection{Web Streaming}
-Raspberry Pi Camera를 Web에서 볼 수 있도록 설정해 본다.
-기본적인 설정은 다음 홈페이지를 따랐다.
-http://www.rasplay.org/?p=7174
-우선 필요한 Library를 설치한다.
+mjpg streamer Library를 이용하면 Web Streaming을 통해 영상을 볼 수 있다. Library를 설치하기 앞서
+Web Streaming에 필요한 파일을 설치한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberry# sudo apt-get install git cmake libjpeg8-dev imagemagick -y
 \end{lstlisting}
-다음 videodev.h 헤더파일을 videodev2.h파일로 링크한다.
+파일 설치가 완료되면 videodev.h 헤더파일을 videodev2.h파일로 링크한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberry# sudo ln -s /usr/include/linux/videodev2.h /usr/include/linux/videodev.h
 \end{lstlisting}
+기본 준비가 끝났으면 git에서 mjpg streamer를 복사한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberry# git clone https://github.com/jacksonliam/mjpg-streamer
 \end{lstlisting}
-다운 받은 코드를 make 한다.
+mjpg-streamer/mjpg-streamer-experimental 폴더로 이동한 후 make를 실행한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberrypi# cd mjpg-streamer/mjpg-streamer-experimental
 pi@raspberrypi:/mjpg-streamer/mjpg-streamer-experimental# make
@@ -412,7 +415,7 @@ export STREAMER_PATH=$HOME/mjpg-streamer/mjpg-streamer-experimental
 export LD_LIBRARY_PATH=$STREAMER_PATH
 $STREAMER_PATH/mjpg_streamer -i "input_raspicam.so -x 640 -y 480 -fps 30" -o "output_http.so -w $STREAMER_PATH/www"
 \end{lstlisting}
-스크립트를 실행 한다.
+마지막으로 스크립트를 실행 한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberrypi# sh mjpg.sh
 MJPG Streamer Version: svn rev:
@@ -450,15 +453,18 @@ Encoder Buffer Size 81920
 pool and connecting ports
  DBG(/home/pi/mjpg-streamer/mjpg-streamer-experimental/plugins/input_raspicam/input_raspicam.c, worker_thread(), 880): Starting video o
 \end{lstlisting}
-스크립트가 실행되면 다음 주소를 통해 웹으로 영상을 확인할 수 있다.
-http://[IP Address]:8080 
-\begin{figure}[!htb]
+스크립트가 실행되면 다음 주소를 통해 영상을 확인할 수 있다.\\
+\\
+http://[IP Address]:8080 \\
+\\
+\begin{figure}[h]
 \centering
 \includegraphics[width=1\textwidth]{./images/raspberry/web_streaming.png}
 \caption{Camera Installation}
 \label{fig:web_stream_cam}
 \end{figure}
-wget을 이용하며 Web Streaming으로 부터 이미지를 저장할 수 있다.
+
+wget명령어를 사용하면 Web Streaming으로 부터 이미지를 저장할 수 있다.
 \begin{lstlisting}[style=termstyle]
 scwook@scwook# wget http://10.1.5.194:8080/?action=snapshot -O image.jpg
 \end{lstlisting}
@@ -486,7 +492,7 @@ scwook@scwook# sudo aptitude install mencoder
 scwook@scwook# ls *.jpg > stills.txt
 \end{lstlisting}
 mencoder를 이용하여 이미지들을 동영상으로 변환 한다.
-\begin{lstlisting}
+\begin{lstlisting}[style=termstyle]
 scwook@scwook# mencoder -nosound -ovc lavc -lavcopts vcodec=mpeg4:aspect=4/3:vbitrate=8000000 -vf scale=640:480 -o timelapse.avi -mf type=jpeg:fps=24 mf://@stills.txt
 \end{lstlisting}
 \section{GPIO}\label{sec:gpioApp}
@@ -914,7 +920,31 @@ PM1001의 경우 UART 통신을 통해 데이터를 전송하므로 Raspberry Pi
 \caption{PM1001 Dust Sensor}
 \label{fig:pm1001_test}
 \end{figure}
-소스코드는 다음과 같다.
+메뉴얼에 따르면 PM1001의 통신 명령어는 다음과 같다.\\
+\\
+        SEND: [IP] [LB] [CMD] [DF] [CS]\\
+\\
+        RESPONSE: [ACK] [LB] [CMD] [DF] [CS]\\
+\\
+여기서 각 명령에 대한 의미는 다음과 같다.\newline
+[IP]: address(fixed as 0x11)\newline
+[LB]: byte length followed does not include CS\newline
+[CMD]: command\newline
+[DF]: parameter items with command, optional\newline
+[CS]: CS = -(IP + LB + CMD + DF)\newline
+[ACK] 0x16 right command\newline
+\newline
+예를 들어 PM1001로 부터 먼지 값을 읽는 명령어는 다음과 같다.\newline\newline
+        SEND: 0X11, 0X01, 0X01, 0XED\newline\newline
+        RESPONSE: 0x16, 0x0D, 0x01, 4BytePM값, 4BytePM값, 4BytePM값, [CS]\newline\newline
+여기서 PM값은 4Byte(DF0, DF1, DF2, DF3)로 구성된 먼지 데이터 값으로 측정 값은 다음과 같다.\newline\newline
+        Measured value = DF0 * 256 * 256 * 256 + DF1 * 256 * 256 + DF2 * 256 + DF3\newline
+
+기본 단위는 PCS/L 로 농도(ug/m³)값으로  변환 하고자 할 경우 다음 식을 사용한다.\newline
+\newline
+        농도(ug/m³) = ((수량PCS/L값) * 3,528) / 100,000\newline
+
+전체 코드는 다음과 같다.
 \begin{lstlisting}[style=termstylenumber, caption={pm1001.c}, label={list:pm1001TestCode}]
 #include <stdio.h>
 #include <wiringPi.h>
@@ -1456,6 +1486,7 @@ DISV: 1             NAME: gpio:inp1     RVAL: 0             SEVR: NO_ALARM
 STAT: NO_ALARM      SVAL: 0             TPRO: 0             VAL: 1
 \end{lstlisting}
 \section{Dust Sensor}
+\subsection{PM1001}
 section\ref{subsec:pm1001Test}에서 진행하였던 PM1001 Sensor를 EPICS로 Integration 하여 테스트해 본다.
 최종 목표는 그림\ref{fig:pm1001_test}와 같이 회로를 구성하고 다음 epics db를 통해 먼지값을 읽는것이다.
 \begin{lstlisting}[style=termstyle]
@@ -1568,16 +1599,16 @@ include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
 \end{lstlisting}
-이제 필요한 Library는 사용준비가 되었으므로 db와 proto 파일을 만들도록 한다. 
-pm1001App/Db 폴더로 이동하여 pm1001.db 파일을 만들고 Makefile에 추가해 준다. 
+db파일을 만들기 위해 pm1001App/Db 폴더로 이동한 후 다음과 같은 pm1001.db 파일을 만든다.
 \begin{lstlisting}[style=termstyle]
-record(ai,"SS:DUST")
+record(ai,"PM1001:DUST")
 {
   field(DTYP, "stream")
   field(INP, "@sensor.proto get_dust UART")
   field(SCAN, "1 second")
 }
 \end{lstlisting}
+Makefile에 db파일을 추가해 준다.
 \begin{lstlisting}[style=termstyle]
 TOP=../..
 include $(TOP)/configure/CONFIG
@@ -1602,29 +1633,7 @@ include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
 \end{lstlisting}
-proto 파일을 만들기 앞서 pm1001 센서의 통신 명령어를 알아야 한다. 메뉴얼을 참고하면 통신 명령어가 다음과
-같음을 알 수 있다.
-
-        SEND: [IP] [LB] [CMD] [DF] [CS]
-
-        RESPONSE: [ACK] [LB] [CMD] [DF] [CS]
-
-여기서 각 명령에 대한 의미는 다음과 같다.
-
-        [IP]: address(fixed as 0x11)
-        [LB]: byte length followed does not include CS
-        [CMD]: command
-        [DF]: parameter items with command, optional
-        [CS]: CS = -(IP + LB + CMD + DF)
-        [ACK] 0x16 right command
-
-예를 들어 PM1001로 부터 먼지 값을 읽는 명령어는 다음과 같다.
-        SEND: 0X11, 0X01, 0X01, 0XED
-        RESPONSE: 0x16, 0x0D, 0x01, 4BytePM값, 4BytePM값, 4BytePM값, [CS]
-여기서 PM값은 4Byte(DF0, DF1, DF2, DF3)로 구성된 먼지 데이터 값으로 측정 값은 다음과 같다.
-        Measured value = DF0 * 256 * 256 * 256 + DF1 * 256 * 256 + DF2 * 256 + DF3
-참고로 값은 값이 3번 반복해서 출력되므로 첫 번째 값만 읽으면 된다.
-이제 proto 파일을 만들기 위해 pm1001에서 proto폴더를 하나 만든 후 pm1001.proto 파일을 다음과 같이 작성한다.
+protocol 파일을 만들기 위해 폴더를 생성한 후 다음과 같은 pm1001.proto 파일을 만든다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberrypi ~/epics/R3.14.12.4/siteApps/pm1001 $ mkdir proto
 pi@raspberrypi ~/epics/R3.14.12.4/siteApps/pm1001 $ cd proto
@@ -1661,11 +1670,13 @@ get_d3{
 	in "%*3r%*3r%1r%*4r%*4r%*1r";
 }
 \end{lstlisting}
-이제 pm1001폴더로 이동하여 make를 실행하자
+마지막으로 앞서 작성한 파일들을 컴파일 하기 위해 pm1001폴더로 이동한 후 make를 실행한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberrypi ~/epics/R3.14.12.4/siteApps/pm1001 $ make
 \end{lstlisting}
-ioc를 실행하기 위해 iocBoot/iocpm1001로 이동 후 st.cmd 파일에 다음과 같이 추가 한다.
+make가 완료되면 bin/linux-arm 폴더에 pm1001파일과 db 폴더에 pm1001.db 파일이 만들어 진다.
+이제 ioc를 실행시키기 위해 iocBoot/iocpm1001 폴더로 이동 후 st.cmd파일에 serial 연결을 위한
+설정 및 pm1001.db를 Load하는 코드를 추가해 준다.
 \begin{lstlisting}[style=termstyle]
 #!../../bin/linux-arm/pm1001
 
@@ -1698,7 +1709,7 @@ iocInit
 ## Start any sequence programs
 #seq sncxxx,"user=piHost"
 \end{lstlisting}
-st.cmd를 실행파일로 변경한 후 실행한다.
+마지막으로 st.cmd를 실행파일로 변경한 후 실행시킨다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberrypi ~/epics/R3.14.12.4/siteApps/pm1001/iocBoot/iocpm1001 $ chmod 755 st.cmd
 pi@raspberrypi ~/epics/R3.14.12.4/siteApps/pm1001/iocBoot/iocpm1001 $ sudo ./st.cmd
@@ -1733,17 +1744,13 @@ iocRun: All initialization complete
 ## Start any sequence programs
 #seq sncxxx,"user=piHost"
 \end{lstlisting}
-먼지 값이 읽어지면 끝!
+먼지 값이 제대로 읽혀지는지 확인해 본다.
 \begin{lstlisting}[style=termstyle]
-epics> dbpr SS:DUST
+epics> dbpr PM1001:DUST
 ASG:                DESC:               DISA: 0             DISP: 0             
 DISV: 1             NAME: SS:DUST       RVAL: 673           SEVR: NO_ALARM      
 STAT: NO_ALARM      SVAL: 0             TPRO: 0             VAL: 673
 \end{lstlisting}
-참고로 pm1001 센서는 먼지 값을 수량PCS/L값 으로 출력해 주는데 이 값을 농도(ug/m³)으로 변환 하고자 할 경우 다음 식을 사용하면 된다.
-
-        농도(ug/m³) = ((수량PCS/L값) * 3,528) / 100,000
-
 \section{Temperature \& Humidity Sensor}
 \subsection{DHT11}
 \ref{subsec:dht11App}에서 진행하였던 DHT11 센서 EPICS로 Integration 하여 테스트해 본다. 최종
