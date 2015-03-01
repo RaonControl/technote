@@ -536,14 +536,34 @@ int main(void)
   return 0;
 }
 \end{lstlisting}
-컴파일 후 실행한다.
+위 코드에서 pinMode함수를 통해 LED는 4번 Output, Button은 1번 Input으로 설정했음을 알 수 있다. 따라서
+Button을 누르면 1번 Pin이 High 상태가 되고 이 값은 digitalRead함수를 통해 읽어진다. 반대로 digitalWrite
+함수는 설정된 Pin 상태를 1(High) 또는 0(Low)상태로 설정할 수 있다. 위 코드에서는 Button의 상태에 따라
+LED가 ON/OFF됨을 알 수 있다.\\
+
+코드를 실행하기 위해 wiringPi Library를 추가한 후 컴파일 한다. 최종적으로 프로그램을 실행한 상태에서
+Button을 눌렀을 때 LED에 불이 들어오는지 확인한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberrypi# gcc -o buttonTest buttonTest.c -lwiringPi
 pi@raspberrypi# sudo ./buttonTest
 \end{lstlisting}
-버튼을 눌렀을 때 불이 들어오면 성공!
 \subsection{PIR Motion Sensor}
-PIR Motion 센서를 이용하여 동작을 감지해 보자. 그림\ref{fig:pir_test}과 같은 회로를 구성한다.
+PIR Motion 센서는 적외선을 이용하여 움직임을 감지하는 센서로 센서의 Detection Area에 움직임이 감지될
+경우 3V의 출력을 내보낸다. 따라서 출력신호를 GPIO에 연결하여 센서의 상태를 읽을 수 있다. 센서에 대한 
+기본 사양은 다음과 같다.
+\begin{itemize}
+\item Input Voltage: 3.3 ~ 5V, 6V Maximum
+\item Working Current: 15uA
+\item Working Temperature: -20 ~ 85 ℃
+\item Output Voltage: High 3V, low 0V
+\item Output Delay Time(High Level): About 2.3 to 3 Seconds
+\item Detection angle: 100 °
+\item Detection distance: 7 meters
+\item Output Indicator LED(When output HIGH, it will be ON)
+\item Pin limit current: 100mA
+\end{itemize}
+
+테스트를 위해 그림\ref{fig:pir_test}과 같은 회로를 구성한다.
 \begin{figure}[!htb]
 \centering
 \includegraphics[width=1\textwidth]{./images/raspberry/pir_test.png}
@@ -577,12 +597,15 @@ int main(void)
   return 0;
 }
 \end{lstlisting}
-컴파일 후 실행한다.
+PIR Motion Sensor는 3V의 출력 신호가 나온다. 따라서 pinMode를 Input으로 설정하였으며 digitalRead 함수를
+통해 값을 Monitoring한다. 위 코드에서는 Motion이 감지될 때 "Motion Detected!" 문자가 출력되어 Sensor의
+작동을 확인할 수 있다. 
+코드를 실행하기 위해 wiringPi Library를 추가한 후 컴파일 한다. 최종적으로 프로그램을 실행한 상태에서
+Motion이 감지되는지 확인한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberrypi# gcc -o pir pir.c -lwiringPi
 pi@raspberrypi# sudo ./pir
 \end{lstlisting}
-Motion이 감지되면 성공
 \section{Humidity and Temperature Sensor}
 \subsection{DHT11}\label{subsec:dht11App}
 DHT11 센서를 이용하여 온도와 습도를 읽어 보자. 그림\ref{fig:dht11_test}와 같은 회로를 구성한다.
@@ -671,6 +694,7 @@ int main(void)
   return 0; 
 }
 \end{lstlisting}
+read_dht11_val함수는 센서로 부터 data를 읽어 온습도값을 출력해주는 함수로 
 컴파일 후 실행한다.
 \begin{lstlisting}[style=termstyle]
 pi@raspberrypi# gcc -o dht11 dht11.c -lwiringPi
@@ -903,7 +927,8 @@ uint8_t crc_cal(uint8_t crc, uint8_t data)
   return crc;
 }
 \end{lstlisting}
-컴파일 후 실행한다.
+ds1820_read함수는 bit data를 읽어 온도값을 return하는 함수로 크게 다음 4개의 함수를 호출한다.
+onewire_reset함수는 command전송하기 위한 초기화 과정을 수행한다. 초기화가 완료되면 
 \begin{lstlisting}[style=termstyle]
 pi@raspberrypi# gcc -o ds1820 ds1820.c -lwiringPi
 pi@raspberrypi# sudo ./ds1820
