@@ -162,7 +162,7 @@ Archive Engine을 시작하기 전 저장하고자 하는 Channel리스트, 주�
 
 \subsection{write\_period}
 그룹 및 채널값을 데이터 파일에 쓰는 주기를 지정한다. Archive Engine은 일정시간
-Buffer에 값을 저장하는데 여기에 설정된 시간이 지난면 데이터 파일에 값을 저장한다.
+Buffer에 값을 저장하는데 여기에 설정된 시간이 지나면 데이터 파일에 값을 저장한다.
 예를 들어 30 sec로 설정 할 경우 30초 동안 들어오는 값들을 메모리 버퍼에 저장했다가
 매 30초 마다 버퍼에 있는 값들을 파일로 저장한다.
 
@@ -181,7 +181,10 @@ Channel로 부터 저장되는 시간이 "현재 시간 + ignored\_future" 시�
 들어오는 Channel값들을 무시한다. 
 
 \subsection{buffer\_reserve}
-메모리 버퍼 크기를 지정한다. 전체 버퍼 크기는 다음 수식에 따라 정해진다.
+메모리 버퍼 크기를 지정한다. 전체 버퍼 크기는 다음 수식에 따라 정해진다.\\
+\newline
+buffer reserve x write period / scan period
+\newline
 
 \subsection{max\_repeat\_count}
 scanned mode의 경우 반복되는 값에 대한 count 최대 값을 지정한다. 
@@ -227,9 +230,9 @@ Engine을 중지하기 위해서는 키보드의 "CTRL-C"를 누르거나 Engine
 여러 Engine을 동시에 시작하고자 할 경우에는 다음 2가지 사항에 따라 진행한다.
 \begin{itemize}
 \item Engine하나당 하나의 lcok파일만 생성되므로 각각의 폴더를 만들어서 실행시킨다.
-\item 웹 서버의 TCP포트 중복을 막기 위해 "-p <port>"옵션을 이용하여 서로 다른 포트를 설정한다.
+\item 웹 서버의 TCP포트 중복을 막기 위해 ``-p \textless port\textgreater''옵션을 이용하여 서로 다른 포트를 설정한다.
 \end{itemize}
-웹 서버의 TCP포트는 기본 4812포트를 사용하며"-p" 옵션을 통해 다음과 같이 변경이 가능하다.
+웹 서버의 TCP포트는 기본 4812포트를 사용하며 ``-p'' 옵션을 통해 다음과 같이 변경이 가능하다.
 \begin{lstlisting}[style=termstyle]
 ctrluser@ctrluser:~\$ ArchiveEngine -p 5001 engineconfig.xml ./index
 07/23/2014 14:41:44 Starting Engine with configuration file engineconfig.xml, index index
