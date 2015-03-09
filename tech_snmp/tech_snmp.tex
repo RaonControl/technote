@@ -94,8 +94,8 @@ MIB는 관리의 편의를 위해 ROOT-Node에서 시작해 branch node와 leaf 
 \end{figure}
 
 \subsection{1.2.1 MIB 파일 설정}
-사용하고자 하는 장비의 MIB파일을 .snmp/snmp.conf파일(그림 \ref{fig:snmp_conf})에 추가하면 복잡한 OID번호 대신 MIB파일 내의 객체의 이름을 사용하여 장비의 정보를 요청할 수 있다.
-snmp.conf 파일에 추가하기 앞서 MIB파일의 DEFINITIONS에 정의된 이름과 파일의 이름이 다를 경우 약간의 수정이 필요한 경우가 있다. 
+사용하고자 하는 장비의 MIB파일을 .snmp/snmp.conf파일(그림 \ref{fig:snmp_conf})에 추가하면 복잡한 OID번호 대신 MIB파일 내 객체 이름을 사용하여 장비의 정보를 요청할 수 있다.
+snmp.conf 파일에 추가하기 앞서 MIB파일의 DEFINITIONS에 정의된 이름과 파일의 이름이 다를 경우 약간의 수정이 필요하다. 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.79\textwidth]{./images/snmp_conf.eps}
@@ -103,7 +103,7 @@ snmp.conf 파일에 추가하기 앞서 MIB파일의 DEFINITIONS에 정의된 �
   \label{fig:snmp_conf}   
 \end{figure}
 
-그림 \ref{fig:pdu_mib}는 APC사 PDU의 MIB파일의 일부분으로 다음과 같이 MIB파일의 DEFINITIONS ::= BEGIN에 파일의 이름(PowerNet-MIB)을 정의해주고, MIB파일의 명도 동일하게(PowerNet-MIB) 저장하면 된다. 이 과정을 거치면 OID번호가 아닌 객체의 이름으로 장비의 정보를 읽고 쓸 수 있다. 
+그림 \ref{fig:pdu_mib}는 APC사 PDU의 MIB파일의 일부분으로 다음과 같이 MIB파일의 DEFINITIONS ::= BEGIN에 파일의 이름(PowerNet-MIB)을 정의해주고, MIB파일의 명도 동일하게(PowerNet-MIB) 저장하면 된다. 이 과정을 거치면 OID번호가 아닌 객체 이름으로 장비의 정보를 읽고 쓸 수 있다. 
 
 
 \begin{figure}[h]
@@ -118,7 +118,7 @@ snmp.conf 파일에 추가하기 앞서 MIB파일의 DEFINITIONS에 정의된 �
 
 \chapter{SNMP의 설치 및 사용}
 \section{설치}
-SNMP를 사용하기 앞서아래의 패키지가 설치되어야 한다. 본 문서에서는 NET-SNMP\citep{net_snmp} v5.4.3을 사용하고 있다.
+SNMP를 사용하기 앞서 아래의 패키지를 설치해야 한다. 본 문서에서는 NET-SNMP\citep{net_snmp} v5.4.3을 사용하고 있다.
 \begin{itemize}
 \item NET-SNMP\footnote{* NET-SNMP는 http://www.net-snmp.org/download.html에서 다운받을 수 있다.}
 \item snmp snmpd
@@ -152,7 +152,7 @@ root@mjpark:~# service snmpd start
 Starting network management services: snmpd.
 \end{lstlisting}
 
-snmpd를 설정 확인은 /usr/share/snmp/snmpd.conf에서 아래와 같이 가능하다. \footnote{* http://www.net-snmp.org/docs/README.snmpv3.html 참조 바람}
+snmpd를 설정은 /usr/share/snmp/snmpd.conf에서 아래와 같이 확인 가능하다. \footnote{* http://www.net-snmp.org/docs/README.snmpv3.html 참조 바람}
 
 \begin{lstlisting}[style=termstyle]
 rwuser mijoy
