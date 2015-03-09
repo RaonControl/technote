@@ -37,7 +37,7 @@ SNMP는 IP 네트워크에서 장치를 관리하기 위한 공식 인터넷 표
 
 \chapter{SNMP의 이해}
 \section{SNMP란?}
-SNMP(Simple Network Management Protocol)는 IP네트워크 상의 장치 및 장비들을 관리하고 모니터링하기 위한 인터넷 표준 프로토콜이다. SNMP는 Manager와 Agent로 구성되어있으며, Manager는 NMS(Network Management Stations)로 표현되기도 한다. Manager는 Agent에게 원하는 장비의 정보를 요청하며, 장비의 설정을 변경한다. Agent는 Manager가 요청한 장비의 정보를 제공하고, 시스템 충돌이나 재부팅 등의 장비에 영향을 미치거나 발생한 Event를 비동기적으로 알리기 위해 Trap 메시지를 보낸다. 이들의 관계는 그림 \ref{fig:relationship_m_a}\citep{essential_snmp}과 같다. 이는 원래 NMS와 Agent의 관계이지만 본 문서에서는 Manager와 Agent의 관계로 재구성하였다.
+SNMP(Simple Network Management Protocol)는 IP네트워크 상의 장치 및 장비들을 관리하고 모니터링하기 위한 인터넷 표준 프로토콜이다. SNMP는 Manager와 Agent로 구성되어있으며, Manager는 NMS(Network Management Stations)로 표현되기도 한다. Manager는 Agent에게 원하는 장비의 정보를 요청하며, 장비의 설정을 변경한다. Agent는 Manager가 요청한 장비의 정보를 제공하고, 시스템 충돌이나 재부팅 등의 장비에 영향을 미치거나 발생한 Event를 비동기적으로 알리기 위해 Trap 메세지를 보낸다. 이들의 관계는 그림 \ref{fig:relationship_m_a}\citep{essential_snmp}과 같다. 이는 원래 NMS와 Agent의 관계이지만 본 문서에서는 Manager와 Agent의 관계로 재구성하였다.
 \begin{figure}[h!]
   \centering
   \includegraphics[width=0.65\textwidth]{./images/relationship_m_a.eps}
@@ -50,7 +50,7 @@ SNMP(Simple Network Management Protocol)는 IP네트워크 상의 장치 및 장
 \hfil\break
 \hfil\break
 
-SNMP는 v1/2c/3의 세 가지 버전이 있으며, 각 버전들은 인증과 암호화에 따른 차이점이 있다. SNMPv1/2c는 Community string에 의존한 문자열 일치로 사용자 인증을 하지만 암호화는 하지 않는다. 반면 v3는 noAuthNoPriv, authNoPriv, authPriv의 세 종류의 보안 레벨에 따라 인증 및 암호화 레벨을 설정을 정할 수 있으며, 이는 암호화 알고리즘(MD5, SHA, DES, AES)을 이용한다. v3는 v1/2c에 비해 보안이 강화되지만 응답시간이 큰 단점이 있다. 자세한 SNMP 각 버전 별 차이점은 표 \ref{table:conparision}\citep{comparison}을 참조바란다.
+SNMP는 v1/2c/3의 세 가지 버전이 있으며, 각 버전들은 인증과 암호화에 따른 차이점이 있다. SNMPv1/2c는 Community string에 의존한 문자열 일치로 사용자 인증을 하지만 암호화 하지 않는다. 반면 v3는 암호화 알고리즘(MD5, SHA, DES, AES)을 통한 인증과 암호화에 따라 noAuthNoPriv, authNoPriv, authPriv의 세 종류의 보안 레벨로 나뉜다. v3는 v1/2c에 비해 보안이 강화되지만 응답시간이 큰 단점이 있다. 자세한 SNMP 버전 별 차이점은 표 \ref{table:conparision}\citep{comparison}을 참조바란다.
 
 \begin{table}[h!]
 \begin{center}
@@ -67,8 +67,18 @@ v3 & authNoPriv & MD5 or SHA & No \\ \cline{2-4}
 \end{center}
 \end{table} 
 
+\clearpage
 \section{MIB(Management Information Base)}
-SNMP를 사용하기 위해서는 MIB가 필요하며, MIB는 관리되어야 할 장비에 대한 정보 값 OID(Object Identifiers)객체를 계층구조로 모아 놓은 것으로 앞서 언급된 Manager가 요청하는 정보에 대해 Agent가 제공하는 정보이기도 하다. 각 각의 OID는 그림 \ref{fig:ex_mib}과 같은 포맷을 가지고 이를 통해 객체의 데이터 타입, 필요 유무 그리고 정의에 대해서 알 수 있다. 각 OID의 access 권한(read-only, read-write, etc...)에 따라 OID에 해당하는 장비 정보를 읽고, 쓸 수 있다.
+SNMP를 지원하는 장치들은 MIB를 가지고 있으며, MIB는 관리되어야 할 장비에 대한 객체들을 계층구조로 모아 놓은 것으로 관리의 편의를 위해 그림 \ref{fig:oid_tree}와 같이 ROOT-Node에서 시작해 branch node와 leaf node로 이뤄진 Tree 구조를 가진다. 일반적인 TCP/IP관리정보는 MIB-2(RFC 1213)에 포함돼 있고, 특정 장비 관련 정보는 장비제조업체에서 제공한다. 
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.65\textwidth]{./images/oid_tree.eps}
+  \caption{MIB의 일반적 구조}
+  \label{fig:oid_tree} 
+\end{figure}
+
+MIB내의 객체들은 고유의 식별자를 가지며 이를 OID(Object Identifiers)라 한다. 그림 \ref{fig:oid_tree}를 참고하면 APC사의 OID는 세 종류의 표기법에 따라 1.3.6.1.4.1.318, iso.org.dod.internet.\\private.enterprises.apc, iso(1).org(3).dod(6).internet(1).private(4).enterprises(1).apc(318)로 표현된다. OID는 그림 \ref{fig:ex_mib}과 같은 포맷을 가지며 이를 통해 객체의 데이터 타입, 필요 유무, 정의 그리고 접근권한(read-only, read-write, etc...)에 대해 알 수 있다. 
 
 \begin{figure}[h!]
   \centering
@@ -77,21 +87,6 @@ SNMP를 사용하기 위해서는 MIB가 필요하며, MIB는 관리되어야 �
   \label{fig:ex_mib}   
 \end{figure}
 
-\hfil\break
-\hfil\break
-\hfil\break
-\hfil\break
-\hfil\break
-\hfil\break
-
-MIB는 관리의 편의를 위해 ROOT-Node에서 시작해 branch node와 leaf node로 이뤄진 Tree 구조를 가진다. 일반적인 TCP/IP관리정보는 MIB-2(RFC 1213)에 포함돼 있고, 특정 장비 관련 정보는 장비제조업체에서 제공한다. OID번호를 사용해 Agent에 원하는 정보를 요청하는 방법은 그림 \ref{fig:oid_tree}의 APC사로 예를 들면 [1.3.6.1.4.1.318], [iso.org.dod.internet.private.\\enterprises.apc] 또는 [iso(1).org(3).dod(6).internet(1).private(4).enterprises(1).apc(318)]이다.
-
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.65\textwidth]{./images/oid_tree.eps}
-  \caption{MIB의 일반적 구조}
-  \label{fig:oid_tree} 
-\end{figure}
 
 \subsection{1.2.1 MIB 파일 설정}
 사용하고자 하는 장비의 MIB파일을 .snmp/snmp.conf파일(그림 \ref{fig:snmp_conf})에 추가하면 복잡한 OID번호 대신 MIB파일 내 객체 이름을 사용하여 장비의 정보를 요청할 수 있다.
@@ -103,7 +98,7 @@ snmp.conf 파일에 추가하기 앞서 MIB파일의 DEFINITIONS에 정의된 �
   \label{fig:snmp_conf}   
 \end{figure}
 
-그림 \ref{fig:pdu_mib}는 APC사 PDU의 MIB파일의 일부분으로 다음과 같이 MIB파일의 DEFINITIONS ::= BEGIN에 파일의 이름(PowerNet-MIB)을 정의해주고, MIB파일의 명도 동일하게(PowerNet-MIB) 저장하면 된다. 이 과정을 거치면 OID번호가 아닌 객체 이름으로 장비의 정보를 읽고 쓸 수 있다. 
+그림 \ref{fig:pdu_mib}는 APC사 PDU의 MIB파일의 일부분으로 다음과 같이 MIB파일의 DEFINITIONS ::= BEGIN에 파일의 이름(PowerNet-MIB)을 정의해주고, MIB파일명도 동일하게(PowerNet-MIB) 저장하면 된다. 이 과정을 거치면 OID번호가 아닌 객체 이름으로 장비의 정보를 읽고 쓸 수 있다. 
 
 
 \begin{figure}[h]
@@ -118,7 +113,7 @@ snmp.conf 파일에 추가하기 앞서 MIB파일의 DEFINITIONS에 정의된 �
 
 \chapter{SNMP의 설치 및 사용}
 \section{설치}
-SNMP를 사용하기 앞서 아래의 패키지를 설치해야 한다. 본 문서에서는 NET-SNMP\citep{net_snmp} v5.4.3을 사용하고 있다.
+SNMP를 사용에 앞서 아래의 패키지를 설치해야 한다. 본 문서에서는 NET-SNMP\citep{net_snmp} v5.4.3을 사용하고 있다.
 \begin{itemize}
 \item NET-SNMP\footnote{* NET-SNMP는 http://www.net-snmp.org/download.html에서 다운받을 수 있다.}
 \item snmp snmpd
@@ -130,7 +125,7 @@ SNMP를 사용하기 앞서 아래의 패키지를 설치해야 한다. 본 문�
 \section{SNMP 명령어와 사용}
 
 \subsection{2.2.1 SNMPv3 설정}
-SNMP의 사용에 앞서 SNMPv3사용에 따른 설정이 필요하다. 이는 SNMPv3가 앞서 설명 했듯이 Username 및 보안레벨에 따른 암호화 알고리즘을 이용한 인증과 암호화는 하기 때문이다. 각 장비의 v3 관련 정보는 장비제조업체에서 제공하는 프로그램, 사이트 및 시리얼 통신을 통해 설정 할 수 있다. localhost의 SNMPv3 설정은 다음과 같이 net-snmp의 snmpd로 가능하다. 이 때, 패스워드는 적어도 8자 이상이여야 한다.
+SNMPv1/2c와 달리 SNMPv3는 사용에 따른 설정이 필요하다. 이는 앞서 설명 했듯 SNMPv3가 Username 및 보안레벨에 따른 암호화 알고리즘을 이용한 인증과 암호화를 하기 때문이다. 각 장비의 v3 관련 정보는 장비제조업체에서 제공하는 프로그램, 웹 페이지 및 시리얼 통신을 통해 설정 할 수 있다. localhost의 SNMPv3 설정은 다음과 같이 net-snmp의 snmpd로 가능하다. 이 때, 패스워드는 적어도 8자 이상이여야 한다.
 
 \begin{lstlisting}[style=termstyle]
 mijoy0909@mjpark:~$ su                                     
@@ -147,7 +142,7 @@ Enter encryption pass-phrase:
 adding the following line to /var/lib/snmp/snmpd.conf:
    createUser test MD5 "[password]" DES [password]
 adding the following line to /usr/share/snmp/snmpd.conf:
-   rwuser mijoy
+   rwuser mijoy 
 root@mjpark:~# service snmpd start
 Starting network management services: snmpd.
 \end{lstlisting}
@@ -160,16 +155,16 @@ rwuser mijoy
 
 
 \subsection{2.2.2 SNMP 명령어}
+SNMP를 이용해 장비의 정보를 요청하기 위해서는 SNMP명령어\footnote{* 자세한 설명은 http://www.net-snmp.org/wiki/index.php/Tutorials를 참조 바람}가 사용되며, 명령어는 SNMP의 버전에 따라 차이가 있다.
+
 \begin{itemize}
 \item get : Manager가 Agent에게 특정 정보를 요청 시 사용
-\item getnext : get과 동일, 특정 정보의 하위 층 정보를 요청 시 사용
-\item walk : Manager가 Agnet에게 모든 정보를 요청 시 사용
-\item set : Manager가 정보 값을 변경 및 설정 시 사용
+\item getnext : get과 동일, 동일 계층의 다음 정보를 요청 시 사용
+\item walk : get의 확장 형태, Tree구조에서 하위 트리들의 정보를 요청 시 사용
+\item set : Manager가 특정 값을 변경 및 설정 시 사용
 \item trap : Agent가 비동기적 사건을 Manager에게 알리기 위해 사용
-\item etc\footnote{* 자세한 설명은 http://www.net-snmp.org/wiki/index.php/Tutorials를 참조 바람}...
+\item etc...
 \end{itemize}
-
-Manager가 Agent에게 MIB파일의 OID를 사용하여 원하는 정보를 요청하기 위해선 SNMP명령어를 이용하며, 이는 SNMP의 버전에 따른 차이가 있다.
 
 \subsection{2.2.3 SNMP 명령어 사용 1 (walk, get)}
 \subsubsection{- SNMPv1/2c}
@@ -178,7 +173,7 @@ Manager가 Agent에게 MIB파일의 OID를 사용하여 원하는 정보를 요�
 snmp(walk, get) -v (v1/2c) -c (Community String) (HostAddress) (OID) 
 \end{lstlisting}
 
-v1/2c의 Community string은 대부분 장비제조업체에서 public/privacy/admin으로 지정하지만, 사용자가 임의로 변경 가능하다. public은 read-only, privacy, admin은 read-write의 권한을 가지고 있다. 따라서 public을 이용하여 장비의 정보 값을 변경할 수 없다. v1/2c는 Community string을 사용한 사용자 인증 외에는 특별한 보안이 없어 보안에 취약하다는 것을 알 수 있다. 
+v1/2c의 Community string은 대부분 장비제조업체에서 public/privacy/admin으로 지정하지만, 사용자가 임의로 변경 가능하다. public은 read-only 권한을 privacy, admin은 read-write의 권한을 가지고 있다. 따라서 public을 이용하여 장비의 정보 값을 변경할 수 없다. v1/2c는 Community string을 사용한 사용자 인증 외에는 특별한 보안이 없어 보안에 취약하다는 것을 알 수 있다. 
 \begin{lstlisting}[style=termstyle]
 mijoy0909@mjpark:~$ snmpwalk -v 1 -c public localhost
 RFC1213-MIB::sysDescr.0 = STRING: "Linux mjpark 3.2.0-4-amd64 #1 SMP Debian 3.2.63-2+deb7u2 x86_64"
@@ -273,7 +268,7 @@ mijoy0909@mjpark:~$ snmpset -v (v1/2c) -c (Community String) (HostAddress) (OID)
 mijoy0909@mjpark:~$ snmpset -v 3 -u (Username) -l {Security Level(noAuthNoPriv/authNoPriv/authPrive)} -a {Authentication Protocol(MD5/SHA)} -A (PASSWORD) -x {Privacy Protocol(DES/AES)} -X (PASSWORD) (HostAddress) (OID) (datatypes) (value)
 \end{lstlisting}
 
-다음은 APC사의 Power Distribution Unit의 정보를 v3를 이용하여 변경한 결과이다. 이 때, snmpget과 마찬가지로 값을 선택적으로 쓸 수 있다.
+다음은 APC사의 Power Distribution Unit의 정보를 v3를 이용하여 Outlet8번의 전원을 설정한 결과이다. snmpset도 snmpget과 마찬가지로 선택적으로 값을 쓸 수 있다.
 
 \begin{lstlisting}[style=termstyle]
 snmpset -v 3 -u mijoy -l authPriv -a MD5 -A [PASSWORD] -x DES -X [PASSWORD] 10.1.5.142 sPDUOutletCtl.8 i 2
@@ -296,9 +291,8 @@ PowerNet-MIB::sPDUIdentModelNumber.0 = STRING: "AP7921"
 
 \clearpage
 \section{SNMP를 이용한 장비 모니터링}
-장비 모니터링 결과에 앞서 본 문서에 사용된 시스템과 소프트웨어는 아래와 같다.
+본 문서에 사용된 시스템, 소프트웨어 및 하드웨어의 정보 그리고 장비제조업체에서 지원하는 SNMP버전\footnote{*본 문서에서 Read는 모니터링, Write는 제어라 칭한다.}은 다음과 같다.
 \subsection{2.3.1 시스템 및 소프트웨어}
-모니터링에 사용된 시스템 및 소프트웨어는 다음과 같다.
 \begin{itemize}
 \item Debian Linux 7 Wheezy
 \item NET-SNMP v5.4.3
@@ -306,7 +300,7 @@ PowerNet-MIB::sPDUIdentModelNumber.0 = STRING: "AP7921"
 \end{itemize}
 
 \subsection{2.3.2 하드웨어 및 SNMP지원버전\ref{table:used_version}}
-모니터링에 사용된 하드웨어 및 장비제조업체에서 지원하는 SNMP버전은 아래와 같다.\footnote{*본 문서에서 Read는 모니터링, Write는 제어라 칭한다.}
+
 \begin{table}[h]
 \begin{center}
 \begin{tabular}{c|c}\hline
@@ -316,7 +310,7 @@ WIENER VME CRATE & v1/2c* (R/W) \\ \hline
 ELMA VME CRATE & v3* (R) \\ \hline
 APC PDU 7921 & v1/2c/3* (R/W) \\ \hline
 \end{tabular}
-\caption{모니터링에 사용된 장비와 장비별 지원하는 SNMP 버전}
+\caption{모니터링에 사용된 장비와 장비 별 지원하는 SNMP 버전}
 {(R: Read, W: Write / *: 모니터링에 사용된 버전)}
   \label{table:used_version}  
 \end{center}
@@ -394,7 +388,7 @@ VMEbus Crate(그림 \ref{fig:elmawiener})들은 가속기를 제어하는데 있
 
 \vspace{2mm}
 
-본 문서에서 Elma사의 Crate는 SNMPv3로 Crate 상태, 온도 등을 모니터링했고, Wiener사의 Crate는 현재 지원하는 SNMPv2c로 Crate의 상태, 팬 스피드, 온도 등에 대한 모니터링과 스위치의 동작과 팬 스피드를  제어했다. 
+본 문서에서 Elma사의 Crate는 SNMPv3로 Crate 상태, 온도 등을 모니터링했고, Wiener사의 Crate는 현재 지원하는 SNMPv2c로 Crate의 상태, 팬 스피드, 온도 등에 대한 모니터링과 스위치의 동작 및 팬 스피드를 제어했다. 
 
 \clearpage
 
@@ -475,7 +469,7 @@ INTEGER: 3600 RPM
 
 \clearpage
 \subsubsection{2.3.3.3 Power Distribution Unit}
-VMEbus Crate와 마찬가지로 Power supply 또한 모니터링과 제어가 가능해야 한다. 모든 버전의 SNMP를 지원하는 APC사의 Power Distribution Unit (PDU) 7921(그림 \ref{fig:apc_pdu})을 이용하여, SNMPv3에서 모니터링과 제어에 필요한 여러 설정을 테스트 해 보았다. 아래는 SNMPv3를 통해 APC PDU의 장비의 상태, 사용전력, 부하된 전류량 등을 모니터링하고 및 장비에서 지원하는 다양한 옵션으로 각각의 Power Outlet을 제어한 결과이다.
+VMEbus Crate와 마찬가지로 Power supply 또한 모니터링과 제어가 가능해야 한다. 모든 버전의 SNMP를 지원하는 APC사의 Power Distribution Unit (PDU) 7921(그림 \ref{fig:apc_pdu})을 이용하여, SNMPv3에서 모니터링과 제어에 필요한 여러 설정을 테스트 해 보았다. 아래는 SNMPv3를 통해 APC PDU의 장비의 상태, 사용전력, 부하된 전류량 등을 모니터링하고 장비에서 지원하는 다양한 옵션으로 각각의 Power Outlet을 제어한 결과이다.
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.6\textwidth]{./images/apc_pdu.eps}
@@ -574,7 +568,7 @@ sample deviation & 0.867 & 0.840 & 0.814 & 0.864 \\ \hline
 앞서 언급했듯이 장비의 응답시간은 제어 네트워크에서 중요하다. 가속기 제어 네트워크 토폴로지 설계에 필요한 물리적인 구성요소는 Layer 2 스위치와 UTP 케이블의 길이이므로 이러한 요소들이 토폴로지 내에서 가능하고, 이상적인 장비의 응답시간과 구성요소들 간의 상관관계를 측정하는 것이 필요하다. 이렇게 측정된 결과들은 네트워크 토폴로지 설계 및 장비의 최적화된 설치위치 선정에 도움이 될 것이다.
 
 \section{실험 방법}
-본 실험에서는 프로그램이 수행되는 시간을 측정하는 리눅스의 time 명령어를 이용하여 SNMP명령어를 1000번 수행한 시간을 응답시간으로 측정하였다. time 명령어는 아래와 같이 세 가지 다른 형태의 시간 측정 결과를 나타낸다\citep{time_command}. 
+본 실험에서는 프로그램이 수행되는 시간을 측정하는 리눅스의 time 명령어를 이용하여 SNMP명령어를 1000번 수행한 시간을 응답시간으로 측정하였다. time 명령어는 아래와 같이 세 가지 형태의 시간 측정 결과를 나타낸다\citep{time_command}. 
 \begin{itemize}
 \item real : 실제로 걸린 시간
 \item user : 커널이 사용한 시간을 제외한 CPU에서 소비된 시간
@@ -737,7 +731,7 @@ Sample Deviation(user+sys) : 0.00640495
 \end{table} 
 표 \ref{table:predict_time}은 그림 \ref{fig:s3s1}에서 v3w부분을 표식화한 것으로, 이를 참조하면 예측된 응답시간과 실제 측정한 응답시간이 오차범위 내에 있는 것을 확인 할 수 있다.
  
- \subsection{3.3.3 회귀분석과 가설 검증}
+ \subsection{3.3.3 회귀분석 결과와 가설 검증}
  실험 전 세운 가설의 타당성을 입증하기 위하여 회귀분석을 수행하였고 표 \ref{table:regression}는 그 결과이다.
  
 \begin{table}[!htb]
@@ -754,7 +748,7 @@ $ Adjusted R^2 $ & 0.666 \\ \hline
   \label{table:regression}  
 \end{center}
 \end{table} 
-회귀분석에서 $  R^2  $은 종속변수의 총 변동에서 독립변수의 변동에 의해 설명되는 부분이 차지하는 비중을 의미한다. 스위치가 3개 연결 되었을 때, v3w의 경우 응답시간 변동의 약 72.2\%를 케이블 길이 변동에 의해 설명할 수 있다. 또한, p-value가 0.0155로 α인 0.05보다 작으므로 앞서 세운 가설이 통계적으로 유의하다고 할 수 있다. 하지만 대부분의 실험의 결과에서 가설이 통계적으로 유의하지 않았다\ref{cha:result}. 이는 측정한 시간이 오차범위 내에 있지만 분석에 사용된 샘플링의 수가 적고, 실험 시 게이블의 길이, 하드웨어 자체의 속도 등의 환경이 완벽하게 동일하지 않아 정밀한 실험이 진행되지 않았음에서 이유를 찾을 수 있다. 
+회귀분석에서 $  R^2  $은 종속변수의 총 변동에서 독립변수의 변동에 의해 설명되는 부분이 차지하는 비중을 의미한다. 스위치가 3개 연결 되었을 때, v3w의 경우 응답시간 변동의 약 72.2\%를 케이블 길이 변동에 의해 설명할 수 있다. 또한, p-value가 0.0155로 α인 0.05보다 작으므로 앞서 세운 가설이 통계적으로 유의하다고 할 수 있다. 하지만 대부분의 실험의 결과에서 가설이 통계적으로 유의하지 않았다\ref{cha:result}. 이는 측정한 시간이 오차범위 내에 있지만 분석에 사용된 샘플링의 수가 적고, 실험 시 케이블의 길이, 하드웨어 자체의 속도 등의 환경이 완벽하게 동일하지 않아 정밀한 실험이 진행되지 않았음에서 이유를 찾을 수 있다. 
 
 \clearpage
 \appendix
