@@ -38,8 +38,9 @@
 
 \begin{abstract}
 Classic Channel Archiver는 EPICS의 ChannelAccess를 통해 각 device에 대한 Channel정보를
-일련의 파일로 저장하는 툴이다. 본 메뉴얼에서는 Classic Channel Archiver 설치 및 사용방법에 
-대하여 설명하였으며, Channel Archiver Manual\citep{CA_MANUAL}을 바탕으로 작성하였다.
+일련의 파일로 저장하는 툴이다. 본 메뉴얼은 Classic Channel Archiver의 Main Engine인 ArchiveEngine 및 
+Engine Configuration, 저장된 Data를 Retrieval하기 위한 DataServer Configuration을 포함하고 있으며
+Channel Archiver Manual\citep{CA_MANUAL}을 바탕으로 작성되었다.
 \end{abstract}
 
 \chapter{Sample Mechanisms}
@@ -78,39 +79,44 @@ Monitor Mode가 더 적합하다. 즉 CA 서버로 부터 1초마다 채널 정�
 있지만 여전히 'repeat count'에 대한 정보를 위해 CA 서버에 채널값에 대한 요청이 필요하다. 만약
 0.1초 주기와 같이 빠른 경우 일반적인 Monitor Mode에 비해 CPU 부하가 커질 수 있다.
 \end{itemize}
-
 \chapter{설치}
-기본적인 설치는 Channel Archive 홈페이지\citep{CA_HOME}또는 Web Repositories\citep{CA_SF}에서
-소스코드를 다운 받은 후 컴파일 하면된다. 하지만 현재 CA는 2006년 이후 새로운 버전이 개발되지
-않고 있어 단순히 컴파일 할 경우 현재 개발 환경과의 차이에 의해 컴파일 오류가 많이 난다.
-따라서 이러한 컴파일 오류를 해결하기 위해 다음과 같은 chanarch.sh[Appendix \ref{app:chanarch}] 
-파일을 만들어 일부 변경 사항 및 추가 사항에 대하여 수정 및 컴파일을 진행한다.
+Channel Archiver를 설치하기 위해서는 기본적으로 EPICS Base 및 Extenstion이 설치 되어 있어야 한다.
+본 메뉴얼에서는 다음 EPICS 구조를 따라 설치를 진행하였다.
+\begin{itemize}
+  \item \texttt{EPICS Structure}
+    {\scriptsize
+     \begin{verbatim}
+      ctrluser@ctrluser $
+      epics
+      ├── downloads
+      └── R3.14.12.4
+          ├── base
+          ├── epicsLibs
+          ├── extensions
+          ├── siteApps
+          └── siteLibs
+     \end{verbatim}
+     }
+\end{itemize}
+Channel Archiver의 기본 설치는 홈페이지\citep{CA_HOME}또는 Web Repositories\citep{CA_SF}에서
+소스코드를 다운 받은 후 컴파일 하면된다. 현재 CA는 2006년 이후 새로운 버전이 개발되지
+않고 있어 Update된 Library 및 Compiler환경에 따른 Compile 오류가 많이 발생한다. 
+따라서 현재 개발 환경에 맞는 코드 수정이 필요하며 다음 Script를 이용하면 쉽게 설치가 가능한다.\\
+Script실행에 앞서 필요한 Library를 설치한다.
 \begin{lstlisting}[style=termstyle]
-ctrluser@ctrluser:~\$ sh chanarch.sh
---2014-08-04 09:32:13--  http://epicschanarch.cvs.sourceforge.net/viewvc/epicschanarch/?view=tar
-Resolving epicschanarch.cvs.sourceforge.net (epicschanarch.cvs.sourceforge.net)... 216.34.181.112
-Connecting to epicschanarch.cvs.sourceforge.net (epicschanarch.cvs.sourceforge.net)|216.34.181.112|:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: unspecified [application/x-gzip]
-Saving to: `epicschanarch.tar.gz'
-
-    [                  <=>                 ] 16,768,526   329K/s   in 57s     
-
-2014-08-04 09:33:12 (286 KB/s) - `epicschanarch.tar.gz' saved [16768526]
-...
-...
-...
-Installing created file ../../../../bin/linux-x86_64/ArchiveManager
-make[2]: Leaving directory `/home/ctrluser/epics/extensions_for_3.14.12.4/src/ChannelArchiver/Manager/O.linux-x86_64'
-make[1]: Leaving directory `/home/ctrluser/epics/extensions_for_3.14.12.4/src/ChannelArchiver/Manager'
-
+ctrluser@ctrluser:~$ aptitude install libxmlrpc-c++4-dev libxerces-c2-dev libcurl3-dev
 \end{lstlisting}
- 
+script를 실행하여 설치를 진행한다.
+\begin{lstlisting}[style=termstyle]
+ctrluser@ctrluser:~$ bash chanarch.sh
+\end{lstlisting}
+설치가 완료되면 extension/src/ChannelArchiver에 소스코드가 설치되고 extension/bin/linux-x86\_64 안에 
+Archive Engine를 포함한 실행파일들이 위치하게 된다.
 \chapter{Archive Engine}
 \section{Configuration}
 Archive Engine을 시작하기 전 저장하고자 하는 Channel리스트, 주기, 데이터 파일 크기와 같은
-기본 설정이 필요하며 이러한 설정들은 XML-type의 파일에 지정된다. XML파일을 만들기 앞서
-파일 구조를 설정하는 DTD파일을 만든다.
+기본 설정이 필요하며 이러한 설정들은 XML-type의 파일에 정의된다. XML파일을 만들기 앞서
+파일 구조를 설정하는 engineconfig.dtd파일을 만든다.
 \begin{lstlisting}[style=termstyle]
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- DTD for the ArchiveEngine Configuration         -->
@@ -137,7 +143,7 @@ Archive Engine을 시작하기 전 저장하고자 하는 Channel리스트, 주�
 <!ELEMENT monitor EMPTY>
 <!ELEMENT disable EMPTY>
 \end{lstlisting} 
-이제 앞서만든 DTD파일 구조를 따르는 XML파일을 생성한 후 값을 설정한다.
+이제 앞서만든 DTD파일 구조를 따르는 engineconfig.xml파일을 생성한 후 값을 설정한다.
 \begin{lstlisting}[style=termstyle]
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE engineconfig SYSTEM "engineconfig.dtd">
@@ -177,7 +183,7 @@ channel은 monitor mode로 작동한다. 반면 period를 30 sec로 변경 할 �
 새로운 파일을 생성 한다.
 
 \subsection{ignored\_future}
-Channel로 부터 저장되는 시간이 "현재 시간 + ignored\_future" 시간 범위를 벗어나는 경우
+Channel로 부터 저장되는 시간이 ``현재 시간 + ignored\_future'' 시간 범위를 벗어나는 경우
 들어오는 Channel값들을 무시한다. 
 
 \subsection{buffer\_reserve}
@@ -225,8 +231,8 @@ Engine이 시작되면 중복 실행되는 것을 방지하기 위해 lock파일
 따라서 archive\_active.lck가 존재하는 상태에서는 Engine을 시작할 수 없게된다. Engine이 중지되면 lock
 파일은 자동으로 삭제되는데, 만약 시스템 오류등으로 제대로 중지되지 않을 경우 lock파일은 삭제되지 않는다.
 이 경우 강제적으로 삭제하면 다시 시작할 수 있게 된다.\\
-Engine을 중지하기 위해서는 키보드의 "CTRL-C"를 누르거나 Engine을 시작할 때 나오는 웹 주소
-"http://localhost:4812/stop" 명령을 통해 중지할 수 있다.\\
+Engine을 중지하기 위해서는 키보드의 ``CTRL-C''를 누르거나 Engine을 시작할 때 나오는 웹 주소
+``http://localhost:4812/stop'' 명령을 통해 중지할 수 있다.\\
 여러 Engine을 동시에 시작하고자 할 경우에는 다음 2가지 사항에 따라 진행한다.
 \begin{itemize}
 \item Engine하나당 하나의 lcok파일만 생성되므로 각각의 폴더를 만들어서 실행시킨다.
