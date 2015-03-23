@@ -56,7 +56,7 @@ SNMP (Simple Network Management Protocol)\footnote{* SNMP에 관한 자세한 �
 \hfill
 
 \section{EPICS}
-EPICS (Experimental Physics and Industrial Control System)는 Los Alamo은 국립 연구소와 Argonne 국립 연구소에서 공동개발 되어 오픈 라이센스로 제공되는 실시간 분산 제어 시스템으로 네트워크로 연결된 다양한 장비들의 모니터링 및 제어를 위해 사용된다. EPICS는 현재 전 세계 과학시설의 개발자들에 의해 개발이 진행되고 있다. EPICS는 그림 \ref{fig:ca}의 EPICS 로고와 같이 네트워크 기반의 클라이언트/서버 구조이며, TCP/UDP 프로토콜을 사용하는 CA (Channel Access) 통신 프로토콜을 사용하여 IOC (Input Output Controllers)를 통해 PV (Process Variable)를 주고받는다. 클라이언트는 PV에 접근하며, 서버는 PV에 대한 접근을 제공한다. 특히, CA는 높은 대역폭, soft real-time networking 제어가 요구되는 응용프로그램들에 맞춰 설계되었고, 이는 엄청난 수의 컴퓨터와 장비들을 포함한 제어시스템 구축에 EPICS가 사용될 수 있는 이유이다. 또한, EPICS는 신뢰성 레벨을 제공하며, 이미 구축된 시스템의 유지보수도 용이하다는 장점이 있다\citep{epics}. 
+EPICS (Experimental Physics and Industrial Control System)는 Los Alamo은 국립 연구소와 Argonne 국립 연구소에서 공동개발 되어 오픈 라이센스로 제공되는 실시간 분산 제어 시스템으로 네트워크로 연결된 다양한 장비들의 모니터링 및 제어를 위해 사용된다. EPICS는 현재 전 세계 과학시설의 개발자들에 의해 개발이 진행되고 있다. EPICS는 그림 \ref{fig:ca}의 EPICS 로고와 같이 네트워크 기반의 클라이언트/서버 구조이며, TCP/UDP 프로토콜을 사용하는 CA (Channel Access) 통신 프로토콜을 사용하여 IOC (Input Output Controllers)를 통해 PV (Process Variable)를 주고받는다. 클라이언트는 PV에 접근하며, 서버는 PV에 대한 접근을 제공한다. 특히, CA는 높은 대역폭, soft real-time networking 제어가 요구되는 응용프로그램들에 맞춰 설계되었고, 이는 엄청난 수의 컴퓨터와 장비들을 포함한 제어시스템 구축에 EPICS가 사용될 수 있는 이유이다. 또한, EPICS는 신뢰성 레벨을 제공하며, 이미 구축된 시스템의 유지보수가 쉽다는 장점이 있다\citep{epics}. 
 
 \begin{figure}[h!]
   \centering
@@ -141,7 +141,7 @@ snmpget -v 2c -c public localhost RFC1213-MIB::sysName.0
 
 \subsection{장단점}
 
-snmp-nscl은 오랜 개발로 IOC의 안정성이 검증되어있으며, 여러 종류의 IOC Shell Commands가 제공되어 모듈 파라미터 구성과 문제를 진단하는 데 도움이 된다. 또한, 다양한 데이터 타입의 값을 지원한다. 하지만 v3를 지원한다고는 하나 사용할 수 없으며, 데이터 타입에 따라 mask와 data length 값을 설정해야 하며, 가끔 반환되는 데이터 값이 실제 값과 차이 나는 문제점이 있다.
+snmp-nscl은 오랜 개발로 IOC의 안정성이 검증되어있으며, 여러 종류의 IOC Shell Commands가 제공되어 모듈 파라미터 구성과 문제를 진단하는 데 도움이 된다. 또한, SNMP의 다양한 데이터 타입(Integer, String, Gauge, IPAddress 등)을 지원한다. 하지만 v3를 지원한다고는 하나 사용할 수 없으며, 데이터 타입에 따라 mask와 data length 값을 설정해야 하며, 가끔 반환되는 데이터 값이 실제 값과 차이 나는 문제점이 있다.
 
 \clearpage
 
@@ -532,56 +532,625 @@ IOC가 실행되어 각각의 PV들이 CA 통신으로 프린터기의 정보를
 
 \clearpage
 
-\chapter{Legacy SNMP Code}
-EPICS Support Module을 사용하여 EPICS와 SNMP를 통합할 수 있지만, 중이온가속기 제어 시스템에 최적화된 통합 시스템 구축을 위해 Net-SNMP의 Tutorial을 활용해 EPICS와 SNMP 통합 시스템을 구현하였다. 
+\chapter{EPICS Integration}
+이미 개발되어있는 EPICS Support Module을 사용하여 EPICS와 SNMP를 통합할 수 있지만, 자체적으로 중이온가속기 제어 시스템에 최적화된 통합 시스템 구축을 위해 유동적이고, API 확장이 가능한 Net-SNMP와 EPICS를 통합한다. 통합 시스템은 모니터링 시에는 SNMPv2c, 제어 시에는 SNMPv3로 최적화한다.
 
-\section{Net-snmp tutorial}
-Net-SNMP는 유동적이며, API 확장이 가능하므로 Net-SNMP 사이트의 Client/Mananger Coding Tutorials을 활용하여 EPICS와 SNMP를 통합해보았다. 
-
-\subsection{Simple application}
-먼저 원격 호스트에서 원하는 정보 값을 얻는 Simple application을 실행 해 보았다. 먼저, 제공되는 소스코드와 MIB파일을 컴파일한다.
-
-\begin{lstlisting}[style=termstyle]
-mijoy0909@mjpark:~/rawcode$ make snmpdemoapp
-gcc -I. `net-snmp-config --cflags`   -c -o snmpdemoapp.o snmpdemoapp.c
-gcc -o snmpdemoapp snmpdemoapp.o `net-snmp-config --libs`
-\end{lstlisting}
-
-컴파일 결과는 다음과 같다. 
-\begin{lstlisting}[style=termstyle]
-mijoy0909@mjpark:~/rawcode$ ./snmpdemoapp 
-RFC1213-MIB::sysDescr.0 = STRING: "test.net-snmp.org"
-value #1 is a string: test.net-snmp.org
-\end{lstlisting}
-
-Simple application은 하나의 호스트에 하나의 정보 값을 얻기 때문에 다양한 장비를 모니터링하기엔 어렵다.
-
-
+\section{Legacy SNMP Code (Net-snmp tutorial)}
+Net-SNMP는 1992년 Carnegie Mellon University에서 시작된 프로젝트에서 개발된 공개코드 SNMP(v2.1.2.1)를 기반으로 개발된 패키지이다. 이는 CMU-SNMP, UCD-SNMP를 거쳐 2000년 Net-SNMP가 되어, IPv4, IPv6를 사용하여 SNMPv1/2c/3을 구현하고, Agent와 Manager가 정보를 주고받을 수 있도록 snmpget, set, walk 등의 명령어를 제공하는 패키지로, Tutorials를 제공해 패키지 사용에 도움을 준다\citep{netsnmp}\citep{tutorials}. 따라서 Net-SNMP에서 제공하는 Client/Mananger Coding Tutorials를 활용하여 SNMP와 Net-SNMP 명령어와 패키지 등에 대해 이해하고 EPICS와의 통합에 사용한다. 
+ 
 \subsection{Simple Async Application}
-
-중이온가속기 제어 시스템에는 다양한 장비가 사용으로 인해 호스트의 개수도 엄청나다. 따라서 이를 만족할 시스템 구현을 위해서 Async Application을 사용한다.
-
-먼저, 사이트에서 예제 파일을 다운받아 실행시킨다.
+Client/Mananger Coding Tutorials에는 장비에서 원하는 정보 값을 얻는 방법으로 동기식의 Simple application와 비동기식의 Simple Async Application이 있다. 
+Simple Async Application 예제의 Host, Community, OID 값을 원하는 장비에 맞춰 변경해 컴파일한 후 실행시키면 아래와 같이 Simple application의 결과와 Simple Async Application 결과를 모두 보여준다. 
 
 \begin{lstlisting}[style=termstyle]
 mijoy0909@mjpark:~/rawcode$ make asyncapp
 gcc -I. `net-snmp-config --cflags`   -c -o asyncapp.o asyncapp.c
-asyncapp.c: In function ‘initialize’:
-asyncapp.c:65:5: warning: passing argument 3 of ‘read_objid’ from incompatible pointer type [enabled by default]
-In file included from /usr/include/net-snmp/mib_api.h:22:0,
-                 from /usr/include/net-snmp/net-snmp-includes.h:77,
-                 from asyncapp.c:15:
-/usr/include/net-snmp/library/mib.h:116:21: note: expected ‘size_t *’ but argument is of type ‘int *’
-asyncapp.c: In function ‘print_result’:
-asyncapp.c:88:11: warning: format ‘%d’ expects argument of type ‘int’, but argument 6 has type ‘__suseconds_t’ [-Wformat]
 gcc -o asyncapp asyncapp.o `net-snmp-config --libs`
 \end{lstlisting}
 
-\subsection{}
+\begin{lstlisting}[style=termstylenumber]
+mijoy0909@mjpark:~/rawcode$ ./asyncapp 
+---------- synchronous -----------
+11:08:18.712241 10.1.4.182: HOST-RESOURCES-MIB::hrDeviceDescr.1 = STRING: FUJI XEROX ApeosPort-IV C3375  v 84. 18.  0 Multifunction System
+11:08:18.714129 10.1.4.182: Printer-MIB::prtGeneralPrinterName.1 = STRING: "ApeosPort-IV C3375 "
+11:08:18.724114 10.1.4.182: Printer-MIB::prtConsoleDisplayBufferText.1.1 = STRING: "Print-User Action"
+11:08:18.760751 10.1.4.184: HOST-RESOURCES-MIB::hrDeviceDescr.1 = STRING: FS-9530DN
+11:08:18.780953 10.1.4.184: Printer-MIB::prtGeneralPrinterName.1 = STRING: "FS-9530DN"
+11:08:19.144312 10.1.4.184: Printer-MIB::prtConsoleDisplayBufferText.1.1 = STRING: "Please wait     "
+---------- asynchronous -----------
+11:08:19.185517 10.1.4.182: HOST-RESOURCES-MIB::hrDeviceDescr.1 = STRING: FUJI XEROX ApeosPort-IV C3375  v 84. 18.  0 Multifunction System
+11:08:19.185877 10.1.4.184: HOST-RESOURCES-MIB::hrDeviceDescr.1 = STRING: FS-9530DN
+11:08:19.186001 10.1.4.182: Printer-MIB::prtGeneralPrinterName.1 = STRING: "ApeosPort-IV C3375 "
+11:08:19.186261 10.1.4.184: Printer-MIB::prtGeneralPrinterName.1 = STRING: "FS-9530DN"
+11:08:19.194116 10.1.4.182: Printer-MIB::prtConsoleDisplayBufferText.1.1 = STRING: "Print-User Action"
+11:08:19.244038 10.1.4.184: Printer-MIB::prtConsoleDisplayBufferText.1.1 = STRING: "Please wait     "
+\end{lstlisting}
+
+Simple application은 Agent에 요청을 보내고 응답이 올 때까지 블럭킹되어 대기상태로 있으므로 중이온가속기 제어 시스템에 사용되는 다양한 장비를 모니터링하기엔 적합하지 않다. 반면에 Simple Async Application은 Agent로부터 요청에 대한 응답이 있을 때 callback 형식으로 호출되어 결과를 출력한다. 따라서 EPICS와 SNMP의 통합에는 비동기식으로 데이터를 전송하는 Simple Async Application 예제를 사용한다.
+
+\section{Library 구성}
+Simple Async Application(이하 AsyncApp)과 EPICS의 통합에서 Library는 소스코드, Record파일, dbd파일로 구성된다.
+
+\subsection{Record}
+AsyncApp과 EPICS IOC의 통신에 사용할 Record를 생성한다. EPICS의 Example IOC Application에서 xxxRecord.dbd를 사용하여 SNMP의 다양한 데이터 타입 중 analog와 string 타입의 snmpRecord와 snmpstrRecord의 dbd파일을 생성한다. 이때, 기본적인 필드 외에 그림 \ref{fig:recorddbd}와 같이 통신에 필요한 장비의 Host, Community string, OID와 snmp버전 정보 및 인증과 암호화 비밀번호에 대한 필드를 추가한다.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.89\textwidth]{./images/recorddbd.eps}
+  \caption{record.dbd 파일 (left: snmpReocrd.dbd right: snmpstrRecord.dbd)}
+  \label{fig:recorddbd}   
+\end{figure}
+
+Record 생성 후 xxxRecord.c를 수정하여 그림 \ref{fig:recordc}과 같이 snmpRecord.c와 snmpstrRecord.c를 생성한다. 이때 string 타입의 레코드는 analog타입의 레코드와 달리 알람을 설정 할 필요가 없으므로 snmpstrRecord.c는 process함수의 checkAlarms부분을 주석처리 한다. 
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.89\textwidth]{./images/recordc.eps}
+  \caption{record.c 파일 (left: snmpReocrd.c right: snmpstrRecord.c)}
+  \label{fig:recordc}   
+\end{figure}
+
+\subsection{소스파일}
+AsyncApp의 소스코드는 EPICS 환경에 맞춰 수정이 필요하다. 몇 가지 주요 수정 사항은 아래와 같고, 나머지 코드는 APPENDIX를 참조 바란다.
+\begin{enumerate}
+\item AsyncApp의 코드와 달리 host, community, oids는 필드로 사용되므로 OID정보와 snmp session, pdu, record 등에 대한 값은 snmp\_info의 구조로 정의한다.
+
+\begin{lstlisting}[style=termstyle]
+/*
+ * a list of variables to query for
+ */
+struct oid_info {
+  char Name[81];
+  oid Oid[MAX_OID_LEN];
+  unsigned int OidLen;
+};
+
+typedef struct oid_info OID;
+typedef struct snmp_info
+{
+  OID  oid_info;
+  struct snmp_session *sess;
+  struct snmp_session ss;
+  struct snmp_pdu *getreq;                           /* startup all hosts */
+  struct snmp_pdu *setreq;                           /* startup all hosts */
+  char sval[12];
+  char type;
+  epicsMutexId mutexId;
+  void *psnmpRecord;
+  void *psnmpstrRecord;
+} SNMP_INFO;
+\end{lstlisting}
+
+\item devSNMPSoft, devSNMPSoftstr을 위한 dset(Address of Device Support Entry Table)을 생성한다.
+
+\begin{lstlisting}[style=termstyle]
+typedef struct devSNMPSoft{
+  long number;
+  DEVSUPFUN report;
+  DEVSUPFUN init;
+  DEVSUPFUN init_record;
+  DEVSUPFUN get_ioint_info;
+  DEVSUPFUN read_write_record;
+  DEVSUPFUN special_linconv;
+}devSNMPSoft;
+
+typedef struct devSNMPSoftstr{
+  long number;
+  DEVSUPFUN report;
+  DEVSUPFUN init;
+  DEVSUPFUN init_record;
+  DEVSUPFUN get_ioint_info;
+  DEVSUPFUN read_write_record;
+  DEVSUPFUN special_linconv;
+}devSNMPSoftstr;
+
+devSNMPSoft devSNMPRead = {6, NULL, NULL, snmp_RInit, NULL, snmp_Read, NULL};
+devSNMPSoft devSNMPWrite = {6, NULL, NULL, snmp_WInit, NULL, snmp_Write, NULL};
+epicsExportAddress(dset, devSNMPRead);
+epicsExportAddress(dset, devSNMPWrite);
+devSNMPSoftstr devSNMPRead_str = {6, NULL, NULL, snmp_strInit, NULL, snmp_strRead, NULL};
+epicsExportAddress(dset, devSNMPRead_str);
+\end{lstlisting}
+
+\item initialize에 SNMP의 기본 정보와 SNMPv3의 인증과 암호화 부분을 추가한다. 
+
+\begin{lstlisting}[style=termstyle]
+void initializeR(void *precord)
+{
+  snmpRecord *psnmp = (snmpRecord *)precord;
+  SNMP_INFO *snmpinfo = (SNMP_INFO*)psnmp->dpvt;
+
+  static int snmpInited = FALSE;
+  snmpinfo->oid_info.OidLen = MAX_OID_LEN;
+  if (!snmpInited)
+    {
+      init_snmp("snmpDevAsync.c");                    /* initialize library */
+      snmpInited = TRUE;
+    };
+
+  if (strlen(psnmp->vers) == 14) {                    /* VERSION 3 */
+    snmp_sess_init(&(snmpinfo->ss));                  /* initialize session */    
+    snmpinfo->ss.version = SNMP_VERSION_3;
+    snmpinfo->ss.peername = strdup(psnmp->host);
+    snmpinfo->ss.securityName =  strdup(psnmp->comm);
+    snmpinfo->ss.securityNameLen = strlen((char*)snmpinfo->ss.securityName);
+    snmpinfo->ss.securityLevel = SNMP_SEC_LEVEL_AUTHPRIV;
+
+    /* Authentication Protocol */
+    /* MD5 */
+    snmpinfo->ss.securityAuthProto = usmHMACMD5AuthProtocol;
+    snmpinfo->ss.securityAuthProtoLen = sizeof(usmHMACMD5AuthProtocol)/sizeof(oid);
+    snmpinfo->ss.securityAuthKeyLen = USM_AUTH_KU_LEN;
+
+    /* Authentication keys generation */
+    if (generate_Ku(snmpinfo->ss.securityAuthProto,
+		    snmpinfo->ss.securityAuthProtoLen,
+		    (u_char *) strdup(psnmp->auth), strlen(psnmp->auth),
+		    snmpinfo->ss.securityAuthKey,
+		    &snmpinfo->ss.securityAuthKeyLen) != SNMPERR_SUCCESS) {
+      snmp_perror("Error!!!!!!!!!!!!");
+      snmp_log(LOG_ERR,
+	       "Error generating Ku from authentication pass phrase. \n");
+      exit(1);
+    }
+
+    /* Privacy protocol */
+    /* DES */
+    snmpinfo->ss.securityPrivProto = usmDESPrivProtocol;
+    snmpinfo->ss.securityPrivProtoLen = USM_PRIV_PROTO_DES_LEN;
+    snmpinfo->ss.securityPrivKeyLen = USM_PRIV_KU_LEN;
+
+    /* Privacy keys generation */
+    if (generate_Ku(snmpinfo->ss.securityAuthProto,
+		    snmpinfo->ss.securityAuthProtoLen,
+		    (u_char *) strdup(psnmp->priv), strlen(psnmp->priv),
+		    snmpinfo->ss.securityPrivKey,
+		    &snmpinfo->ss.securityPrivKeyLen) != SNMPERR_SUCCESS) {
+      printf ("Error generating Ku from privacity pass phrase. \n");
+      exit(1);
+    }
+
+    snmpinfo->ss.callback = asynch_response;        /* default callback */
+    snmpinfo->ss.callback_magic = snmpinfo;
+  } else {                                          /* VERSION 2c */
+    snmp_sess_init(&(snmpinfo->ss));                /* initialize session */
+    snmpinfo->ss.version = SNMP_VERSION_2c;
+    snmpinfo->ss.peername = strdup(psnmp->host);
+    snmpinfo->ss.community = (unsigned char*)strdup(psnmp->comm);
+    snmpinfo->ss.community_len = strlen((char*)snmpinfo->ss.community);
+    snmpinfo->ss.callback = asynch_response;        /* default callback */
+    snmpinfo->ss.callback_magic = snmpinfo;
+  }
+  
+                                                    /* parse the oids */
+  if (!read_objid(psnmp->oids, snmpinfo->oid_info.Oid, &snmpinfo->oid_info.OidLen))      
+    {
+      printf("parse the oids %s\n",psnmp->oids);
+      snmp_perror("read_objid");
+      exit(1);
+    }
+}
+\end{lstlisting}
+
+\item Switch문을 사용하여 SNMP 데이터 타입에 따라 callback 되는 데이터값을 처리한다.
+
+\begin{lstlisting}[style=termstyle]
+int return_data(int status, struct snmp_info *sinfo, struct snmp_pdu *pdu)               
+{
+  char buf[1024];
+  struct variable_list *vp;
+  int ix;
+  char *getdata = NULL;
+  int nVal;
+  char tVal[40];
+  char *sVal;
+  char *pValStr;
+  struct snmp_session *sp = sinfo->sess;
+  snmpRecord *psnmp = (snmpRecord *)sinfo->psnmpRecord;
+  snmpstrRecord *psnmpstr = (snmpstrRecord *)sinfo->psnmpstrRecord;
+
+  switch (status) {
+  case STAT_SUCCESS:
+    vp = pdu->variables;
+    if (pdu->errstat == SNMP_ERR_NOERROR) {
+      while (vp) {
+	snprint_variable(buf, sizeof(buf), vp->name, vp->name_length, vp);
+	/*mjpark------------------------------------------*/
+	pValStr = strrchr(buf, ':');
+	sprintf(tVal, "%s", pValStr+2);
+	getdata = (char *)malloc(1 + vp->val_len);
+	memcpy(getdata, vp->val.string, vp->val_len);
+	getdata[vp->val_len] = '\0';
+	sVal = trimwhitespace(replace_str2(tVal,"\"","")); 
+
+	switch(vp->type)
+	  {
+	  case ASN_INTEGER:
+	    {
+	      memcpy((void *)&nVal, getdata, sizeof(int));
+	      psnmp->val = nVal;
+	      break;
+	    }
+	  case ASN_OCTET_STR:
+	  case ASN_BIT_STR:
+	    {
+	      sprintf(psnmpstr->val, "%s", sVal);
+	      break;
+	    }
+	  case ASN_GAUGE:
+	  case ASN_OPAQUE:
+	  case ASN_COUNTER:
+	  case ASN_TIMETICKS:
+	  case ASN_IPADDRESS:
+	  default :
+	    sscanf(tVal,"%lg",&psnmp->val);
+	  }
+	/*------------------------------------------------*/
+	vp = vp->next_variable;
+      }
+      free(getdata);
+    }
+    else {
+      for (ix = 1; vp && ix != pdu->errindex; vp = vp->next_variable, ix++);
+      if (vp)
+	snprint_objid(buf, sizeof(buf), vp->name, vp->name_length);
+      else
+	strcpy(buf, "(none)");
+      fprintf(stdout, "%s: %s: %s\n", sp->peername, buf, snmp_errstring(pdu->errstat));
+    }
+    return 1;
+    
+  case STAT_TIMEOUT:
+    fprintf(stdout, "%s: Timeout\n", sp->peername);
+    return 0;
+  
+  case STAT_ERROR:
+    snmp_perror(sp->peername);
+    return 0;
+  }
+  return 0;
+}
+\end{lstlisting}
+
+\item 제어를 위해 AsyncApp에 없는 snmpset을 추가한다.
+
+\begin{lstlisting}[style=termstyle]
+int set_snmp(void *precord, const char *sval)
+{
+  snmpRecord *psnmp = (snmpRecord *)precord;
+  SNMP_INFO *snmpinfo = (SNMP_INFO*)psnmp->dpvt;
+  char type = 'i';
+
+  if (!(snmpinfo->sess = snmp_open(&snmpinfo->ss))) {
+    snmp_perror("snmp_open");
+    return -1;
+  };
+  
+  static int count = 0;
+  printf("SValue[%d]: %s\n", count++, sval);
+
+  snmpinfo->setreq = snmp_pdu_create(SNMP_MSG_SET);   /* send the first GET */
+  if (! snmpinfo->setreq) {
+    snmp_free_pdu(snmpinfo->setreq);
+    snmp_close(snmpinfo->sess);                       /* cleanup */
+    return -1;
+  }
+  
+/* snmp_add_var(netsnmp_pdu *, const oid *, size_t, char, const char *) */
+  snmp_add_var(snmpinfo->setreq, snmpinfo->oid_info.Oid, snmpinfo->oid_info.OidLen, type, sval);       
+
+  if (snmp_send(snmpinfo->sess, snmpinfo->setreq))
+    hosts++;
+  else {
+    snmp_perror("snmp_setsend");
+    snmp_free_pdu(snmpinfo->setreq);
+    snmp_close(snmpinfo->sess);                      /* cleanup */
+    return -1;
+  }
+
+  active_hosts();
+  snmp_close(snmpinfo->sess);                        /* cleanup */
+  return 0;
+}
+\end{lstlisting}
+\end{enumerate}
+
+\subsection{dbd}
+코드가 작성되면 dset에 맞춰 dbd파일을 작성한다.
 
 
+\begin{lstlisting}[style=termstyle]
+include "snmpRecord.dbd"
+include "snmpstrRecord.dbd"
+
+device(snmp,INST_IO,devSNMPRead,"SNMP Read")
+device(snmp,INST_IO,devSNMPWrite,"SNMP Write")
+device(snmpstr,INST_IO,devSNMPRead_str,"SNMP Read")
+\end{lstlisting}
+
+\subsection{Makefile}
+위의 과정을 거쳐 수정 및 생성한 파일들을 라이브러리로 만들어 EPICS IOC에서 실행하기 위해 Makefile을 수정한다. 라이브러리로 사용할 이름을 설정하고, 빌드할 파일들을 설정한다.
+
+\begin{lstlisting}[style=termstylenumber]
+TOP = ../..
+include $(TOP)/configure/CONFIG
+
+LIBRARY += snmpMon
+DBDINC       += snmpRecord snmpstrRecord
+DBD          += snmpRecord.dbd snmpstrRecord.dbd
+DBD          += snmpDevSoft.dbd
+snmpMon_SRCS += snmpDevAsync.c snmpRecord.c snmpstrRecord.c
+
+netsnmp_DIR = /usr/lib
+# for jessie, need to check for Wheezy
+# jhlee
+netsnmp_DIR += /usr/lib/x86_64-linux-gnu
+snmpMon_LIBS +=netsnmp
+
+# need to check where it is in Wheezy
+
+USR_CFLAGS  += `net-snmp-config --cflags`
+USR_LDFLAGS += `net-snmp-config --libs`
+PROD_LDLIBS += `net-snmp-config --libs`
+
+include $(TOP)/configure/RULES      
+\end{lstlisting}
+
+Makefile 수정 후 make를 실행하면 아래와 같이 lib, include, dbd폴더와 파일들이 생성된다.
+
+    {\scriptsize
+         \begin{verbatim}
+    
+mijoy0909@mjpark:~/epics/R3.14.12.4/siteLibs$ tree -L 3
+
+├── [       4096]  dbd
+│   ├── [        445]  snmpDevSoft.dbd
+│   ├── [       5926]  snmpRecord.dbd
+│   └── [       3024]  snmpstrRecord.dbd
+├── [       4096]  include
+│   ├── [      19578]  snmpRecord.h
+│   └── [      14389]  snmpstrRecord.h
+├── [       4096]  lib
+│   └── [       4096]  linux-x86_64
+│       ├── [     165542]  libsnmpMon.a
+│       └── [     103574]  libsnmpMon.so
+├── [        186]  Makefile
+├── [        345]  Makefile.template
+├── [       4096]  README
+├── [       4096]  snmpLib
+│   ├── [        305]  Makefile
+│   ├── [       4096]  mibs
+│   ├── [       4096]  rawcode
+│   └── [       4096]  src
+│       ├── [        628]  Makefile
+│       ├── [       4096]  O.Common
+│       ├── [       4096]  O.linux-x86_64
+│       ├── [      27789]  snmpDevAsync.c
+│       ├── [        445]  snmpDevSoft.dbd
+│       ├── [       7086]  snmpRecord.c
+│       ├── [       5926]  snmpRecord.dbd
+│       ├── [       7803]  snmpstrRecord.c
+│       ├── [       3024]  snmpstrRecord.dbd
+└──     └── [       4096]  test
+     \end{verbatim}
+     }
+
+\section{Application 구성}
+만들어진 Library를 사용하여 EPICS IOC를 실행하기 위한 Application을 구성한다.
+
+\subsection{Application 환경 폴더생성}
+Application 구성을 위해 EPICS에서 제공되는 makeBaseApp.pl을 사용하여 Application 환경폴더를 생성한다.
+
+\begin{lstlisting}[style=termstyle]
+mijoy0909@mjpark:~/epics/R3.14.12.4/siteApps/snmp2$ makeBaseApp.pl -t ioc snmp2
+mijoy0909@mjpark:~/epics/R3.14.12.4/siteApps/snmp2$ makeBaseApp.pl -i -t ioc snmp2
+Using target architecture linux-x86_64 (only one available)
+The following applications are available: snmp2
+What application should the IOC(s) boot?
+The default uses the IOC's name, even if not listed above.
+Application name? snmp2
+mijoy0909@mjpark:~/epics/R3.14.12.4/siteApps/snmp2$ ls
+configure/  iocBoot/  Makefile  snmp2App/
+\end{lstlisting}
+
+Application 환경을 만든 후 make를 하면 아래와 같이 bin, dbd 폴더가 생성된다.
+\begin{lstlisting}[style=termstyle]
+mijoy0909@mjpark:~/epics/R3.14.12.4/siteApps/snmp2$ make
+mijoy0909@mjpark:~/epics/R3.14.12.4/siteApps/snmp2$ ls
+bin/  configure/  dbd/  iocBoot/  Makefile  snmp2App/
+\end{lstlisting}
+
+\subsection{src/Makefile 수정}
+환경을 구성한 후 앞서 만든 library를 사용하기 위해 siteApps/snmp2/snmp2App/src/Makefile을 수정한다.
+
+\begin{lstlisting}[style=termstylenumber]
+TOP=../..
+
+include $(TOP)/configure/CONFIG
 
 
+USR_INCLUDES += -I${RAON_SITELIBS}/include/
+USR_DBDFLAGS += -I${RAON_SITELIBS}/dbd/
+USR_INCLUDES  += -I$(EPICS_EXTENSIONS)/include
+
+snmpMon_DIR += ${RAON_SITELIBS}/lib/$(T_A)
+
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+#=============================
+
+#=============================
+# Build the IOC application
+
+PROD_IOC = snmp2
+# snmp2.dbd will be created and installed
+DBD += snmp2.dbd
+
+# snmp2.dbd will be made up from these files:
+snmp2_DBD += base.dbd
+snmp2_DBD += snmpRecord.dbd
+
+# Include dbd files from all support applications:
+#snmp2_DBD += xxx.dbd
+snmp2_DBD += snmpDevSoft.dbd
+
+# Add all the support libraries needed by this IOC
+#snmp2_LIBS += xxx
+snmp2_LIBS += snmpMon 
+
+
+# snmp2_registerRecordDeviceDriver.cpp derives from snmp2.dbd
+snmp2_SRCS += snmp2_registerRecordDeviceDriver.cpp
+
+# Build the main IOC entry point on workstation OSs.
+snmp2_SRCS_DEFAULT += snmp2Main.cpp
+snmp2_SRCS_vxWorks += -nil-
+
+# Add support from base/src/vxWorks if needed
+#snmp2_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
+
+# Finally link to the EPICS Base libraries
+snmp2_LIBS += $(EPICS_BASE_IOC_LIBS)
+
+#===========================
+
+include $(TOP)/configure/RULES
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+\end{lstlisting}
+
+\subsection{db파일 생성}
+EPIC IOC를 통해 모니터링 및 제어를 원하는 장비의 MIB정보를 record로 만들어 db파일을 생성한다. 아래는 WIENER Crate db파일의 예이다. 레코드의 Read/Write여부를 결정하고, 그에 맞춰 버전과 인증비밀번호, Host, Communiy, OID의 정보를 필드로 추가한다.
+
+\begin{lstlisting}[style=termstyle]
+record(snmp, "${W}:${C}_MainPower_W") {
+  field(DESC, "WIENER Main Power Switch") 
+  field(DTYP, "SNMP Write")
+  field(SCAN, "5 second")
+  field(VERS, "${V3}")
+  field(AUTH, "${AUTH_P}")
+  field(PRIV, "${PRIV_P}")
+  field(HOST, "${HOST}")
+  field(COMM, "${USER}")
+  field(OIDS, "${WI}sysMainSwitch.0")
+  field(MDEL, "-1")
+  field(RVAL, "1")
+}
+
+record(snmp, "${W}:${C}_MainPower_R") {
+  field(DESC, "WIENER Main Power Switch") 
+  field(DTYP, "SNMP Read")
+  field(SCAN, "5 second")
+  field(VERS, "${V2C}")
+  field(HOST, "${HOST}")
+  field(COMM, "${COM}")
+  field(OIDS, "${WI}sysMainSwitch.0")
+  field(MDEL, "-1")
+}
+\end{lstlisting}
+
+\subsection{Db/Makefile 수정}
+생성된 db파일을 사용하기 위해 siteApps/snmp2/snmp2App/Db의 Makefile을 수정한다.
+
+\begin{lstlisting}[style=termstylenumber]
+TOP=../..
+include $(TOP)/configure/CONFIG
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+#----------------------------------------------------
+#  Optimization of db files using dbst (DEFAULT: NO)
+#DB_OPT = YES
+
+#----------------------------------------------------
+# Create and install (or just install) into <top>/db
+# databases, templates, substitutions like this
+#DB += xxx.db
+DB += wiener.vdb
+
+#----------------------------------------------------
+# If <anyname>.db template is not named <anyname>*.template add
+# <anyname>_template = <templatename>
+
+include $(TOP)/configure/RULES
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+\end{lstlisting}
+
+\subsection{IOC 실행}
+EPICS IOC 실행에 앞서 siteApps/snmp2에서 make를 실행한다. 실행 후 문제가 없다면 iocBoot/iocsnmp2로 이동하여 st.cmd에 db파일을 추가한다.
+
+\begin{lstlisting}[style=termstylenumber]
+#!../../bin/linux-x86_64/snmp2
+
+## You may have to change snmp2 to something else
+## everywhere it appears in this file
+
+< envPaths
+
+cd ${TOP}
+
+epicsEnvSet("MIBDIRS", "${EPICS_PATH}/siteLibs/snmpLib/mibs")
+
+## Register all support components
+dbLoadDatabase "dbd/snmp2.dbd"
+snmp2_registerRecordDeviceDriver pdbbase
+
+## Load record instances
+#dbLoadRecords("db/xxx.db","user=mijoy0909Host")
+dbLoadRecords("db/wiener.vdb", "W=WIENER, C=CRATE3, HOST=10.1.5.123, COM=public, USER=admin, V2C=SNMP_VERSION_2c, V3=SNMP_VERSION_3, WI=WIENER-CRATE-MIB::, AUTH_P=MySecret, PRIV_P=MySecret")
+
+cd ${TOP}/iocBoot/${IOC}
+iocInit
+
+## Start any sequence programs
+#seq sncxxx,"user=mijoy0909Host"
+\end{lstlisting}
+
+위의 과정이 모두 완료되면 st.cmd에 실행권한을 부여하고 실행시킨다.
+
+\begin{lstlisting}[style=termstyle]
+mijoy0909@mjpark:~/epics/R3.14.12.4/siteApps/snmp2/iocBoot/iocsnmp2$ chmod 755 st.cmd
+\end{lstlisting}
+
+EPICS IOC 실행 결과는 다음과 같다.
+
+\begin{lstlisting}[style=termstyle]
+mijoy0909@mjpark:~/epics/R3.14.12.4/siteApps/snmp2/iocBoot/iocsnmp2$ ./st.cmd 
+#!../../bin/linux-x86_64/snmp2
+## You may have to change snmp2 to something else
+## everywhere it appears in this file
+< envPaths
+epicsEnvSet("ARCH","linux-x86_64")
+epicsEnvSet("IOC","iocsnmp2")
+epicsEnvSet("TOP","/home/mijoy0909/epics/R3.14.12.4/siteApps/snmp2")
+cd /home/mijoy0909/epics/R3.14.12.4/siteApps/snmp2
+#epicsEnvSet("MIBDIRS", "${EPICS_PATH}/siteLibs/snmpLib/mibs")
+## Register all support components
+dbLoadDatabase "dbd/snmp2.dbd"
+snmp2_registerRecordDeviceDriver pdbbase
+#drvSNMPConnInit("10.1.5.142", "qwertyuiop12345", "qwertyuiop12345");
+#drvSNMPConnInit("SNMP_VERSION_2c", "10.1.5.142", "public", NULL, NULL);
+## Load record instances
+#dbLoadRecords("db/xxx.db","user=mijoy0909Host")
+dbLoadRecords("db/pdu.vdb", "A=APC, P=PDU2, HOST=10.1.5.142, COM=public, USER=mijoy, V2C=SNMP_VERSION_2c, V3=SNMP_VERSION_3, PO=PowerNet-MIB::, AUTH_P=qwertyuiop12345, PRIV_P=qwertyuiop12345")
+dbLoadRecords("db/wiener.vdb", "W=WIENER, C=CRATE3, HOST=10.1.5.123, COM=public, USER=admin, V2C=SNMP_VERSION_2c, V3=SNMP_VERSION_3, WI=WIENER-CRATE-MIB::, AUTH_P=MySecret, PRIV_P=MySecret")
+dbLoadRecords("db/timestamp.vdb", "S=SNMPIOC")
+cd /home/mijoy0909/epics/R3.14.12.4/siteApps/snmp2/iocBoot/iocsnmp2
+iocInit
+Starting iocInit
+############################################################################
+## EPICS R3.14.12.4 $Date: Mon 2013-12-16 15:51:45 -0600$
+## EPICS Base built Aug 29 2014
+############################################################################
+iocRun: All initialization complete
+## Start any sequence programs
+#seq sncxxx,"user=mijoy0909Host"
+epics> 
+epics> dbl
+WIENER:CRATE3_MainPower_R
+WIENER:CRATE3_MainPower_W
+\end{lstlisting}
 
 
 \clearpage
