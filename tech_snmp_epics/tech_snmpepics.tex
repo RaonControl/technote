@@ -1213,8 +1213,7 @@ WIENER Crate webpage
 모든 값이 같게 바뀌므로 EPICS IOC와 장비가 연결되어 통신함을 알 수 있다. 추가적인 장비의 정보를 레코드로 생성하고 다른 장비에 대한 Db파일을 생성하는 과정을 거치면 하나의 IOC에서 여러 장비의 모니터링 및 제어를 할 수 있다. 위의 integration 과정을 거치면 EPICS와 SNMP 통합 모니터링 시스템이 완성된다.
 
 \section{EPICS Support Module과 차이점}
-차이점 자리\\
-차이점 자리\\
+중이온가속기 제어 환경에 맞춰 개발된 통합 모니터링 시스템은 기존의 EPICS IOC Support Module과 달리 library와 application이 분리돼 library의 재사용이 가능하며, 기존의 여러 종류의 Record 대신 snmpRecord, snmpstrRecord 만으로 다양한 SNMP의 데이터 타입을 지원한다. 따라서, INP/OUT 필드에 데이터 타입에 대한 마스크를 정의하지 않아도 된다. 또한, Support Module에서 지원하지 않던 SNMPv3가 지원되므로 사용자가 원하는 버전에 맞춰 필드를 사용해 Record를 생성 할 수 있다.
 
 \section{안정성 테스트}
 완성된 통합 모니터링 시스템의 안정성을 테스트하기 위해 PV의 값을 주기적으로 변경하고, 변경된 PV데이터는 EPICS Extension 툴인 Archiver Appliance를 사용해 저장했다.
@@ -1227,8 +1226,38 @@ WIENER Crate의 FanSpeed와 APC PDU의 Outlet 8번의 상태에 대한 PV값을 
 
 while [ : ]; do  
 #++
-stat=`caget APC:PDU2_Outlet8_R`
+
 for i in {1200..3000..100};do
+stat=`caget APC:PDU2_Outlet8_R`
+echo "***************************************************************"
+caget SNMPIOC:TIMESTAMP
+
+echo "---------------------------------------------------------------"
+echo "snmpget -------------------------------------------------------"
+snmpget -v 1 -c public 10.1.5.123 WIENER-CRATE-MIB::sysMainSwitch.0  WIENER-CRATE-MIB::sysStatus.0  WIENER-CRATE-MIB::fanAirTemperature.0 WIENER-CRATE-MIB::fanNominalSpeed.0
+snmpget -v 1 -c public 10.1.5.142 PowerNet-MIB::sPDUOutletCtl.8
+echo "---------------------------------------------------------------"
+echo "caget ---------------------------------------------------------"
+caget WIENER:CRATE3_MainPower_R WIENER:CRATE3_PS_Status WIENER:CRATE3_FanairTemp WIENER:CRATE3_FanNominalSpeed_R WIENER:CRATE3_FanNominalSpeed_W APC:PDU2_Outlet8_R APC:PDU2_Outlet8_W 
+echo "caput ---------------------------------------------------------"
+
+case "$stat" in
+"APC:PDU2_Outlet8_R             1")
+caput APC:PDU2_Outlet8_W 2;;
+"APC:PDU2_Outlet8_R             2")
+caput APC:PDU2_Outlet8_W 1;;
+*)
+echo "error";;
+esac
+
+caput WIENER:CRATE3_FanNominalSpeed_W $i
+sleep 60
+done
+
+
+#--
+for i in {2900..1300..100};do
+stat=`caget APC:PDU2_Outlet8_R`
 echo "***************************************************************"
 caget SNMPIOC:TIMESTAMP
 echo "---------------------------------------------------------------"
@@ -1252,15 +1281,37 @@ esac
 caput WIENER:CRATE3_FanNominalSpeed_W $i
 sleep 60
 done
-...
+done
+done
 \end{lstlisting}
 
-Script는 1분 주기로 Crate의 FanSpeed를 100단위로 1200에서 3000까지 올렸다, 내리고 PDU Outlet 8번의 전원을 켰다 끈다. 이때 snmp명령어와 camonitor로 통신 되는 값을 모두 확인하고 Script의 결과는 log 파일로 만든다.
+Script는 1분 주기로 Crate의 FanSpeed를 100단위로 1200에서 3000까지 올렸다, 내리고 PDU Outlet 8번의 전원을 켰다 끈다. 이때 snmp명령어와 camonitor로 통신 되는 값을 모두 확인하고 Script의 결과는 아래와 같은 형식으로 log파일에 저장된다.
 
 \begin{lstlisting}[style=termstyle]
-mijoy0909@mjpark:~/epics/R3.14.12.4/siteApps/snmp2$ ./archivertest.sh > aatest_03.24.log 
+***************************************************************
+SNMPIOC:TIMESTAMP              2015/03/24 19:07:23
+---------------------------------------------------------------
+snmpget -------------------------------------------------------
+WIENER-CRATE-MIB::sysMainSwitch.0 = INTEGER: ON(1)
+WIENER-CRATE-MIB::sysStatus.0 = BITS: 80 mainOn(0) 
+WIENER-CRATE-MIB::fanAirTemperature.0 = INTEGER: 22 \ufffdC
+WIENER-CRATE-MIB::fanNominalSpeed.0 = INTEGER: 2400 RPM
+PowerNet-MIB::sPDUOutletCtl.8 = INTEGER: outletOn(1)
+---------------------------------------------------------------
+caget ---------------------------------------------------------
+WIENER:CRATE3_MainPower_R      1
+WIENER:CRATE3_PS_Status        80 mainOn(0)
+WIENER:CRATE3_FanairTemp       22
+WIENER:CRATE3_FanNominalSpeed_R 2400
+WIENER:CRATE3_FanNominalSpeed_W 2400
+APC:PDU2_Outlet8_R             1
+APC:PDU2_Outlet8_W             1
+caput ---------------------------------------------------------
+Old : APC:PDU2_Outlet8_W             1
+New : APC:PDU2_Outlet8_W             2
+Old : WIENER:CRATE3_FanNominalSpeed_W 2400
+New : WIENER:CRATE3_FanNominalSpeed_W 2500
 \end{lstlisting}
-
 
 \subsection{Raspberry Pi를 활용한 모니터링}
 스크립트가 실행될 때 변경되는 값이 실제 Crate의 FanSpeed에 영향을 미치는지 확인하기 위해 Raspberry Pi의 카메라 모듈을 활용하여 그림 \ref{fig:rpimonitoring}와 같이 Crate의 패널을 영상으로 모니터링한다.
@@ -1296,7 +1347,7 @@ Monitoring using Raspberry Pi Camera
 \end{figure}
 
 \subsection{Archiver Appliance}
-EPICS의 extension툴인 Archiver Appliance로 주기적으로 변하는 PV 데이터를 저장하고 모니터링한다. Archiver Appliance의 Archiver Viewer로 Crate의 상태, 온도 및 FanSpeed와 PDU Outlet 8번의 상태를 그림 \ref{fig:aaviewer}과 같이 확인한다.
+EPICS의 extension툴인 Archiver Appliance 로 주기적으로 변하는 PV 데이터를 저장하고 모니터링한다. Archiver Appliance의 Archiver Viewer로 Crate의 상태, 온도 및 FanSpeed와 PDU Outlet 8번의 상태를 그림 \ref{fig:aaviewer}과 같이 확인한다.
 
 \begin{figure}[h!]
   \centering
@@ -1305,7 +1356,7 @@ EPICS의 extension툴인 Archiver Appliance로 주기적으로 변하는 PV 데�
   \label{fig:aaviewer}   
 \end{figure}
 
-Archiver Appliance로 모니터링하는 전체 구성은 그림\ref{fig:allscreen} 과 같다. 
+Archiver Appliance의 모니터링 구성은 그림\ref{fig:allscreen} 과 같다. 
 
 \begin{figure}[h!]
   \centering
@@ -1327,7 +1378,7 @@ Archiver Appliance로 모니터링하는 전체 구성은 그림\ref{fig:allscre
 
 
 \section{OPI 구현}
-OPI 구현에는 EPICS의 UI (User Interface) 프로그램인 CSS (Control System Studio)를 사용한다. CSS는 가속기 사이트와 같이 큰 규모의 제어 시스템의 동작 및 모니터링하는 Eclipse 기반의 툴이다\citep{css}. EPICS IOC의 PV 데이터를 사용자의 환경에 맞춰 구성한다. 그림 \ref{fig:cssopi}는 APC사의 PDU와 WIENER사의 Crate의 PV를 사용하여 만든 UI다. PDU는 각 상태와 Oultet에 대한 모니터링 및 Outlet 제어를 할 수 있고, Crate 역시 상태 모니터링뿐만 아니라 전원, Fanspeed 등의 상태를 제어할 수 있다. 
+OPI 구현에는 EPICS의 UI (User Interface) 프로그램인 CSS (Control System Studio)를 사용한다. CSS는 가속기 사이트와 같이 큰 규모의 제어 시스템의 동작 및 모니터링에 사용하는 Eclipse 기반의 툴이다\citep{css}. EPICS IOC의 PV 데이터를 사용자가 원하는 환경에 맞춰 OPI를 구성하여 UI를 구현한다. 그림 \ref{fig:cssopi}는 APC사의 PDU와 WIENER사의 Crate의 PV로 만든 UI다. PDU는 각 상태와 Oultet에 대한 모니터링 및 Outlet 제어를 할 수 있고, Crate 역시 상태 모니터링뿐만 아니라 전원, Fanspeed 등의 상태를 제어할 수 있다. 
 
  \begin{figure}[!h]
    \centering
