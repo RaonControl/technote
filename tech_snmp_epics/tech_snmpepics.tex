@@ -1148,9 +1148,155 @@ iocRun: All initialization complete
 #seq sncxxx,"user=mijoy0909Host"
 epics> 
 epics> dbl
-WIENER:CRATE3_MainPower_R
-WIENER:CRATE3_MainPower_W
+WIENER:CRATE3_FanNominalSpeed_R
+WIENER:CRATE3_FanNominalSpeed_W
 \end{lstlisting}
+
+EPICS IOC의 PV와 장비의 통신을 확인한다. IOC 내에서 dbpr 명령어로 pv의 값을 확인한 후 dbpf 명령어로 값을 변경했을 때 값이 변경되는지 확인한다. 또한 camonitor 및 snmpget 통해 값의 변경을 확인한다.
+
+\begin{lstlisting}[style=termstyle]
+epics> dbpr WIENER:CRATE3_FanNominalSpeed_R
+ASG:                DESC: WIENER Fan rotation speed         DISA: 0             
+DISP: 0             DISV: 1             NAME: WIENER:CRATE3_FanNominalSpeed_R   
+OVAL: 0             RVAL: 0             SEVR: NO_ALARM      STAT: NO_ALARM      
+SVAL: 0             TPRO: 0             VAL: 2000           
+epics> dbpf WIENER:CRATE3_FanNominalSpeed_W 2500
+DBR_DOUBLE:         2500      
+epics> dbpr WIENER:CRATE3_FanNominalSpeed_W
+ASG:                DESC: WIENER Fan rotation speed         DISA: 0             
+DISP: 0             DISV: 1             NAME: WIENER:CRATE3_FanNominalSpeed_W   
+OVAL: 2000          RVAL: 0             SEVR: NO_ALARM      STAT: NO_ALARM      
+SVAL: 0             TPRO: 0             VAL: 2500      
+epics> dbpr WIENER:CRATE3_FanNominalSpeed_R
+ASG:                DESC: WIENER Fan rotation speed         DISA: 0             
+DISP: 0             DISV: 1             NAME: WIENER:CRATE3_FanNominalSpeed_R   
+OVAL: 0             RVAL: 0             SEVR: NO_ALARM      STAT: NO_ALARM      
+SVAL: 0             TPRO: 0             VAL: 2500     
+\end{lstlisting}
+
+\begin{lstlisting}[style=termstyle]
+mijoy0909@mjpark:~$ camonitor WIENER:CRATE3_FanNominalSpeed_R WIENER:CRATE3_FanNominalSpeed_W
+WIENER:CRATE3_FanNominalSpeed_R 2015-03-24 09:57:20.552400 2000  
+WIENER:CRATE3_FanNominalSpeed_W 2015-03-24 09:57:45.593398 2500  
+WIENER:CRATE3_FanNominalSpeed_R 2015-03-24 09:57:50.575369 2500  
+\end{lstlisting}
+
+\begin{lstlisting}[style=termstyle]
+mijoy0909@mjpark:~$ snmpget -v 2c -c public 10.1.5.123 fanNominalSpeed.0
+WIENER-CRATE-MIB::fanNominalSpeed.0 = INTEGER: 2000 RPM
+WIENER-CRATE-MIB::fanNominalSpeed.0 = INTEGER: 2500 RPM
+\end{lstlisting}
+
+그림 \ref{fig:wienerweb}의 WIENER사에서 제공하는 웹페이지를 통해 값 변경을 확인한다.
+
+\begin{figure}[!h]
+  \centering
+  \subbottom[WIENER Crate Fanspeed 2000]
+  	    {
+  \includegraphics[width=0.45\textwidth]{./images/wienerfanr.eps}
+  \label{fig:wienerwebon}   
+  	    }
+              \hfill
+  \subbottom[WIENER Crate Fanspeed 2500]
+  	    {
+  \includegraphics[width=0.45\textwidth]{./images/wienerfanw.eps}
+  \label{fig:wienerweboff}   
+  	    }
+              \hfill
+  \caption
+      {
+WIENER Crate webpage
+      }
+ \label{fig:wienerweb}
+\end{figure}
+
+모든 값이 같게 바뀌므로 EPICS IOC와 장비가 연결되어 통신함을 알 수 있다. 추가적인 장비의 정보를 레코드로 생성하고 다른 장비에 대한 Db파일을 생성하는 과정을 거치면 하나의 IOC에서 여러 장비의 모니터링 및 제어가 가능하다. 
+위와 같이 integration 과정을 거치면 EPICS와 SNMP 통합 모니터링 시스템이 완성된다.
+
+\section{안정성 테스트}
+완성된 통합 모니터링 시스템의 안정성을 테스트하기 위해 PV의 값을 주기적으로 변경하였고, EPICS Extension 툴인 Archiver Appliance를 통해 변경되는 PV데이터를 저장했다.
+
+\subsection{테스트 Script}
+WIENER Crate의 fanspeed와 APC PDU의 outlet 8번에 대한 PV값을 주기적으로 변경하는 스크립트를 아래와 같이 작성한다. 스크립트는 fanspeed는 1200에서 3000까지 fanspeed를 100단위로 올렸다,내리고 PDU의 outlet 8번은 전원을 켰다 끄기를 1분 간격으로 수행한다. 이때 snmp명령어와 CA통신을 통한 값을 모두 확인하고 실행과정을 log 파일로 만든다.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.79\textwidth]{./images/testscript.eps}
+  \caption{안정성 테스트 Script}
+  \label{fig:script}   
+\end{figure}
+
+\begin{lstlisting}[style=termstyle]
+
+
+
+
+
+\end{lstlisting}
+
+
+\subsection{Raspberry Pi를 활용한 모니터링}
+스크립트가 실행될 때 실제로 Crate의 fanspeed에 영향을 미치는지 확인하기 위해 Raspberry Pi의 카메라 모듈을 활용하여 그림 \ref{fig:rpimonitoring}와 같이 Crate의 패널을 영상으로 모니터링한다.
+
+\begin{figure}[!h]
+  \centering
+  \subbottom[Raspberry Pi Camera Module]
+  	    {
+  \includegraphics[width=0.45\textwidth]{./images/Rpi.eps}
+  \label{fig:rpi}   
+  	    }
+              \hfill
+  \subbottom[Raspberry Pi Monitoring Environment]
+  	    {
+  \includegraphics[width=0.45\textwidth]{./images/Rpitest.eps}
+  \label{fig:rpitest}   
+  	    }
+              \hfill
+  \caption
+      {
+Monitoring using Raspberry Pi Camera
+      }
+ \label{fig:rpimonitoring}
+\end{figure}
+
+카메라 모듈로 촬영되는 영상은 Web Streaming을 통해 그림 \ref{fig:javapage}과 같이 웹페이지로 볼 수 있다. 
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.59\textwidth]{./images/javapage.eps}
+  \caption{Javascript }
+  \label{fig:javapage}   
+\end{figure}
+
+\subsection{Archiver Appliance}
+
+
+
+
+
+
+
+
+\section{OPI 구현}
+EPICS의 UI (User Interface) 프로그램인 CSS (Control System Studio)를 사용하여 UI를 구성한다. CSS는 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 \clearpage
