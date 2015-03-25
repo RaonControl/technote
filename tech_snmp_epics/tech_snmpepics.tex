@@ -9,10 +9,11 @@
 
 \usepackage{control}
 \usepackage[numbers]{natbib}
+\usepackage{tabulary}
 
 
 \begin{document}
-
+ 
 \newcommand{\technumber}{
   RAON Control-Document Series\\
   Revision : v0.1,   Release : Mar. 12. 2015}
@@ -44,7 +45,7 @@
 한국의 기초과학연구원(Institute for Basic Science) 산하 중이온가속기구축사업단(Rare Isotope Science Project)은 빔에너지 200Mev/u, 빔 출력 400kW급 희귀동위 원소 가속기 시설을 구축하고 있다. 중이온가속기구축사업단은 수소, 헬륨보다 무거운 지구 상의 모든 원소의 이온을 빛의 속도에 가깝게 가속하는 가속기를 구축하는 연구시설로, 중이온가속기는 전기장을 이용해 중이온(탄소, 우라늄 등)을 빠른 속도로 가속하며, 이렇게 가속된 입자들을 표적 물질에 충동시켜 자연 상태에 존재하지 않는 다양한 희귀동위원소 생성에 이용하거나, 원자핵 등의 관찰, 물질의 성질 연구에 이용한다\citep{raon}\citep{risp}. 
 
 \section{SNMP}
-SNMP (Simple Network Management Protocol)\footnote{* SNMP에 관한 자세한 설명은 SNMP 이해 및 응답시간 테스트 문서를 참조 바란다}는 IP 네트워크 상의 장치 및 장비들을 관리하고 모니터링하기 위한 인터넷 표준 프로토콜이다\citep{snmp}. SNMP는 인증과 암호화 등의 차이로 v1/2c/3의 세 가지 버전으로 나뉘며, 그림\ref{fig:relationship_m_a}과 같이 Manager/Agent 구조이다\citep{snmpm_a}. Manager는 Agent에게 원하는 장비의 정보를 요청하며, 장비의 설정을 변경한다. Agent는 Manager가 요청한 장비의 정보를 제공하고, 시스템 충돌이나 재부팅 등의 장비에 영향을 미치거나 발생한 Event를 비동기적으로 알리기 위해 Trap 메시지를 보낸다. OID (Object Identifiers시 객체로 구성된 MIB (Management Information Base)는 계층구조를 이루며, 장비의 정보를 내포하고 있다. 일반적인 TCP/IP 관리정보는 MIB-2(RFC 1213)에 포함돼있고, 특정 장비들의 정보는 장비제조업체에서 제공한다. 
+SNMP (Simple Network Management Protocol)\footnote{* SNMP에 관한 자세한 설명은 SNMP 이해 및 응답시간 테스트 문서를 참조 바란다}는 IP 네트워크 상의 장치 및 장비들을 관리하고 모니터링하기 위한 인터넷 표준 프로토콜이다\citep{snmp}. SNMP는 인증과 암호화 등의 차이로 v1/2c/3의 세 가지 버전으로 나뉘며, 그림\ref{fig:relationship_m_a}과 같이 Manager/Agent 구조이다\citep{snmpm_a}. Manager는 Agent에게 원하는 장비의 정보를 요청하며, 장비의 설정을 변경한다. Agent는 Manager가 요청한 장비의 정보를 제공하고, 시스템 충돌이나 재부팅 등의 장비에 영향을 미치거나 발생한 Event를 비동기적으로 알리기 위해 Trap 메시지를 보낸다. OID (Object Identifiers) 객체로 구성된 MIB (Management Information Base)는 계층구조를 이루며, 장비의 정보를 내포하고 있다. 일반적인 TCP/IP 관리정보는 MIB-2(RFC 1213)에 포함돼있고, 특정 장비들의 정보는 장비제조업체에서 제공한다. 
 
 \begin{figure}[h!]
   \centering
@@ -79,7 +80,7 @@ EPICS와 통합된 네트워크 기반의 제어 시스템 구축에 SNMP가 용
 EPICS IOC Support Module은 다른 종류의 인터페이스를 가진 하드웨어에 따라 새로운 타입의 레코드나 소프트웨어를 지원하는 Module인 Soft Support와 IOC 내에서 사용 가능한 하드웨어를 지원하는 Module인 Hardware Support로 분류된다. SNMP Soft Support Module은 이미 다수의 개발자에 의해 devSNMP와 이를 보완한 snmp-nscl 등이 존재한다. 본 문서에서는 NSCL/FRIB의 SNMP Device Support Module(snmp-nscl)을 사용하여 초기 버전의 모니터링 시스템을 구축한다\citep{modules}.
 
 \section{NSCL/FRIB SNMP Device Support Module}
-NSCL/FRIB SNMP Device Support Module (이하 snmp-nscl)은 EPICS와 SNMP를 통한 하드웨어 장비와의 통신을 위해 2004년 LANL\footnote{* Los Alamos National Laboratory}의 Richard Dubney에 의해 최초 개발된 후 DESY\footnote{* Deutsches Elektronen-Synchrotron}의 Albert Kagarmanov에 의해 개발된 devSNMP를 기반으로 NSCL\footnote{* National Superconducting Cyclotron Laboratory}/FRIB\footnote{* Facility for Rare Isotope Beams}의 John Priller에 의해 개발되었다. DESY의 devSNMP는 snmpv1/2c와 Read만을 지원했다. 이에 devSNMP 코드를 기반으로 snmpv1/2c/3과 Read/ Write를 지원하는 snmp-nscl이 개발되었고, 이는 현재 Wiener/ISEG/MPOD power supply crates에 초점을 두고 RC9 버전까지 개발되었으며, SNMPv2에 최적화 되어있다\citep{devsnmp}. 
+NSCL/FRIB SNMP Device Support Module (이하 snmp-nscl)은 EPICS에서 SNMP를 통한 하드웨어 장비와의 통신을 위해 2004년 LANL\footnote{* Los Alamos National Laboratory}의 Richard Dubney에 의해 최초 개발된 후 DESY\footnote{* Deutsches Elektronen-Synchrotron}의 Albert Kagarmanov에 의해 개발된 devSNMP를 기반으로 NSCL\footnote{* National Superconducting Cyclotron Laboratory}/FRIB\footnote{* Facility for Rare Isotope Beams}의 John Priller에 의해 개발되었다. DESY의 devSNMP는 snmpv1/2c와 Read만을 지원했다. 이에 devSNMP 코드를 기반으로 snmpv1/2c/3과 Read/ Write를 지원하는 snmp-nscl이 개발되었고, 이는 현재 Wiener/ISEG/MPOD power supply crates에 초점을 두고 RC9 버전까지 개발되었으며, SNMPv2에 최적화 되어있다\citep{devsnmp}. 
 
 \subsection{사용 방법}
 snmp-nscl을 사용하여 SNMP를 통해 하드웨어와 EPICS가 통신하기 위해서는 Net-SNMP library와 SNMP를 지원하는 장비, 그리고 장비의 MIB파일이 필요하다. MIB는 보통 리눅스 시스템에서 아래의 경로에 있다.
@@ -152,9 +153,9 @@ snmp-nscl은 오랜 개발로 IOC의 안정성이 검증되어있으며, 여러 
 \item Debian Linux 7 Wheezy
 \item NET-SNMP v5.4.3
 \item EPICS v3.14.12.4
-\item snmp-nscl (FRIB SNMP Device Support Module) RC8
+\item snmp-nscl (NSCL/FRIB SNMP Device Support Module) vRC8
 \item EPICS CSS (Control System Studio)
-\item Printers (XEROX ApeosPort-IV C3375, KYOCERA FS-9530DN)
+\item Printers(XEROX ApeosPort-IV C3375, KYOCERA FS-9530DN)
 \end{itemize}
 
 \subsection{Customize 이유 및 수정 사항}
@@ -162,7 +163,7 @@ snmp-nscl은 오랜 개발로 IOC의 안정성이 검증되어있으며, 여러 
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.89\textwidth]{./images/epicstree.eps}
+  \includegraphics[width=0.79\textwidth]{./images/epicstree.eps}
   \caption{표준화된 중이온가속기 제어 환경의 구조}
   \label{fig:epicstree}   
 \end{figure}
@@ -533,7 +534,15 @@ IOC가 실행되어 각각의 PV들이 CA 통신으로 프린터기의 정보를
 \clearpage
 
 \chapter{EPICS Integration}
-이미 개발되어있는 EPICS Support Module을 사용하여 EPICS와 SNMP를 통합할 수 있지만, 자체적으로 중이온가속기 제어 시스템에 최적화된 통합 시스템 구축을 위해 유동적이고, API 확장이 가능한 Net-SNMP와 EPICS를 통합한다. 통합 시스템은 모니터링 시에는 SNMPv2c, 제어 시에는 SNMPv3로 최적화한다.
+이미 개발되어있는 EPICS Support Module을 사용하여 EPICS와 SNMP를 통합할 수 있지만, 자체적으로 중이온가속기 제어 시스템에 최적화된 통합 시스템 구축을 위해 유동적이고, API 확장이 가능한 Net-SNMP와 EPICS를 통합한다. 통합 시스템은 모니터링 시에는 SNMPv2c, 제어 시에는 SNMPv3로 최적화한다. 통합에 사용한 소프트웨어아 하드웨어는 그림 \ref{fig:integ2}와 같다.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.89\textwidth]{./images/integ2.eps}
+  \caption{모니터링 시스템의 구성}
+  \label{fig:integ2}   
+\end{figure}
+
 
 \section{Legacy SNMP Code (Net-snmp tutorial)}
 Net-SNMP는 1992년 Carnegie Mellon University에서 시작된 프로젝트에서 개발된 공개코드 SNMP(v2.1.2.1)를 기반으로 개발된 패키지이다. 이는 CMU-SNMP, UCD-SNMP를 거쳐 2000년 Net-SNMP가 되어, IPv4, IPv6를 사용하여 SNMPv1/2c/3을 구현하고, Agent와 Manager가 정보를 주고받을 수 있도록 snmpget, set, walk 등의 명령어를 제공하는 패키지로, Tutorials를 제공해 패키지 사용에 도움을 준다\citep{netsnmp}\citep{tutorials}. 따라서 Net-SNMP에서 제공하는 Client/Mananger Coding Tutorials를 활용하여 SNMP와 Net-SNMP 명령어와 패키지 등에 대해 이해하고 EPICS와의 통합에 사용한다. 
@@ -568,11 +577,13 @@ mijoy0909@mjpark:~/rawcode$ ./asyncapp
 
 Simple application은 Agent에 요청을 보내고 응답이 올 때까지 블럭킹되어 대기상태로 있으므로 중이온가속기 제어 시스템에 사용되는 다양한 장비를 모니터링하기엔 적합하지 않다. 반면에 Simple Async Application은 Agent로부터 요청에 대한 응답이 있을 때 callback 형식으로 호출되어 결과를 출력한다. 따라서 EPICS와 SNMP의 통합에는 비동기식으로 데이터를 전송하는 Simple Async Application 예제를 사용한다.
 
+\clearpage
+
 \section{Library 구성}
 Simple Async Application(이하 AsyncApp)과 EPICS의 통합에서 Library는 소스코드, Record파일, dbd파일로 구성된다.
 
 \subsection{Record}
-AsyncApp과 EPICS IOC의 통신에 사용할 Record를 생성한다. EPICS의 Example IOC Application에서 xxxRecord.dbd를 사용하여 SNMP의 다양한 데이터 타입 중 analog와 string 타입의 snmpRecord와 snmpstrRecord의 dbd파일을 생성한다. 이때, 기본적인 필드 외에 그림 \ref{fig:recorddbd}와 같이 통신에 필요한 장비의 Host, Community string, OID와 snmp버전 정보 및 인증과 암호화 비밀번호에 대한 필드를 추가한다.
+AsyncApp과 EPICS IOC의 통신에 사용할 Record를 생성한다. EPICS의 Example IOC Application에서 xxxRecord.dbd를 사용하여 SNMP의 다양한 데이터 타입 중 analog와 string 타입의 snmpRecord와 snmpstrRecord의 dbd파일을 생성한다. 이때, 기본적인 필드 외에 그림 \ref{fig:recorddbd}과 같이 통신에 필요한 장비의 Host, Community string, OID와 snmp버전 정보 및 인증과 암호화 비밀번호에 대한 필드를 추가한다.
 
 \begin{figure}[h!]
   \centering
@@ -581,7 +592,7 @@ AsyncApp과 EPICS IOC의 통신에 사용할 Record를 생성한다. EPICS의 Ex
   \label{fig:recorddbd}   
 \end{figure}
 
-Record 생성 후 xxxRecord.c를 수정하여 그림 \ref{fig:recordc}과 같이 snmpRecord.c와 snmpstrRecord.c를 생성한다. 이때 string 타입의 레코드는 analog타입의 레코드와 달리 알람을 설정 할 필요가 없으므로 snmpstrRecord.c는 process함수의 checkAlarms부분을 주석처리 한다. 
+Record 생성 후 xxxRecord.c를 수정하여 그림 \ref{fig:recordc}와 같이 snmpRecord.c와 snmpstrRecord.c를 생성한다. 이때 string 타입의 레코드는 analog타입의 레코드와 달리 알람을 설정 할 필요가 없으므로 snmpstrRecord.c는 process함수의 checkAlarms부분을 주석처리 한다. 
 
 \begin{figure}[h!]
   \centering
@@ -589,6 +600,8 @@ Record 생성 후 xxxRecord.c를 수정하여 그림 \ref{fig:recordc}과 같이
   \caption{record.c 파일 (left: snmpReocrd.c right: snmpstrRecord.c)}
   \label{fig:recordc}   
 \end{figure}
+
+
 
 \subsection{소스파일}
 AsyncApp의 소스코드는 EPICS 환경에 맞춰 수정이 필요하다. 몇 가지 주요 수정 사항은 아래와 같고, 나머지 코드는 APPENDIX를 참조 바란다.
@@ -1213,7 +1226,7 @@ WIENER Crate webpage
 모든 값이 같게 바뀌므로 EPICS IOC와 장비가 연결되어 통신함을 알 수 있다. 추가적인 장비의 정보를 레코드로 생성하고 다른 장비에 대한 Db파일을 생성하는 과정을 거치면 하나의 IOC에서 여러 장비의 모니터링 및 제어를 할 수 있다. 위의 integration 과정을 거치면 EPICS와 SNMP 통합 모니터링 시스템이 완성된다.
 
 \section{EPICS Support Module과 차이점}
-중이온가속기 제어 환경에 맞춰 개발된 통합 모니터링 시스템은 기존의 EPICS IOC Support Module과 달리 library와 application이 분리돼 library의 재사용이 가능하며, 기존의 여러 종류의 Record 대신 snmpRecord, snmpstrRecord 만으로 다양한 SNMP의 데이터 타입을 지원한다. 따라서, INP/OUT 필드에 데이터 타입에 대한 마스크를 정의하지 않아도 된다. 또한, Support Module에서 지원하지 않던 SNMPv3가 지원되므로 사용자가 원하는 버전에 맞춰 필드를 사용해 Record를 생성 할 수 있다.
+중이온가속기 제어 환경에 맞춰 개발된 통합 모니터링 시스템은 기존의 EPICS IOC Support Module과 달리 library와 application이 분리돼 library의 재사용이 가능하며, 기존의 여러 종류의 Record 대신 snmpRecord, snmpstrRecord 만으로 다양한 SNMP의 데이터 타입을 지원한다. 따라서, INP/OUT 필드에 데이터 타입에 대한 마스크와 datalength를 정의하지 않아도 된다. 또한, Support Module에서 지원하지 않던 SNMPv3가 지원되고, Support Module에서 호스트 주소에 하나의 버전만 지정되던 것과 달리 레코드에 사용자가 원하는 버전에 맞춰 필드를 사용하여 장비에 대해 여러 버전의 snmp를 사용해 Record를 생성 할 수 있다.
 
 \section{안정성 테스트}
 완성된 통합 모니터링 시스템의 안정성을 테스트하기 위해 PV의 값을 주기적으로 변경하고, 변경된 PV데이터는 EPICS Extension 툴인 Archiver Appliance를 사용해 저장했다.
@@ -1314,7 +1327,7 @@ New : WIENER:CRATE3_FanNominalSpeed_W 2500
 \end{lstlisting}
 
 \subsection{Raspberry Pi를 활용한 모니터링}
-스크립트가 실행될 때 변경되는 값이 실제 Crate의 FanSpeed에 영향을 미치는지 확인하기 위해 Raspberry Pi의 카메라 모듈을 활용하여 그림 \ref{fig:rpimonitoring}와 같이 Crate의 패널을 영상으로 모니터링한다.
+스크립트가 실행될 때 변경되는 값이 실제 Crate의 FanSpeed에 영향을 미치는지 확인하기 위해 Raspberry Pi의 카메라 모듈을 활용하여 그림 \ref{fig:rpimonitoring}과 같이 Crate의 패널을 영상으로 모니터링한다.
 
 \begin{figure}[!h]
   \centering
@@ -1351,12 +1364,12 @@ EPICS의 extension툴인 Archiver Appliance 로 주기적으로 변하는 PV 데
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.99\textwidth]{./images/aaviewer_2.eps}
+  \includegraphics[width=0.99\textwidth]{./images/aaviewer_3.eps}
   \caption{Archiver Appliance Viewer}
   \label{fig:aaviewer}   
 \end{figure}
 
-Archiver Appliance의 모니터링 구성은 그림\ref{fig:allscreen} 과 같다. 
+Archiver Appliance의 모니터링 구성은 그림\ref{fig:allscreen}와 같다. 
 
 \begin{figure}[h!]
   \centering
@@ -1378,7 +1391,80 @@ Archiver Appliance의 모니터링 구성은 그림\ref{fig:allscreen} 과 같�
 
 
 \section{OPI 구현}
-OPI 구현에는 EPICS의 UI (User Interface) 프로그램인 CSS (Control System Studio)를 사용한다. CSS는 가속기 사이트와 같이 큰 규모의 제어 시스템의 동작 및 모니터링에 사용하는 Eclipse 기반의 툴이다\citep{css}. EPICS IOC의 PV 데이터를 사용자가 원하는 환경에 맞춰 OPI를 구성하여 UI를 구현한다. 그림 \ref{fig:cssopi}는 APC사의 PDU와 WIENER사의 Crate의 PV로 만든 UI다. PDU는 각 상태와 Oultet에 대한 모니터링 및 Outlet 제어를 할 수 있고, Crate 역시 상태 모니터링뿐만 아니라 전원, Fanspeed 등의 상태를 제어할 수 있다. 
+OPI 구현에는 EPICS의 UI (User Interface) 프로그램인 CSS (Control System Studio)를 사용한다. CSS는 가속기 사이트와 같이 큰 규모의 제어 시스템의 동작 및 모니터링에 사용하는 Eclipse 기반의 툴이다\citep{css}. EPICS IOC의 PV 데이터를 사용자가 원하는 환경에 맞춰 UI를 구현한다. 그림 \ref{fig:cssopi}은 APC사의 PDU와 WIENER사의 Crate의 PV로 만든 UI다. Crate와 PDU의 PV리스트는 아래 표\ref{table:wienerpvlist}, \ref{table:apcpvlist}며, PV를 통해 장비 상태 모니터링 및 제어를 할 수 있다\cite{pvlist}.
+
+\begin{table}[h!]
+\begin{center}
+\small 
+\begin{tabulary}{\textwidth}{L|C|C|L}
+PV Name & Type & Access & Comments\\ \hline
+ \$\{W\}:\$\{C\}\_MainPower\_R/W & Integer& R/W & Power ON/OFF \\ \hline
+ \$\{W\}:\$\{C\}\_NomVoltage0,1,3,5\_R/W & float & R/W & Channel voltage \\ \hline
+ \$\{W\}:\$\{C\}\_LimCurrent0,1,3,5\_R/W & float & R/W & Channel current limit \\ \hline
+ \$\{W\}:\$\{C\}\_Voltage0,1,3,5 & float & R & Measured Channel Voltage \\ \hline
+ \$\{W\}:\$\{C\}\_Current0,1,3,5 & float & R & Measured Channel current \\ \hline
+ \$\{W\}:\$\{C\}\_SensorTemp1...8 & Integer & R & Measured temperature of sensors\\ \hline
+ \$\{W\}:\$\{C\}\_FanairTemp & Integer & R & Air inlet temperature \\ \hline
+ \$\{W\}:\$\{C\}\_sensorWarning&&&\\ Threshold\_temp1...8\_R/W & Integer & R/W & Warning temperature limit\\ \hline
+ \$\{W\}:\$\{C\}\_sensorFailure&&&\\Threshold\_temp1...8\_R/W & Integer & R/W & Over temperature limit\\ \hline
+ \$\{W\}:\$\{C\}\_FanNominalSpeed\_R/W & Integer & R/W & Fan speed \\ \hline
+ \$\{W\}:\$\{C\}\_Fanspeed1...3 & Integer & R & Measured speed of fan \\ \hline
+\end{tabulary}
+\caption{WIENER Crate PV List (R:Read/W:Write)}{* \$\{W\}:\$\{C\}\_는 WIENER:CRATE3}
+  \label{table:wienerpvlist} 
+\end{center}
+\end{table} 
+
+\begin{table}[h!]
+\begin{center}
+\small 
+\begin{tabulary}{\textwidth}{L|C|C|L}
+PV Name& Type & Access & Comments\\ \hline
+\$\{A\}:\$\{P\}\_PowerSupply1Status & Integer & R & PowerSupply1 status\\ \hline
+\$\{A\}:\$\{P\}\_PowerSupply2Status & Integer & R & PowerSupply2 status\\ \hline
+\$\{A\}:\$\{P\}\_PowerSupplyAlarm & Integer & R & PowerSupply Alarm\\ \hline
+\$\{A\}:\$\{P\}\_OutletDevCommand\_R/W & Integer & R/W & Setting all outlets\\ \hline
+\$\{A\}:\$\{P\}\_Outlet1...8\_R/W & Integer & R/W & Outlet state\\ \hline
+\$\{A\}:\$\{P\}\_OutletOntime1...8\_R/W & Integer & R/W & Powering on time \\ \hline
+\$\{A\}:\$\{P\}\_OutletOfftime1...8\_R/W & Integer & R/W & Powering off time \\ \hline
+\$\{A\}:\$\{P\}\_RebootTime\_Outlet1...8\_R/W & Integer & R/W & Reboot Duration\\ \hline
+\$\{A\}:\$\{P\}\_Rating & integer & R & Rating of the device \\ \hline
+\$\{A\}:\$\{P\}\_LineVoltage\_R/W & Integer & R/W & Line to Line Voltage\\ \hline
+\$\{A\}:\$\{P\}\_PowerWatts & Integer & R & Power in Watts \\ \hline
+\$\{A\}:\$\{P\}\_PowerFactor\_R/W & Integer & R/W & Power Factor \\ \hline
+\$\{A\}:\$\{P\}\_LowLoadThreshold\_R/W & Integer & R/W & LowLoadThreshold \\ \hline
+\$\{A\}:\$\{P\}\_NearOverloadThreshold\_R/W & Integer & R/W & NearOverloadThreshold\\ \hline
+\$\{A\}:\$\{P\}\_OverloadThreshold\_R/W & Integer & R/W & OverloadThreshold\\ \hline
+\$\{A\}:\$\{P\}\_PowerLoad & Gauge & R & phase/bank load \\ \hline
+\$\{A\}:\$\{P\}\_LoadStatus & Integer & R & phase/bank load state \\ \hline
+\$\{A\}:\$\{P\}\_currentPhaseAlarm & Integer & R & Current Phase Alarm\\ \hline
+\end{tabulary}
+\caption{APC PDU PV List (R:Read/W:Write)  }{* \$\{A\}:\$\{P\}\_는 APC:PDU2}
+  \label{table:apcpvlist} 
+\end{center}
+\end{table} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
  \begin{figure}[!h]
    \centering
