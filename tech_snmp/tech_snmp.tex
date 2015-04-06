@@ -125,7 +125,7 @@ SNMP를 사용에 앞서 아래의 패키지를 설치해야 한다. 본 문서�
 \section{SNMP 명령어와 사용}
 
 \subsection{2.2.1 SNMPv3 설정}
-SNMPv1/2c와 달리 SNMPv3는 사용에 따른 설정이 필요하다. 이는 앞서 설명 했듯 SNMPv3가 Username 및 보안레벨에 따른 암호화 알고리즘을 이용한 인증과 암호화를 하기 때문이다. 각 장비의 v3 관련 정보는 장비제조업체에서 제공하는 프로그램, 웹 페이지 및 시리얼 통신을 통해 설정 할 수 있다. localhost의 SNMPv3 설정은 다음과 같이 net-snmp의 snmpd로 가능하다. 이 때, 패스워드는 적어도 8자 이상이여야 한다.
+SNMPv1/2c와 달리 SNMPv3는 사용에 따른 설정이 필요하다. 이는 앞서 설명했듯 SNMPv3가 Username 및 보안레벨에 따른 암호화 알고리즘을 이용한 인증과 암호화를 하기 때문이다. 각 장비의 v3 관련 정보는 장비제조업체에서 제공하는 프로그램, 웹 페이지 및 시리얼 통신을 통해 설정할 수 있다. localhost의 SNMPv3 설정은 다음과 같이 net-snmp의 snmpd로 가능하다. 이때, 패스워드는 적어도 8자 이상이어야 한다.
 
 \begin{lstlisting}[style=termstyle]
 mijoy0909@mjpark:~$ su                                     
@@ -147,7 +147,7 @@ root@mjpark:~# service snmpd start
 Starting network management services: snmpd.
 \end{lstlisting}
 
-snmpd를 설정은 /usr/share/snmp/snmpd.conf에서 아래와 같이 확인 가능하다. \footnote{* http://www.net-snmp.org/docs/README.snmpv3.html 참조 바람}
+snmpd의 설정은 /usr/share/snmp/snmpd.conf에서 아래와 같이 확인 가능하다. \footnote{* http://www.net-snmp.org/docs/README.snmpv3.html 참조 바람}
 
 \begin{lstlisting}[style=termstyle]
 rwuser mijoy
@@ -173,7 +173,7 @@ SNMP를 이용해 장비의 정보를 요청하기 위해서는 SNMP명령어\fo
 snmp(walk, get) -v (v1/2c) -c (Community String) (HostAddress) (OID) 
 \end{lstlisting}
 
-v1/2c의 Community string은 대부분 장비제조업체에서 public/privacy/admin으로 지정하지만, 사용자가 임의로 변경 가능하다. public은 read-only 권한을 privacy, admin은 read-write의 권한을 가지고 있다. 따라서 public을 이용하여 장비의 정보 값을 변경할 수 없다. v1/2c는 Community string을 사용한 사용자 인증 외에는 특별한 보안이 없어 보안에 취약하다는 것을 알 수 있다. 
+v1/2c의 Community string은 대부분 장비제조업체에서 public/privacy/admin으로 지정하지만, 사용자가 임의로 변경 할 수 있다. public은 read-only 권한을 privacy, admin은 read-write의 권한을 가지고 있다. 따라서 public을 이용하여 장비의 정보 값을 변경할 수 없다. v1/2c는 Community string을 사용한 사용자 인증 외에는 특별한 보안이 없어 보안에 취약하다는 것을 알 수 있다. 
 \begin{lstlisting}[style=termstyle]
 mijoy0909@mjpark:~$ snmpwalk -v 1 -c public localhost
 RFC1213-MIB::sysDescr.0 = STRING: "Linux mjpark 3.2.0-4-amd64 #1 SMP Debian 3.2.63-2+deb7u2 x86_64"
@@ -268,7 +268,7 @@ mijoy0909@mjpark:~$ snmpset -v (v1/2c) -c (Community String) (HostAddress) (OID)
 mijoy0909@mjpark:~$ snmpset -v 3 -u (Username) -l {Security Level(noAuthNoPriv/authNoPriv/authPrive)} -a {Authentication Protocol(MD5/SHA)} -A (PASSWORD) -x {Privacy Protocol(DES/AES)} -X (PASSWORD) (HostAddress) (OID) (datatypes) (value)
 \end{lstlisting}
 
-다음은 APC사의 Power Distribution Unit의 정보를 v3를 이용하여 Outlet8번의 전원을 설정한 결과이다. snmpset도 snmpget과 마찬가지로 선택적으로 값을 쓸 수 있다.
+다음은 APC사의 Power Distribution Unit의 Outlet8번의 전원정보를 v3를 이용하여 설정한 결과이다. 
 
 \begin{lstlisting}[style=termstyle]
 snmpset -v 3 -u mijoy -l authPriv -a MD5 -A [PASSWORD] -x DES -X [PASSWORD] 10.1.5.142 sPDUOutletCtl.8 i 2
@@ -280,7 +280,7 @@ PowerNet-MIB::sPDUOutletCtl.7 = INTEGER: outletOn(1)
 PowerNet-MIB::sPDUOutletCtl.8 = INTEGER: outletOn(1)
 \end{lstlisting}
 
-추가적으로 SNMPv1/2c와 달리 v3의 명령어가 긴 문제를 해결하기 위해서 그림 \ref{fig:snmp_conf}와 같이 snmp.conf파일에 미리 v3에 대한 보안레벨과 암호화 알고리즘을 설정하고 패스워드정보를 저장해둔다면 아래와 같이 간단하게 SNMPv3를 사용할 수 있다.\footnote{* 여러가지 장비의 정보를 설정한 후 장비의 정보를 요청한 결과 첫 번째로 저장된 설정에서만 간편하게 SNMPv3 사용이 가능하였다. 이는 추가적인 확인이 필요한데, 만약 첫 번째로 저장된 설정에서만 가능하다면 v3를 사용하고자 하는 장비의 보안레벨, 암호화 프로토콜, 그리고 패스워드를 통일하는 작업이 필요 할 것 같다.}
+추가로 SNMPv1/2c와 달리 긴 v3의 명령어를 간단하게 사용하기 위해서 그림 \ref{fig:snmp_conf}와 같이 snmp.conf파일에 미리 v3에 대한 보안레벨과 암호화 알고리즘을 설정하고 패스워드정보를 저장해둔다면 아래와 같이 간단하게 SNMPv3를 사용할 수 있다.\footnote{* 여러가지 장비의 정보를 설정한 후 장비의 정보를 요청한 결과 첫 번째로 저장된 설정에서만 간편하게 SNMPv3 사용이 가능하였다. 이는 추가적인 확인이 필요한데, 만약 첫 번째로 저장된 설정에서만 가능하다면 v3를 사용하고자 하는 장비의 보안레벨, 암호화 프로토콜, 그리고 패스워드를 통일하는 작업이 필요 할 것 같다.}
 
 \begin{lstlisting}[style=termstyle]
 mijoy0909@mjpark:~$ snmpget 10.1.5.142 sPDUIdentModelNumber
@@ -403,7 +403,7 @@ mijoy0909@mjpark:~/users/mijoy0909$ ./elma_test1.sh
    1     "+3.3V"          3.290 V          OK
    2       "+5V"          4.980 V          OK
    3      "+12V"         11.960 V          OK
-   4      "-12V"    2147483.647 V          OK
+   4      "-12V"         12.090 V          OK
 ==================================================
 
 - Temp
@@ -469,7 +469,7 @@ INTEGER: 3600 RPM
 
 \clearpage
 \subsubsection{2.3.3.3 Power Distribution Unit}
-VMEbus Crate와 마찬가지로 Power supply 또한 모니터링과 제어가 가능해야 한다. 모든 버전의 SNMP를 지원하는 APC사의 Power Distribution Unit (PDU) 7921(그림 \ref{fig:apc_pdu})을 이용하여, SNMPv3에서 모니터링과 제어에 필요한 여러 설정을 테스트 해 보았다. 아래는 SNMPv3를 통해 APC PDU의 장비의 상태, 사용전력, 부하된 전류량 등을 모니터링하고 장비에서 지원하는 다양한 옵션으로 각각의 Power Outlet을 제어한 결과이다.
+VMEbus Crate와 마찬가지로 Power supply 또한 모니터링과 제어가 가능해야 한다. 모든 버전의 SNMP를 지원하는 APC사의 Power Distribution Unit (PDU) 7921(그림 \ref{fig:apc_pdu})을 이용하여, SNMPv3에서 모니터링과 제어에 필요한 여러 설정을 테스트해 보았다. 아래는 SNMPv3를 통해 APC PDU의 장비의 상태, 사용전력, 부하된 전류량 등을 모니터링하고 장비에서 지원하는 다양한 옵션으로 각각의 Power Outlet을 제어한 결과이다.
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.6\textwidth]{./images/apc_pdu.eps}
@@ -549,7 +549,7 @@ outletOff
 \clearpage
 
 \chapter{SNMP 버전 별 응답시간 실험}
-가속기 제어 시스템에서 시설의 복잡성과 장비의 다양성, 그리고 안전한 장비 접근성을 만족하며, 동시에 장비의 안정된 응답시간을 만족시키는 설치 위치를 선정하는 것은 어렵기 때문에 장비의 응답시간을 고려하여 제어 네트워크 토폴로지 설계 및 네트워크 보안에 따른 SNMP의 응답시간 최적화 설계가 필요하다. 따라서 실험 당시 SNMP의 모든 버전(v1/2c/3)을 지원하는 장비인 APC PDU 7921을 사용하여 모니터링 및 제어에 걸리는 SNMP 버전 별 응답시간에 대한 실험을 진행했다.
+가속기 제어 시스템에서 시설의 복잡성과 장비의 다양성, 그리고 안전한 장비 접근성을 만족하며, 동시에 장비의 안정된 응답시간을 만족하는 설치 위치를 선정하는 것은 어려우므로 장비의 응답시간을 고려하여 제어 네트워크 토폴로지 설계 및 네트워크 보안에 따른 SNMP의 응답시간 최적화 설계가 필요하다. 따라서 실험 당시 SNMP의 모든 버전(v1/2c/3)을 지원하는 장비인 APC PDU 7921을 사용하여 모니터링 및 제어에 걸리는 SNMP 버전 별 응답시간에 대한 실험을 진행했다.
 
 \begin{table}[h!]
 \begin{center}
@@ -562,10 +562,10 @@ sample deviation & 0.867 & 0.840 & 0.814 & 0.864 \\ \hline
   \label{table:test}  
 \end{center}
 \end{table}에
-표 \ref{table:test}은 암호화 및 복호화에 걸리는 시간, 케이블 딜레이, 하드웨어 자체의 속도 및 사용된 Linux OS에 대한 응답시간 차이가 동일하다는 가정 하에 장비의 정보를 요청 시 SNMP 버전 별 응답시간을 측정한 결과이다. 이 결과로 SNMPv1/2c는 서로 비교할 수 없는 오차 범위에 있으며, v3는 모니터링과 제어에서 타 버전에 비해 1.5배 정도의 시간이 더 소모됨을 확인 할 수 있다.
+표 \ref{table:test}은 암호화 및 복호화에 걸리는 시간, 케이블 딜레이, 하드웨어 자체의 속도 및 사용된 Linux OS에 대한 응답시간 차이가 같다는 가정에 따라 장비의 정보를 요청 시 SNMP 버전 별 응답시간을 측정한 결과이다. 이 결과로 SNMPv1/2c는 서로 비교할 수 없는 오차 범위에 있으며, v3는 모니터링과 제어에서 타 버전보다 1.5배 정도의 시간이 더 소모됨을 확인할 수 있다.
 
 \section{실험 목적}
-앞서 언급했듯이 장비의 응답시간은 제어 네트워크에서 중요하다. 가속기 제어 네트워크 토폴로지 설계에 필요한 물리적인 구성요소는 Layer 2 스위치와 UTP 케이블의 길이이므로 이러한 요소들이 토폴로지 내에서 가능하고, 이상적인 장비의 응답시간과 구성요소들 간의 상관관계를 측정하는 것이 필요하다. 이렇게 측정된 결과들은 네트워크 토폴로지 설계 및 장비의 최적화된 설치위치 선정에 도움이 될 것이다.
+앞서 언급했듯이 장비의 응답시간은 제어 네트워크에서 중요하다. 가속기 제어 네트워크 토폴로지 설계에 필요한 물리적인 구성요소는 Layer 2 스위치와 UTP 케이블의 길이이므로 이러한 요소들이 토폴로지 내에서 가능하고, 이상적인 장비의 응답시간과 구성요소 간의 상관관계를 측정하는 것이 필요하다. 이렇게 측정된 결과들은 네트워크 토폴로지 설계 및 장비의 최적화된 설치위치 선정에 도움이 될 것이다.
 
 \section{실험 방법}
 본 실험에서는 프로그램이 수행되는 시간을 측정하는 리눅스의 time 명령어를 이용하여 SNMP명령어를 1000번 수행한 시간을 응답시간으로 측정하였다. time 명령어는 아래와 같이 세 가지 형태의 시간 측정 결과를 나타낸다\citep{time_command}. 
@@ -589,7 +589,7 @@ sample deviation & 0.867 & 0.840 & 0.814 & 0.864 \\ \hline
 \end{itemize}
 
 \subsection{3.2.2 Bash Script 구성}
-본 문서의 SNMPv1/2c/3의 응답시간 측정에는 GNU Bash를 이용하여 만든 Script를 사용한다. 이 Script는 리눅스 sleep 명령어를 사용해 Script를 1초 멈추는 조건과 그렇지 않는 조건으로 snmpget, set 명령어로 장비의 정보를 1,000번 요청하고, v3의 경우 설정을 변경한다. 이 과정에 소요된 응답시간을 time 명령어로 측정하고, CLI로 total count, mean, sample deviation, standard deviation의 측정 결과를 보인다.
+본 문서의 SNMPv1/2c/3의 응답시간 측정에는 GNU Bash를 이용하여 만든 Script를 사용한다. 이 Script는 리눅스 sleep 명령어를 사용해 Script를 1초 멈추는 조건과 그렇지 않은 조건으로 snmpget, set 명령어로 장비의 정보를 1,000번 요청하고, v3의 경우 추가로 설정을 변경한다. 이 과정에 든 응답시간을 time 명령어로 측정하고, CLI로 total count, mean, sample deviation, standard deviation의 측정 결과를 보인다.
 
 \begin{lstlisting}[style=termstyle, caption=GNU Bash script를 통한 CLI]
 mijoy0909@mjpark:~/speedtest$ ./speedtest.sh 
@@ -669,7 +669,7 @@ Sample Deviation(user+sys) : 0.00640495
 \end{lstlisting}
 
 \subsection{3.2.3 실험 배치도 및 방법}
-그림 \ref{fig:switch}은 스위치 5개를 연결 했을 때의 실험 배치도이다. 예를 들어 길이가 1m인 케이블을 이용한 응답시간 측정 시에 컴퓨터, PDU, 스위치를 1m의 네트워크 케이블로 연결한 후 Script를 실행하여 응답시간을 측정한다. 점차 스위치의 개수를 증가시키면서 테스트를 진행한다. 이 때, 컴퓨터는 첫 번째 스위치 계속해 연결되어있고, 스위치의 개수를 5개까지 추가하면서 마지막 스위치에 PDU를 연결한다. 다른 길이의 케이블도 각각 위의 과정을 수행한다. 
+그림 \ref{fig:switch}은 스위치 5개를 연결했을 때의 실험 배치도이다. 예를 들어 길이가 1m인 케이블을 이용한 응답시간 측정 시에 컴퓨터, PDU, 스위치를 1m의 네트워크 케이블로 연결한 후 Script를 실행하여 응답시간을 측정한다. 점차 스위치의 개수를 증가시키면서 테스트를 진행한다. 이때 컴퓨터는 첫 번째 스위치 계속해 연결되어있고, 스위치의 개수를 5개까지 추가하면서 마지막 스위치에 PDU를 연결한다. 다른 길이의 케이블도 각각 위의 과정을 수행한다. 
 
 \begin{figure}[!htb]
   \centering
@@ -678,7 +678,7 @@ Sample Deviation(user+sys) : 0.00640495
   \label{fig:switch}   
 \end{figure}
 
-이렇게 측정된 응답시간의 mean값은 ASCII 파일로 저장이 되고, 이 ASCII 파일은 그림 \ref{fig:time_table}와 같이 데이터 테이블로 재구성된다. 이렇게 만들어진 데이터 테이블을 이용해 통계 계산과 그래픽을 위한 프로그래밍 언어이자 소프트웨어 환경인 R\citep{r}을 통해 통계적 예측과 분석을 수행한다. 
+이렇게 측정된 응답시간의 mean값은 ASCII 파일로 저장되고, 이 ASCII 파일은 그림 \ref{fig:time_table}와 같이 데이터 테이블로 재구성된다. 이렇게 만들어진 데이터 테이블을 이용해 통계 계산과 그래픽을 위한 프로그래밍 언어이자 소프트웨어 환경인 R\citep{r}을 통해 통계적 예측과 분석을 수행한다. 
 
 \begin{figure}[!htb]
   \centering
@@ -690,7 +690,7 @@ Sample Deviation(user+sys) : 0.00640495
 \clearpage
 \section{실험 결과}
 \subsection{3.3.1 케이블 길이와 응답시간의 관계}
-본 실험에서는 통계적 분석에 앞서 케이블 길이가 길어질수록 응답시간이 클 것이라는 가설을 세웠고, 두 변수 간의 관련성이 연구할 만한 자료인지 판단하기 위해 산점도와 linear fitting을 통한 linear그래프를 그려 변수들의 상관관계를 확인하였다. 그림 \ref{fig:linear}은 스위치의 개수와 SNMP 버전 별로 케이블 길이와 응답시간의 관계를 보여준다. 대부분의 그래프에서 케이블의 길이가 길어질수록 응답시간이 것을 알 수 있다.
+본 실험에서는 통계적 분석에 앞서 케이블 길이가 길어질수록 응답시간이 클 것이라는 가설을 세웠고, 두 변수 간의 관련성이 연구할 만한 자료인지 판단하기 위해 산점도와 linear fitting을 통한 linear그래프를 그려 변수들의 상관관계를 확인하였다. 그림 \ref{fig:linear}은 스위치의 개수와 SNMP 버전 별로 케이블 길이와 응답시간의 관계를 보여준다. 대부분 그래프에서 케이블의 길이가 길어질수록 응답시간이 긴 것을 알 수 있다.
 
 \begin{figure}[!htb]
   \centering
@@ -702,7 +702,7 @@ Sample Deviation(user+sys) : 0.00640495
 \clearpage
 
 \subsection{3.3.2 R을 통한 데이터 분석 및 예측}
-본 실험은 데이터 분석에 하나 또는 그 이상의 독립변수(x)의 종속변수(y)에 대한 영향의 추정을 할 수 있는 통계기법인 회귀분석을 사용하였다\citep{analysis}. 회귀분석은 최소 하나 이상의 독립변수의 값에 근거하여 종속변수의 값을 예측하거나 독립변수가 종속변수에 미치는 영향력의 크기를 설명하는데 유용하다. 회귀분석에서 독립변수는 다른 변수에 영향을 미치는 변수이고, 종속변수는 독립변수에 의해 영향을 받는 변수이다. 따라서 독립변수는 케이블 길이이고, 종속변수는 응답시간이다. 종속변수가 독립변수에 어떻게 관련되어 있는가를 나타내는 방정식은 회귀모델이며, 실험의 회귀모델은 식\ref{eq:eps}과 같다. 
+본 실험은 데이터 분석에 하나 또는 그 이상의 독립변수(x)의 종속변수(y)에 대한 영향의 추정을 할 수 있는 통계기법인 회귀분석을 사용하였다\citep{analysis}. 회귀분석은 최소 하나 이상의 독립변수의 값에 근거하여 종속변수의 값을 예측하거나 독립변수가 종속변수에 미치는 영향력의 크기를 설명하는 데 유용하다. 회귀분석에서 독립변수는 다른 변수에 영향을 미치는 변수이고, 종속변수는 독립변수에 의해 영향을 받는 변수이다. 따라서 독립변수는 케이블 길이이고, 종속변수는 응답시간이다. 종속변수가 독립변수에 어떻게 관련되어 있는가를 나타내는 방정식은 회귀모델이며, 실험의 회귀모델은 식\ref{eq:eps}과 같다. 
 \begin{equation} \label{eq:eps}
   y=\alpha + \beta x 
 \end{equation}
@@ -716,7 +716,7 @@ Sample Deviation(user+sys) : 0.00640495
   \label{fig:s3s1}   
 \end{figure}
 
-이 그래프에서 confidence limit(녹색점선)은 추가적인 실험 진행 시 1, 10, 20, 30, 40, 50, 100m의 케이블 길이에서 나올 수 있는 응답시간의 범위를 나타내고, prediction limit(청색점선)은 실험에 사용된 케이블 길이가 아닌 길이의 케이블을 사용하여 응답시간 측정 시에 나올 수 있는 응답시간의 범위이다. ●는 1, 10, 20, 30, 40, 50, 100m의 케이블 길이에서 측정한 결과 값이며, ▲는 1, 50, 100m 길이로 측정한 결과 값으로 linear fitting 피팅을 통해 10, 20, 30, 40m의 길이에서 응답시간을 예측한 값이다. 
+이 그래프에서 confidence limit(녹색 점선)은 추가적인 실험 진행 시 1, 10, 20, 30, 40, 50, 100m의 케이블 길이에서 나올 수 있는 응답시간의 범위를 나타내고, prediction limit(청색 점선)은 실험에 사용된 케이블 길이가 아닌 길이의 케이블을 사용하여 응답시간 측정 시에 나올 수 있는 응답시간의 범위이다. ●는 1, 10, 20, 30, 40, 50, 100m의 케이블 길이에서 측정한 결괏값이며, ▲는 1, 50, 100m 길이로 측정한 결괏값으로 linear fitting 피팅을 통해 10, 20, 30, 40m의 길이에서 응답시간을 예측한 값이다. 
 
 \begin{table}[!htb]
 \begin{center}
@@ -729,8 +729,9 @@ Sample Deviation(user+sys) : 0.00640495
   \label{table:predict_time}  
 \end{center}
 \end{table} 
-표 \ref{table:predict_time}은 그림 \ref{fig:s3s1}에서 v3w부분을 표식화한 것으로, 이를 참조하면 예측된 응답시간과 실제 측정한 응답시간이 오차범위 내에 있는 것을 확인 할 수 있다.
+표 \ref{table:predict_time}은 그림 \ref{fig:s3s1}에서 v3w부분을 표식 화한 것으로, 이를 참조하면 예측된 응답시간과 실제 측정한 응답시간이 오차범위 내에 있는 것을 확인할 수 있다.
  
+
  \subsection{3.3.3 회귀분석 결과와 가설 검증}
  실험 전 세운 가설의 타당성을 입증하기 위하여 회귀분석을 수행하였고 표 \ref{table:regression}는 그 결과이다.
  
@@ -748,7 +749,7 @@ $ Adjusted R^2 $ & 0.666 \\ \hline
   \label{table:regression}  
 \end{center}
 \end{table} 
-회귀분석에서 $  R^2  $은 종속변수의 총 변동에서 독립변수의 변동에 의해 설명되는 부분이 차지하는 비중을 의미한다. 스위치가 3개 연결 되었을 때, v3w의 경우 응답시간 변동의 약 72.2\%를 케이블 길이 변동에 의해 설명할 수 있다. 또한, p-value가 0.0155로 α인 0.05보다 작으므로 앞서 세운 가설이 통계적으로 유의하다고 할 수 있다. 하지만 대부분의 실험 결과에서 특정 케이블 길이에서 예측된 응답시간과 실제 측정된 응답시간은 오차범위 내에 속했지만, 가설은 통계적으로 유의하지 않았다. 이는 분석에 사용된 샘플링의 수의 부족, 사용된 케이블 길이 간 오차, 하드웨어 자체의 속도 등의 테스트 환경이 완벽하게 동일하지 않아 정밀한 실험이 불가능했다는 점을 이유로 꼽을 수 있다. 따라서 샘플링의 수를 증가시키고 실험 환경을 보완한 후, APC사의 PDU와 현재 SNMP 세 가지 버전을 지원하는 다른 장비에 대해서도 추가적인 응답시간 실험이 필요할 것으로 보인다. 
+회귀분석에서 $  R^2  $은 종속변수의 총 변동에서 독립변수의 변동으로 설명되는 부분이 차지하는 비중을 의미한다. 스위치가 3개 연결되었을 때, v3w의 경우 응답시간 변동의 약 72.2\%를 케이블 길이 변동으로 설명할 수 있다. 또한, p-value가 0.0155로 α인 0.05보다 작으므로 앞서 세운 가설이 통계적으로 유의하다고 할 수 있다. 하지만 대부분의 실험 결과에서 특정 케이블 길이에서 예측된 응답시간과 실제 측정된 응답시간은 오차범위 내에 속했지만, 가설은 통계적으로 유의하지 않았다. 이는 분석에 사용된 샘플링의 수의 부족, 사용된 케이블 길이 간 오차, 하드웨어 자체의 속도 등의 테스트 환경이 완벽하게 같지 않아 정밀한 실험이 불가능했다는 점을 이유로 꼽을 수 있다. 따라서 샘플링의 수를 증가시키고 실험 환경을 보완한 후, APC사의 PDU와 현재 SNMP 세 가지 버전을 지원하는 다른 장비에 대해서도 추가적인 응답시간 실험이 필요할 것으로 보인다. 
 
 \clearpage
 \appendix
