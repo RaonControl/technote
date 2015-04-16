@@ -865,6 +865,103 @@ epics>
 위에서 보면 aliveEx:alive 이라는 alive Ioc 의 PV 값을 정상적으로 나타난다.
 
 
+devIocStats 에 대한 IOC 가 제대로 구동하지 않아서, 일단 devIocStats의 IOC를 독립적으로
+구동하려고 아래처럼 몇몇 파일들을 수정하였다.
+
+먼저 ioctestStatsRTMES 의 st.cmd 파일의 pv 값과 db 의 이름을 맞춰주기 위해 
+기존에 배웠던 RaspberryPi 교육 시간에 배운데로 수정하였다.
+
+## Load all record instances (VxWorks)
+dbLoadRecords("db/iocAdminVxWorks.db","P=IOCTEST")
+## or load only those records for RTEMS IOCs
+dbLoadRecords("db/iocAdminRTEMS.db","P=IOCTEST")
+## or load only those records for Soft IOCs
+dbLoadRecords("db/iocAdminSoft.db","P=IOCTEST")
+## optionally load the SCAN monitoring records
+dbLoadRecords("db/iocAdminScanMon.db","P=IOCTEST")
+## optionally load RELEASE records
+dbLoadRecords("db/testIocAdminRelease.db","P=IOCTEST")
+
+위의 코드를 보면 "P=IOCTEST" 라고 수정했다. 원래는 "IOC=IOCTEST" 였다.
+
+그리고 db 디렉토리의 iocAdminVxWorks.db 파일을 열어서 PV 이름을 아래처럼 수정하였다.
+
+# Used by Channel Access Security to determine access to this IOC.
+record(mbbo, "$(P):ACCESS")  //이 부분은 원래 $(IOCNAME UNDEFINED):"ACCESS"였다.//
+{
+  field(DESC, "${P}: Acc Mode")
+  field(PINI, "YES")
+  field(ZRST, "Running")
+  field(ZRSV, "NO_ALARM")
+  field(ONST, "Maintenance")
+  field(ONSV, "MINOR")
+  field(TWST, "Test")
+  field(TWSV, "MINOR")
+  field(THST, "OFFLINE")
+  field(THSV, "MAJOR")
+  info(autosaveFields, "VAL")
+}
+record(stringin, "$(P):STARTTOD")
+{
+    field(DESC, "Time and date of startup")
+    field(DTYP, "Soft Timestamp")
+    field(PINI, "YES")
+    field(INP, "@%m/%d/%Y %H:%M:%S")
+}
+
+위의 코드는 긴 코드 중 일부분이다. 모든 부분을 $(P) 및 ${P}로 수정하였다. 
+
+파일을 메이크 하고 ioctestStatsRTEMS 의 st.cmd 파일을 실행하여 IOC 를 구동하여 보았다.
+
+hjson@ctrlhj:~/epics/R3.14.12.5/epicsLibs/synApps_5_8/support/devIocStats-3-1-13/iocBoot/ioctestStatsRTEMS$ ./st.cmd 
+#!../../bin/linux-x86_64/testIocAdmin
+# ioctestStatsRTEMS startup file
+#chdir("/boot/u/qb/saa/spear/iocStats/")
+#ld("bin/RTEMS-beatnik/testIocStats.obj")
+#
+# do OS-specific startup here
+#
+< envPaths
+Can't open envPaths: No such file or directory
+macLib: macro TOP is undefined (expanding string cd ${TOP})
+epicsEnvSet("ENGINEER","engineer")
+epicsEnvSet("LOCATION","location")
+## Register all support components
+dbLoadDatabase("dbd/testIocStats.dbd")
+filename="../dbLexRoutines.c" line number=240
+No such file or directory dbRead opening file dbd/testIocStats.dbd
+testIocStats_registerRecordDeviceDriver(pdbbase)
+st.cmd line 22: Command testIocStats_registerRecordDeviceDriver not found.
+## Load all record instances (VxWorks)
+dbLoadRecords("db/iocAdminVxWorks.db","P=IOCTEST")
+filename="../dbLexRoutines.c" line number=240
+No such file or directory dbRead opening file db/iocAdminVxWorks.db
+
+위와 같이 dbLexRoutines.c 의 240번 부근에서 문제가 있는 듯 하다. 그래서 dbLeXRoutines.c 를 열어보았다.
+
+아래는 dbLexRoutines.c 의 코드 중 240번 부근의 코드 내용이다.
+
+ if(pinputFile->filename) pinputFile->path = dbOpenFile(pdbbase,pinputFile->filename,&fp1);
+        if(!pinputFile->filename || !fp1) {
+            errPrintf(0,__FILE__, __LINE__,                       //여기가 라인 번호 240 번이다.
+                "dbRead opening file %s",pinputFile->filename);
+            free((void *)pinputFile->filename);
+            free((void *)pinputFile);
+            status = -1;
+            goto cleanup;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 hjson@ctrlhj:~/epics/R3.14.12.5/epicsLibs$ tree -L 3
 .
 `-- [hjson    4.0K]  synApps_5_8
