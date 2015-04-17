@@ -8,7 +8,7 @@ exSysMon      grackApps     rdbPG           snmp2       Tr1     Tr5
 exTimeStamp   keithley6514  README.siteApp  snmpTest    Tr2     Tr6
 exTr5         modbusR2-7    rtp             sorensenPS  Tr3
 
-위와 같이 siteApps 에는 기존에 만들어 놓은 IOC 를 돌릴 수 있는 IOC 관련 파일들이 있는 폴더들이 존재한다.
+위와 같이 siteApps 에는 기존에 만들어 놓은 IOC 를 돌릴 수 있는 Application 파일이 있는 폴더들이 존재한다.
 또한 기존에 IOC 를 돌리기 위한 Library 파일들은 아래의 경로에 저장되어 있다.
 
 hjson@ctrlhj:~/epics/R3.14.12.5/siteLibs$ ls
@@ -27,7 +27,9 @@ IOC integrate 작업을 실행할 것이므로 epicsLibs 에 있는 파일들을
 hjson@ctrlhj:~/epics/R3.14.12.5/siteApps/snmpTest$ ls
 bin  configure  db  dbd  iocBoot  Makefile  snmpTestApp
 
-위와 같은 파일들이 모두 존재해야 IOC 가 제대로 작동한다.
+위와 같은 폴더가(bin,db,dbd 디렉토리) 모두 존재해야 IOC 가 제대로 작동한다.
+위의 디렉토리를 생성하기 위해서는 technote_snmp_epics 의 makeBaseApp.pl 디렉토리를
+만들어서 make 하는 방법을 참조하자.
 
 hjson@ctrlhj:~/epics/R3.14.12.5/siteApps/snmpTest/snmpTestApp$ ls
 Db  Makefile  src
@@ -83,7 +85,9 @@ USR_DBDFLAGS += -I${EPICS_PATH}/epicsLibs/synApps_5_8/support/devIocStats-3-1-1$
 USR_DBDFLAGS += -I${EPICS_PATH}/epicsLibs/synApps_5_8/support/devIocStats-3-1-1$
 USR_INCLUDES += -I${EPICS_PATH}/epicsLibs/synApps_5_8/support/devIocStats-3-1-1$
 
-## 아래는 무엇을 위한 구문인지 잘 모르겠으나 기존 snmp 파일의 구문을 참조해서 추가시킴 ##
+## 아래는 Application 이 사용할 Library 가 있는 폴더이다 ##
+## Snmp 의 경우 siteLibs/lib/linux-x86_64 의 경로에 ( .so 및 .a) 파일이 존재한다.
+
 snmpMon_DIR += ${RAON_SITELIBS}/lib/$(T_A)
 timeStamp_DIR += $(RAON_SITELIBS)/lib/$(T_A)
 alive_DIR += ${EPICS_PATH}/epicsLibs/synApps_5_8/support/alive-1-0/lib/$(T_A)
@@ -184,7 +188,7 @@ dbLoadRecords("db/timestamp.vdb", "S=SNMPIOC")
 
 dbLoadRecords("db/alive.db", "P=aliveEx:,RHOST=x.x.x.x")
 
-## devIocStat db 들을 아래와 같이 추가하였다. 형식은 decIocStat 에 있는 st.cmd 파일을 참고함. ##
+## devIocStat db 들을 아래와 같이 추가하였다. 형식은 devIocStat 에 있는 st.cmd 파일을 참고함. ##
 
 ## Load all record instances (VxWorks)
 dbLoadRecords("db/iocAdminVxWorks.db","IOC=IOCTEST")
