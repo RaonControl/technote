@@ -357,13 +357,15 @@ iocInit
 #seq sncExample, "user=namshHost"
 
 \end{lstlisting}
-\section{Alternative way}
+st.cmd까지 수정을 완료한 후 chmod 명령어를 이용하여 st.cmd를 실행가능 파일로 만든 후 실행해 준다.
+\section{Alternative way changing src Makefile}
 \subsection{Changing configure RELEASE file}
 2.1절에서는 src의 Makefile에 dbd, header 그리고 LIB의 주소를 적어 주었다. 다른 방법으로는
 src의 Makefile에 주소를 추가하지 않고 configure의 RELEASE 파일에 주소를 적음으로 IOC가 똑같이
 동작하게 만들수 있다.
 \begin{itemize}
-\item Method 1	
+\item Method 1\\
+MakeFile
 
 \begin{lstlisting}[style=termstyle]
 # RELEASE - Location of external support modules
@@ -407,7 +409,8 @@ CMD_DBDFLAGS += -I${EPICS_SYNAPPS}/alive-1-0/aliveApp/src
 \end{lstlisting}
 여기서 주의할 것은 LIB 파일의 주소를 적을때는 Makefile에 주소와 똑같이 적으면 되지만 dbd 파일의 주소를 
 적을때는  USER DBDFLAGS 대신 위와같이 CMD DBDFLAGS로 바꿔주어야 한다.
-\item Method 2
+\item Method 2\\
+MakeFile
 \begin{lstlisting}[style=termstyle]
 # RELEASE - Location of external support modules
 #
@@ -516,7 +519,37 @@ include $(TOP)/configure/RULES
 #  ADD RULES AFTER THIS LINE
 \end{lstlisting}
 여기서 주의 할것은 dbd,lib 그리고 header 파일의 주소는 RELEASE 파일에 적어 주었기 때문에 dbd나 lib파일은 추가해주어도 주소는 추가하면 안된다는 것이다.
-src의 Makefile변경 이후 부분은 위의 나머지 부분과 같다.
+\section{Alternative way changing Db Makefile without copying Db}
+Db 디렉토리의 Makefile 변경에서 db파일을 복사하지 않고 db를 쓰는 간단한 방법도 있다.
+\begin{lstlisting}[style=termstyle]
+TOP=../..
+include $(TOP)/configure/CONFIG
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+#----------------------------------------------------
+#  Optimization of db files using dbst (DEFAULT: NO)
+#DB_OPT = YES
+
+#----------------------------------------------------
+# Create and install (or just install) into <top>/db
+# databases, templates, substitutions like this
+\end{lstlisting}
+Add the db file install
+\begin{lstlisting}[style=termstyle]
+DB_INSTALLS +=${EPICS_SYNAPPS}/alive-1-0/db/alive.db
+\end{lstlisting}
+\begin{lstlisting}[style=termstyle]
+#----------------------------------------------------
+# If <anyname>.db template is not named <anyname>*.template add
+# <anyname>_template = <templatename>
+
+include $(TOP)/configure/RULES
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+
+\end{lstlisting}
+위와 같이 db install에 관한 구문을 추가 시키면 db 복사 없이 IOC를 구동시킬수 있다.
 \clearpage
 \chapter{Integrated devIocStats in integrateTest IOC}
 Dev IOC를 integrate 시키기에 앞서 alive IOC를 integrate 시킨것 처럼 먼저 dev IOC를 integrate 시켜보고 이 뒷부분을 읽어보는것을 추천한다.
@@ -651,8 +684,9 @@ include $(TOP)/configure/RULES
 \end{lstlisting}
 \section{Copy db and changing Db Makefile of integrateTest}
 \subsection{Copy devIocStats db}
+devIocStats에는 많은 db가 있지만 필요한 db만 복사해서 쓰도록 한다.
 \begin{lstlisting}[style=termstyle]
-namsh@namsh:~/epics/R3.14.12.5/siteApps/snmpTest/snmpTestApp/Db$ ls
+namsh@namsh:~/epics/R3.14.12.5/siteApps/integrateTest/integrateTestApp/Db$ ls
 access.db           iocEnvVar.db        iocScanMon.db      O.Common
 alive.db            iocGeneralTime.db   iocScanMonSum.db   O.linux-x86_64     
 iocCluster.db       ioc.db              iocRTOS.db         Makefile           
@@ -757,7 +791,7 @@ iocInit
 #seq sncExample, "user=namshHost"
 
 \end{lstlisting}
-\section{Alternative way}
+\section{Alternative way changing src Makefile}
 \subsection{Changing configure RELEASE file}
 위에서는 src의 Makefile에 dbd, header 그리고 LIB의 주소를 적어 주었다. 다른 방법으로는 alive때와 같이
 src의 Makefile에 주소를 추가하지 않고 configure의 RELEASE 파일에 주소를 적음으로 IOC가 똑같이
@@ -920,6 +954,65 @@ include $(TOP)/configure/RULES
 \end{lstlisting}
 여기서 주의 할것은 dbd,lib 그리고 header 파일의 주소는 RELEASE 파일에 적어 주었기 때문에 dbd나 lib파일은 추가해주어도 주소는 추가하면 안된다는 것이다.
 src의 Makefile변경 이후 부분은 위의 나머지 부분과 같다.
+\section{Alternative way changing Db Makefile without copying Db}
+Db 디렉토리의 Makefile 변경에서 db파일을 복사하지 않고 db를 쓰는 간단한 방법도 있다.
+\begin{lstlisting}[style=termstyle]
+TOP=../..
+include $(TOP)/configure/CONFIG
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+#----------------------------------------------------
+#  Optimization of db files using dbst (DEFAULT: NO)
+#DB_OPT = YES
+
+#----------------------------------------------------
+# Create and install (or just install) into <top>/db
+# databases, templates, substitutions like this
+DB_INSTALLS +=${EPICS_SYNAPPS}/alive-1-0/db/alive.db
+\end{lstlisting}
+Add the db file install
+\begin{lstlisting}[style=termstyle]
+DB_INSTALLS +=${EPICS_SYNAPPS}/devIocStats-3-1-13/db/access.db
+DB_INSTALLS +=${EPICS_SYNAPPS}/devIocStats-3-1-13/db/iocAdminSoft.db
+DB_INSTALLS +=${EPICS_SYNAPPS}/devIocStats-3-1-13/db/iocEnvVar.db
+DB_INSTALLS +=${EPICS_SYNAPPS}/devIocStats-3-1-13/db/iocScanMon.db
+DB_INSTALLS +=${EPICS_SYNAPPS}/devIocStats-3-1-13/db/iocGeneralTime.db
+DB_INSTALLS +=${EPICS_SYNAPPS}/devIocStats-3-1-13/db/iocScanMonSum.db
+DB_INSTALLS +=${EPICS_SYNAPPS}/devIocStats-3-1-13/db/iocCluster.db
+DB_INSTALLS +=${EPICS_SYNAPPS}/devIocStats-3-1-13/db/iocAdminScanMon.db
+DB_INSTALLS +=${EPICS_SYNAPPS}/devIocStats-3-1-13/db/ioc.db
+DB_INSTALLS +=${EPICS_SYNAPPS}/devIocStats-3-1-13/db/iocRTOS.db
+
+
+\end{lstlisting}
+\begin{lstlisting}[style=termstyle]
+#----------------------------------------------------
+# If <anyname>.db template is not named <anyname>*.template add
+# <anyname>_template = <templatename>
+
+include $(TOP)/configure/RULES
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+
+\end{lstlisting}
+위와 같이 db install에 관한 구문을 추가 시키면 db 복사 없이 IOC를 구동시킬수 있다.
+\begin{itemize}
+	
+	\item 
+	\begin{lstlisting}[style=termstyle]
+namsh@namsh:~/epics/R3.14.12.5/siteApps/integrateTest/integrateTestApp/Db$ ls
+Makefile  O.Common  O.linux-x86_64
+\end{lstlisting}
+	\item	
+	\begin{lstlisting}[style=termstyle]
+namsh@namsh:~/epics/R3.14.12.5/siteApps/integrateTest/db$ ls
+access.db  iocAdminScanMon.db  iocCluster.db  iocEnvVar.db       iocRTOS.db     
+alive.db   iocAdminSoft.db     ioc.db         iocGeneralTime.db  iocScanMon.db
+iocScanMonSum.db
+\end{lstlisting}
+\end{itemize}
+위를 보면 App안의 Db 폴더에는 db파일이 없지만 상위 db 폴더에 필요 db들이 install된것을 볼수있다.
 \clearpage
 \chapter{Compile and operating EPICS}
 
