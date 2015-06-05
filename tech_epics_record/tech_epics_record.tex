@@ -53,6 +53,32 @@ rdbpostgreSQL record의 개발 목적은 아래와 같다.
 	\item 향 후 가속기 Alarm 시스템과 통신사의 SMS DB와 연계하여 해당 운전자 그룹에 자동 Alarm Message 전송
 \end{itemize}
 
+\chapter{rdbmySQL}
+SRF Test Facility에서 RMS(Radiation Monitoring System)는 radiation 관련 모니터링 데이터를 MySQL 데이터베이스에 저장한다. 이 저장된 radiation 정보를 통합 operation 관점에서 상시 모니터링 되어야 하므로 MySQL의 데이터베이스와 EPICS간의 인터페이스를 위한 record이다.
+
+rdbmySQL record의 개발 목적은 아래와 같다.
+\begin{itemize}
+	\item MySQL 데이터베이스와의 interface.
+	\item EPICS로 구성된 가속기 operation parameters 들을 자동으로 Database화 하여 관리
+\end{itemize}
+
+그림 \ref{fig:rms_epics_db}는 rdbmySQL record를 이용하여 RMS t\_values 테이블과 인터페이스하기 위하여 EPICS db를 구성하는 예를 보여준다.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=1\textwidth]{./images/rms_epics_db.eps}
+	\caption{RMS MySQL 인터페이스를 위한 EPICS DB설정}
+	\label{fig:rms_epics_db}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=1\textwidth]{./images/rms_epics_view_trigger.eps}
+	\caption{MySQL 트리거링을 이용한 RMS View Table}
+	\label{fig:rms_epics_view_trigger}
+\end{figure}
+
+\clearpage
 
 \chapter{ifstat}
 
