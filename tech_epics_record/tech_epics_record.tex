@@ -16,10 +16,10 @@
 
 \newcommand{\technumber}{
   RAON Control-Document Series\\
-  Revision : v1.0,   Release : 2014-12-24 fixed date}
+  Revision : v1.0,   Release : 2015-06-08 fixed date}
 \title{\textbf{EPICS IOC를 위한 EPICS Records 사용법 및 그 개발 방법}}
 
-\author{이상일\thanks{silee7103@ibs.re.kr},이정한\thanks{jhlee@ibs.re.kr}, 손창욱\thanks{cwson@ibs.re.kr},박미정\thanks{mijoy0909@ibs.re.kr} \\
+\author{이상일\thanks{silee7103@ibs.re.kr},이정한\thanks{jhlee@ibs.re.kr}, 손창욱\thanks{cwson@ibs.re.kr},박미정\thanks{mijoy0909@ibs.re.kr}, 장효재\thanks{lkcom@ibs.re.kr}, 손형주\thanks{hjson@ibs.re.kr}, 남승희\thanks{namsh@ibs.re.kr} \\
 
   Rare Isotope Science Project\\
   Institute for Basic Science, Daejeon, South Korea
@@ -62,18 +62,166 @@ rdbmySQL record의 개발 목적은 아래와 같다.
 	\item EPICS로 구성된 가속기 operation parameters 들을 자동으로 Database화 하여 관리
 \end{itemize}
 
-그림 \ref{fig:rms_epics_db}는 rdbmySQL record를 이용하여 RMS t\_values 테이블과 인터페이스하기 위하여 EPICS db를 구성하는 예를 보여준다.
+그림 \ref{fig:rms_epics_db}는 rdbmySQL record를 이용하여 RMS t\_values 테이블과 인터페이스하기 위하여 EPICS db를 구성하는 예를 보여준다. 현 문지동 SRF Test Facility에는 Radiation Monitoring을 위한 시스템이 구축 되어 운영 중이다. 이 시스템은 방사능 모니터링 디바이스로 부터 나오는 측정 값을 RS 485 시리얼 통신을 통해 획득하며 그 데이터를 MySQL 데이터 베이스에 저장한다. 이는 해당 데이터를 계속적으로 MySQL 테이블에 insert 하는 형태이며, EPICS PV화를 위해서는 항상 마지막 insert 데이터를 쿼리해야 하는 상황이다. 해당 부분을 좀 더 효과적으로 하기 위한 방안으로 해당 테이블의 insert transaction이 발생할 경우 MySQL trigger를 발생시켜 해당 테이블에 특정 필드 값만을 새롭게 테이블로 구성하여 insert transaction의 값을 새로운 테이블에 update 시킨다. 이 경우 EPICS PV interface를 위한 rdbmySQL record는 항상 새롭게 update되는 테이블에 쿼리하여 향 후 수만 개 이상의 데이터가 쌓이더라도 RMS 실시간 데이터를 보기위한 비용은 거의 없이 EPICS로 처리 할 수 있다. 해당 record를 "I/O Intr"로 설정시 insert transaction 처리 전에 update를 거치며 거의 최대 0.1 sec 이내 EPICS PV와 동기화 되어 작동된다.
+
+RMS 방사능 측정 데이터 테이블 t\_values에 대한 insert transaction에 대한 MySQL trigger 발생은 아래와 같이 구성 할 수 있다.
+
+
+\begin{lstlisting}[style=termstyle]
+mysql> create table t_values_epics (E_ID int, InDate datetime, ChannelNo int, Value1 varchar(20), Value2 varchar(20));
+Query OK, 0 rows affected (0.14 sec)
+
+mysql> insert into t_values_epics(E_ID,InDate,ChannelNo,Value1,Value2) values(3,curdate(),2,1.2323, 3.4563);
+Query OK, 1 row affected (0.04 sec)
+
+mysql> select * from t_values_epics;
++------+---------------------+-----------+--------+--------+
+| E_ID | InDate              | ChannelNo | Value1 | Value2 |
++------+---------------------+-----------+--------+--------+
+|    3 | 2015-06-05 00:00:00 |         2 | 1.2323 | 3.4563 |
++------+---------------------+-----------+--------+--------+
+1 row in set (0.00 sec)
+
+mysql> delimiter //
+mysql> create trigger rms_epics_tri before insert on t_values for each row begin update t_values_epics set E_ID=new.E_ID, InDate=new.InDate, ChannelNo=new.ChannelNo, Value1=new.Value1, Value2=new.Value2; end //
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> delimiter ;
+
+mysql> select * from t_values_epics;
++------+---------------------+-----------+--------+--------+
+| E_ID | InDate              | ChannelNo | Value1 | Value2 |
++------+---------------------+-----------+--------+--------+
+|    3 | 2015-06-05 00:00:00 |         2 | 1.2323 | 3.4563 |
++------+---------------------+-----------+--------+--------+
+1 row in set (0.00 sec)
+
+mysql> INSERT INTO `t_values` VALUES (1,'2015-06-03 12:20:17',1,'0.165296E+0','','1','20150603','122017','0','0',1,'',NULL);
+ERROR 1062 (23000): Duplicate entry '1-2015-06-03 12:20:17-20150603-122017' for key 'PRIMARY'
+
+mysql> INSERT INTO `t_values` VALUES (3,'2015-06-07 12:20:19',2,'3.1534','45.2323','4','20150607','122019','0','0',1,'',NULL);
+Query OK, 1 row affected (0.06 sec)
+
+mysql> select * from t_values_epics;
++------+---------------------+-----------+--------+---------+
+| E_ID | InDate              | ChannelNo | Value1 | Value2  |
++------+---------------------+-----------+--------+---------+
+|    3 | 2015-06-07 12:20:19 |         2 | 3.1534 | 45.2323 |
++------+---------------------+-----------+--------+---------+
+1 row in set (0.00 sec)
+
+$>camonitor  MYSQL_RMS_EID MYSQL_RMS_INDATE MYSQL_RMS_CHANNELNO MYSQL_RMS_VALUES1 MYSQL_RMS_VALUES2
+
+MYSQL_RMS_EID                  2015-06-05 13:57:26.969823 1  
+MYSQL_RMS_INDATE               2015-06-05 13:57:26.969839 2015-06-05 12:20:17  
+MYSQL_RMS_CHANNELNO            2015-06-05 13:57:26.969844 1  
+MYSQL_RMS_VALUES1              2015-06-05 13:57:26.969846 0.165296E+0  
+MYSQL_RMS_VALUES2              2015-06-05 13:57:26.969848   
+MYSQL_RMS_INDATE               2015-06-05 13:57:54.095276 2015-06-05 12:20:18  
+MYSQL_RMS_VALUES2              2015-06-05 13:57:54.095281 0.3534  
+MYSQL_RMS_EID                  2015-06-05 13:58:58.558086 2  
+MYSQL_RMS_INDATE               2015-06-05 13:58:58.558092 2015-06-05 12:20:19  
+MYSQL_RMS_CHANNELNO            2015-06-05 13:58:58.558093 2  
+MYSQL_RMS_VALUES1              2015-06-05 13:58:58.558094 0.1534  
+MYSQL_RMS_VALUES2              2015-06-05 13:58:58.558095 5.2323  
+MYSQL_RMS_EID                  2015-06-08 08:25:23.384936 3  
+MYSQL_RMS_INDATE               2015-06-08 08:25:23.384960 2015-06-07 12:20:19  
+MYSQL_RMS_VALUES1              2015-06-08 08:25:23.384969 3.1534  
+MYSQL_RMS_VALUES2              2015-06-08 08:25:23.384973 45.2323  
+\end{lstlisting}
+
+DB 구성 및 사용방법:
+
+rdbmySQL record는 INP, INPA to INPL까지 총 13개의 입력 필드를 갖는다. 해당 입력필드는 QRY 필드에 작성되는 query문의 필드 순서에 따른 SQL query가 작성 된다. 쿼리 실행에 대한 데이터 타입은 인터페이스 되는 MySQL 테이블의 필드에 대한 데이터 타입을 확인하여 INP 링크에 연결되는 EPICS record의 데이터 타입를 설정한다. 그림 \ref{fig:rms_epics_db}에 대한 예를 설명하면 아래와 같다.
+
+\begin{lstlisting}[style=termstyle]
+record(stringin, "$(SYS)_RMS_INDATE") {
+	field(SCAN, "Passive")
+}
+record(longin, "$(SYS)_RMS_EID") {
+	field(SCAN, "Passive")
+}
+record(longin, "$(SYS)_RMS_CHANNELNO") {
+	field(SCAN, "Passive")
+}
+record(stringin, "$(SYS)_RMS_VALUES1") {
+	field(SCAN, "Passive")
+}
+record(stringin, "$(SYS)_RMS_VALUES2") {
+	field(SCAN, "Passive")
+}
+record(rdbmySQL, "$(SYS):READ_RMS") {
+	field(SCAN, "I/O Intr")
+	field(PINI, "YES")
+	field(DTYP, "ReadData")
+	field(QRY, "select E_ID, InDate, ChannelNo, Value1, Value2 from t_values_epics")
+	field(INP, "$(SYS)_RMS_EID")
+	field(INPA, "$(SYS)_RMS_INDATE")
+	field(INPB, "$(SYS)_RMS_CHANNELNO")
+	field(INPC, "$(SYS)_RMS_VALUES1")
+	field(INPD, "$(SYS)_RMS_VALUES2")
+}
+\end{lstlisting}
+상위의 rdbmySQL record "\$(SYS):READ\_RMS"에서 QRY 필드는 200자 까지의 SQL query문을 작성할 수 있다.  QRY에 작성된 "select E\_ID,InDate,ChannelNo,Value1,Value2 from t\_values\_epics" 는  t\_values\_epics 테이블로 부터 각 필드가 순서대로 INP, INPA, INPB, INPC, INPD의 Input link PV와 연결된다. 따라서 각 필드의 데이터 타입에 따라 INP 링크에 연결된 PV의 record 타입을 설정한다. 아래는 t\_values\_epics 테이블에 대한 각 필드의 데이터 타입을 보여준다.
+
+\begin{lstlisting}[style=termstyle]
+mysql> desc t_values_epics;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| E_ID      | int(11)     | YES  |     | NULL    |       |
+| InDate    | datetime    | YES  |     | NULL    |       |
+| ChannelNo | int(11)     | YES  |     | NULL    |       |
+| Value1    | varchar(20) | YES  |     | NULL    |       |
+| Value2    | varchar(20) | YES  |     | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+\end{lstlisting}
+
+여기서 INP와 link된 EPICS PV record 타입은 longin이며, INPA는 string 형태의 날짜를 보여주기 위하여 stringin, INPB는 longin, INPC와 INPD는 ai record가 사용되었다. 해당 INP 링크는 DB scan이 processing passive로 설정되어 rdbmySQL scan rate을 따른다. rdbmySQL record "\$(SYS):READ\_RMS"가 "I/O Intr"로 설정되면, MySQL insert transaction과 최대 0.1sec로 scan offset을 발생한다. 또한, rdbmySQL record의 값은 0, -1값을 가질 수 있으며 0의 경우는 SQL query 수행이 정상적으로 fetch 되었음을 의미하며, -1의 값을 SQL query 실행에 문제가 있어 정상적인 값을 fetch 하지 못했음을 의미한다.
+
+st.cmd 실행 방법:
+아래와 같이 st.cmd 스크립트 내에 MySQL database와 connection을 위한 drvMySQLConnInit을 아래 파라미터 정보에 맞게 추가한다.
+
+\begin{lstlisting}[style=termstyle]
+#!../../bin/linux-x86_64/rdbmysql
+
+## You may have to change rdbmysql to something else
+## everywhere it appears in this file
+
+< envPaths
+
+cd "${TOP}"
+
+## Register all support components
+dbLoadDatabase "dbd/rdbmysql.dbd"
+rdbmysql_registerRecordDeviceDriver pdbbase
+
+# parameters: dbname, username, password, host to connect, port to connect
+#drvMySQLConnInit("dbname","username","password","hostip","port");
+#drvMySQLConnInit("epics_db","root","qwer1234","127.0.0.1","3306");
+drvMySQLConnInit("rad_inst","root","qwer1234","127.0.0.1","3306");
+
+#dbLoadRecords("db/MYSQL_EPICS.vdb","SYS=MYSQL")
+dbLoadRecords("db/RMS_EPICS.vdb","SYS=MYSQL")
+
+cd "${TOP}/iocBoot/${IOC}"
+iocInit
+\end{lstlisting}
+
+아래 그림 \ref{fig:rms_epics_view_trigger}은 MySQL t\_values 테이블의 insert transaction 시 t\_values\_epics 테이블이 triggering update 됨을 보여준다.
+
+\clearpage
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=1\textwidth]{./images/rms_epics_db.eps}
+	\includegraphics[width=0.7\textwidth]{./images/rms_epics_db.eps}
 	\caption{RMS MySQL 인터페이스를 위한 EPICS DB설정}
 	\label{fig:rms_epics_db}
 \end{figure}
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=1\textwidth]{./images/rms_epics_view_trigger.eps}
+	\includegraphics[width=0.7\textwidth]{./images/rms_epics_view_trigger.eps}
 	\caption{MySQL 트리거링을 이용한 RMS View Table}
 	\label{fig:rms_epics_view_trigger}
 \end{figure}
@@ -81,553 +229,8 @@ rdbmySQL record의 개발 목적은 아래와 같다.
 \clearpage
 
 \chapter{ifstat}
+EPICS IOC는 ethernet based의 분산 제어 software framework로 불린다. 이는 ethenet으로 연결된 IOC는 항상 데이터 패킷을 발생 시키는데 해당 데이터 패킷이 얼마나 발생하는지 로컬 ethernet에 대한 패킷량을 계산하여 PV화 한다. 이는 네트워크 모니터링 용으로 사용 될 수 있으며, 향 후 IOC의 네트워크에 대한 건전성을 모니터링하는데 적용 할 수 있다.
 
-
-
-\begin{itemize}
-	\item VxWorks 버전: VxWorks 6.9 (이전 VxWorks 5.5 이하)
-	\item IDE 환경 버전: Workbench 3.3 (이전 Tornado 2.2 )
-\end{itemize}
-
-Linux에서 Workbench 3.3을 설치하면 기본 설치 디렉토리 경로는 "/opt/WindRiver/" 되며, 이것과 관련된 환경변수 설정은 아래와 같다.
-
-\begin{lstlisting}[style=termstyle]
-export DEFAULT_WIND=/opt/WindRiver
-export PATH=$PATH:$DEFAULT_WIND
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/WindRiver/lmapi-5.0/x86-linux2/lib
-\end{lstlisting}
-
-\section{EPICS Target Build on VxWorks}
-EPICS base는 R3.14.8 이상과 R.3.14.12.4 이하 버전을 사용하여 하며, VxWorks EPICS 모듈 컴파일을 위하여는 아래과 같은 EPICS 환경설정을 설정한다.
-
-\begin{lstlisting}[style=termstyle]
-vxworks@ctrlpc0:$>cd ${EPICS_BASE}/configure/
-vxworks@ctrlpc0:$configure>vi CONFIG_SITE
-CROSS_COMPILER_TARGET_ARCHS=vxWorks-ppc604
-
-vxworks@ctrlpc0:$configure>cd os
-vxworks@ctrlpc0:$configure/os>vi CONFIG.Common.vxWorks-ppc604
-#ARCH_DEP_CFLAGS_4 = -mcpu=604 -mstrict-align -fno-implicit-fp
-ARCH_DEP_CFLAGS_4 = -mcpu=604 -mstrict-align
-
-vxworks@ctrlpc0:$configure/os>vi CONFIG_SITE.Common.vxWorksCommon
-VXWORKS_VERSION = 6.9
-WIND_BASE = /opt/WindRiver
-WORKBENCH_VERSION = 3.3
-UTILITIES_VERSION = 1.0
-
-vxworks@ctrlpc0:$configure/os>cd $EPICS_BASE/
-vxworks@ctrlpc0:$configure/os>cd ~/epics/R3.14.12.4
-vxworks@ctrlpc0:$~/epics/R3.14.12.4>make install
-\end{lstlisting}
-
-VMVE6100 controller에서 실행될 VxWorks-EPICS 라이브러리 compile시에 아래와 같은 에러가 발생한다. 이는 VxWorks에서 제공하는 "stdio.h" 파일에 정의된 oprintf와 voprintf 인라인 함수에 대한 cplusplus의 prototype 선언부에 대한 충돌이 발생을 보여준다. 이는 컴파일러 버전에 따라 오류가 나지 않을 수 도 있는 부분이다. 
-
-\begin{lstlisting}[style=termstyle]
-In file included from ../../../src/libCom/osi/epicsStdio.h:15,
-from ../../../src/libCom/osi/epicsStdioRedirect.h:19,
-from ../../../src/libCom/osi/epicsEvent.cpp:19:
-/opt/WindRiver/vxworks-6.9/target/h/stdio.h:319: error: declaration of C function 'int oprintf(int (*)(...), _Vx_usr_arg_t, const char*, ...)' conflicts with
-/opt/WindRiver/vxworks-6.9/target/h/stdio.h:206: error: previous declaration 'int oprintf(int (*)(char*, size_t, _Vx_usr_arg_t), _Vx_usr_arg_t, const char*, ...)' here
-/opt/WindRiver/vxworks-6.9/target/h/stdio.h:338: error: declaration of C function 'int voprintf(int (*)(...), _Vx_usr_arg_t, const char*, __va_list_tag*)' conflicts with
-/opt/WindRiver/vxworks-6.9/target/h/stdio.h:225: error: previous declaration 'int voprintf(int (*)(char*, size_t, _Vx_usr_arg_t), _Vx_usr_arg_t, const char*, __va_list_tag*)' here
-/opt/WindRiver/vxworks-6.9/target/h/stdio.h: In function 'int voprintf(int (*)(...), _Vx_usr_arg_t, const char*, __va_list_tag*)':
-/opt/WindRiver/vxworks-6.9/target/h/stdio.h:349: error: invalid conversion from 'int (*)(char*, size_t, _Vx_usr_arg_t)' to 'int (*)(...)'
-/opt/WindRiver/vxworks-6.9/target/h/stdio.h:349: error:   initializing argument 1 of 'int voprintf(int (*)(...), _Vx_usr_arg_t, const char*, __va_list_tag*)'
-make[3]: *** [epicsEvent.o] Error 1
-make[3]: Leaving directory `/home/vxworks/epics/R3.14.12.4/base/src/libCom/O.vxWorks-ppc604'
-\end{lstlisting}
-
-상위의 모듈에 대한 충돌문제를 해결 하기 위하여 아래와 같이 해당 부분에 주석처리 한다.
-\begin{lstlisting}[style=termstyle]
-vxworks@ctrlpc0:>vi /opt/WindRiver/vxworks-6.9/target/h/stdio.h
-
-#if 0
-/*
-* Inlined C++ wrappers for the old-style FUNCPTR based oprintf() and
-* voprintf() function prototypes.
-*/
-
-extern int oprintf (FUNCPTR routine, _Vx_usr_arg_t arg, const char *, ...) \
-_WRS_DEPRECATED ("please use fully qualified function pointer "
-"version of API");
-
-inline int oprintf
-(
-FUNCPTR routine,
-_Vx_usr_arg_t arg,
-const char * fmt,
-...
-)
-{
-va_list vaList;     /* traverses argument list */
-
-va_start (vaList, fmt);
-
-return voprintf ((OPRINTF_OUTPUT_FUNCPTR)routine, arg, fmt, vaList);
-}
-
-extern int voprintf (FUNCPTR routine, _Vx_usr_arg_t arg, const char *, va_list)\
-_WRS_DEPRECATED ("please use fully qualified function pointer "
-"version of API");
-
-inline int voprintf
-(
-FUNCPTR routine,
-_Vx_usr_arg_t arg,
-const char * fmt,
-va_list vaList
-)
-{
-return voprintf ((OPRINTF_OUTPUT_FUNCPTR)routine, arg, fmt, vaList);
-}
-#endif
-
-\end{lstlisting}
- 
-
-\chapter{MRF IOC 구성}
-MRF IOC를 구성하기 위한 의존성 모듈은 devlib2 모듈을 설치하여야 한다.
-
-\section{devlib2 모듈 설치}
-devlib2 모듈은 vxworks 또는 rtems 에서 cPCI 또는 VME 디바이스에 대한 interface를 제공하는 모듈이다. 이 모듈을 설치하기 위하여
-아래와 같은 설정을 한다.
-
-\begin{lstlisting}[style=termstyle]
-vxworks@ctrlpc0:~/epics/R3.14.12.4/siteApps/devlib2/configure>vi RELEASE
-# EPICS_BASE usually appears last so other apps can override stuff:
-EPICS_BASE=${HOME}/epics/R3.14.12.4/base
-\end{lstlisting}
-
-해당 모듈에 대한 버전은 아래와 같은 EPICS base에 대한 버전에 의존성을 갖는다. 
-\begin{itemize}
-	\item devlib2 : Version 2.5 이하 사용(EPICS base R.3.14.12.4 이하)
-\end{itemize}
-
-아래는 컴파일된 devlib2 에 대한 소스 트리를 보여준다.
-\begin{lstlisting}[style=termstyle]
-vxworks@ctrlpc0:~/epics/R3.14.12.4/siteApps/devlib2$> tree -L 2
-.
-|-- Changelog
-|-- LICENSE
-|-- Makefile
-|-- README.txt
-|-- common
-|   |-- Makefile
-|   |-- O.Common
-|   |-- O.linux-x86
-|   |-- O.vxWorks-ppc604
-|   |-- epicsEndian.h
-|   `-- os
-|-- configure
-|   |-- CONFIG
-|   |-- CONFIG_SITE
-|   |-- Makefile
-|   |-- O.Common
-|   |-- O.linux-x86
-|   |-- O.vxWorks-ppc604
-|   |-- RELEASE
-|   |-- RULES
-|   |-- RULES.ioc
-|   |-- RULES_DIRS
-|   `-- RULES_TOP
-|-- dbd
-|   |-- epicspci.dbd
-|   `-- epicsvme.dbd
-|-- documentation
-|   |-- Doxyfile
-|   `-- mainpage.h
-|-- include
-|   |-- devLibPCI.h
-|   |-- devLibPCIImpl.h
-|   |-- devcsr.h
-|   |-- os
-|   `-- vmedefs.h
-|-- lib
-|   |-- linux-x86
-|   `-- vxWorks-ppc604
-|-- pciApp
-|   |-- Makefile
-|   |-- O.Common
-|   |-- O.linux-x86
-|   |-- O.vxWorks-ppc604
-|   |-- devLibPCI.c
-|   |-- devLibPCI.h
-|   |-- devLibPCIImpl.h
-|   |-- epicspci.dbd
-|   |-- os
-|   |-- osdPciShared.c
-|   |-- osdPciShared.h
-|   `-- pcish.c
-`-- vmeApp
-|-- Makefile
-|-- O.Common
-|-- O.linux-x86
-|-- O.vxWorks-ppc604
-|-- devLibVME.c
-|-- devLibVME.h
-|-- devcsr.c
-|-- devcsr.h
-|-- devlib_compat.c
-|-- devlib_dummy.c
-|-- epicsvme.dbd
-|-- iocreg.c
-|-- os
-|-- vmedefs.h
-`-- vmesh.c
-\end{lstlisting}
-
-
-\section{구성}
-MRF IOC는 아래와 같은 devlib2 모듈에 대한 설정을 한후 컴파일한다.
-
-\begin{lstlisting}[style=termstyle]
-## Required Modules ##
-# PCI and VME64x support library
-DEVLIB2=${HOME}/epics/R3.14.12.4/siteApps/devlib2/
-
-# EPICS_BASE usually appears last so other apps can override stuff:
-EPICS_BASE=${HOME}/epics/R3.14.12.4/base
-\end{lstlisting}
-
-컴파일된 MRF IOC 디렉토리에 대한 내용은 아래와 같다.\\
-
-RTEMS 경우
-\begin{lstlisting}[style=termstyle]
-rtems@silee:~/epics/R3.14.12.4/siteApps/mrfioc2$ tree -L 2
-.
-|-- Changelog
-|-- Doxyfile
-|-- LICENSE
-|-- Makefile
-|-- README
-|-- TODO.evr
-|-- bin
-|   |-- RTEMS-mvme3100
-|   `-- linux-x86_64
-|-- configure
-|   |-- CONFIG
-|   |-- CONFIG_SITE
-|   |-- Makefile
-|   |-- O.Common
-|   |-- O.RTEMS-mvme3100
-|   |-- O.linux-x86_64
-|   |-- RELEASE
-|   |-- RULES
-|   |-- RULES.ioc
-|   |-- RULES_DIRS
-|   `-- RULES_TOP
-|-- db
-|   |-- databuftx.db
-|   |-- databuftxCtrl.db
-|   |-- evgDbus.db
-|   |-- evgEvtClk.db
-|   |-- evgInput.db
-|   |-- evgMrm.db
-|   |-- evgMxc.db
-|   |-- evgOutput.db
-|   |-- evgSoftEvt.db
-|   |-- evgSoftSeq.db
-|   |-- evgTrigEvt.db
-|   |-- evgUserEvt.db
-|   |-- evr-pmc-230.db
-|   |-- evr-tg-300.db
-|   |-- evr-vmerf-230.db
-|   |-- evrNtp.db
-|   |-- evralias.db
-|   |-- evrbase.db
-|   |-- evrcml.db
-|   |-- evrcmlextra.db
-|   |-- evrcmlgun.db
-|   |-- evrevent-cycle.db
-|   |-- evrevent.db
-|   |-- evrin.db
-|   |-- evrmap.db
-|   |-- evrout.db
-|   |-- evrpulser.db
-|   |-- evrpulsermap.db
-|   |-- evrscale.db
-|   |-- evrsoftgate.db
-|   |-- mrmevrbufrx.db
-|   |-- mrmevrout.db
-|   |-- nsls2-egunfine.db
-|   |-- nsls2-inj-seqs.db
-|   |-- sequencedemo.db
-|   |-- sfp.db
-|   |-- vme-evg230-nsls2.db
-|   `-- vme-evg230.db
-|-- dbd
-|   |-- drvemSupport.dbd
-|   |-- evgInit.dbd
-|   |-- evgMrm.dbd
-|   |-- evrSupport.dbd
-|   |-- mrf.dbd
-|   |-- mrfCommon.dbd
-|   `-- mrmShared.dbd
-|-- documentation
-|   |-- Doxyfile
-|   |-- EVG_Block_Daigram.JPG
-|   |-- EVG_Timestamping.JPG
-|   |-- cPCI-EVG-2x0.pdf
-|   |-- cPCI-EVR-2x0_3-notes.txt
-|   |-- cPCI-EVR-2x0_3.pdf
-|   |-- demo
-|   |-- epics-201005.lyx
-|   |-- epics-201110.lyx
-|   |-- epics-201204.lyx
-|   |-- evg-actions.dia
-|   |-- evg-seq-usage.lyx
-|   |-- evg-seq.dia
-|   |-- evg-seq.jpeg
-|   |-- evg-states.dia
-|   |-- evg-usage.lyx
-|   |-- evr-usage.lyx
-|   |-- images
-|   `-- mainpage.h
-|-- evgMrmApp
-|   |-- Db
-|   |-- Makefile
-|   |-- docs
-|   |-- op
-|   `-- src
-|-- evrApp
-|   |-- Db
-|   |-- Makefile
-|   `-- src
-|-- evrMrmApp
-|   |-- Db
-|   |-- Makefile
-|   |-- op
-|   `-- src
-|-- evrtg.txt
-|-- include
-|   |-- devObj.h
-|   |-- evgAcTrig.h
-|   |-- evgDbus.h
-|   |-- evgEvtClk.h
-|   |-- evgInput.h
-|   |-- evgMrm.h
-|   |-- evgMxc.h
-|   |-- evgOutput.h
-|   |-- evgRegMap.h
-|   |-- evgSequencer
-|   |-- evgSoftEvt.h
-|   |-- evgTrigEvt.h
-|   |-- evr
-|   |-- evrGTIF.h
-|   |-- linkoptions.h
-|   |-- mrf
-|   |-- mrfBitOps.h
-|   |-- mrfCommon.h
-|   |-- mrfCommonIO.h
-|   |-- mrfFracSynth.h
-|   |-- mrfcsr.h
-|   |-- mrmDataBufTx.h
-|   `-- sfp.h
-|-- iocBoot
-|   |-- Makefile
-|   |-- iocevgmrm
-|   `-- iocevrmrm
-|-- lib
-|   |-- RTEMS-mvme3100
-|   `-- linux-x86_64
-|-- mrfCommon
-|   |-- Makefile
-|   `-- src
-|-- mrmShared
-|   |-- Db
-|   |-- Makefile
-|   |-- linux
-|   `-- src
-|-- mrmtestApp
-|   |-- Db
-|   |-- Makefile
-|   `-- src
-`-- python
-	|-- mrfioc2
-	|-- nsls2.py
-	`-- test.py
-\end{lstlisting}
-
-VxWorks 경우
-\begin{lstlisting}[style=termstyle]
-vxworks@ctrlpc0:~/epics/R3.14.12.4/siteApps/mrfioc2$ tree -L 2
-.
-|-- Changelog
-|-- Doxyfile
-|-- LICENSE
-|-- Makefile
-|-- README
-|-- TODO.evr
-|-- bin
-|   |-- linux-x86
-|   `-- vxWorks-ppc604
-|-- configure
-|   |-- CONFIG
-|   |-- CONFIG_SITE
-|   |-- Makefile
-|   |-- O.Common
-|   |-- O.linux-x86
-|   |-- O.vxWorks-ppc604
-|   |-- RELEASE
-|   |-- RULES
-|   |-- RULES.ioc
-|   |-- RULES_DIRS
-|   `-- RULES_TOP
-|-- db
-|   |-- databuftx.db
-|   |-- databuftxCtrl.db
-|   |-- evgDbus.db
-|   |-- evgEvtClk.db
-|   |-- evgInput.db
-|   |-- evgMrm.db
-|   |-- evgMxc.db
-|   |-- evgOutput.db
-|   |-- evgSoftEvt.db
-|   |-- evgSoftSeq.db
-|   |-- evgTrigEvt.db
-|   |-- evgUserEvt.db
-|   |-- evr-pmc-230.db
-|   |-- evr-tg-300.db
-|   |-- evr-vmerf-230.db
-|   |-- evrNtp.db
-|   |-- evralias.db
-|   |-- evrbase.db
-|   |-- evrcml.db
-|   |-- evrcmlextra.db
-|   |-- evrcmlgun.db
-|   |-- evrevent-cycle.db
-|   |-- evrevent.db
-|   |-- evrin.db
-|   |-- evrmap.db
-|   |-- evrout.db
-|   |-- evrpulser.db
-|   |-- evrpulsermap.db
-|   |-- evrscale.db
-|   |-- evrsoftgate.db
-|   |-- mrmevrbufrx.db
-|   |-- mrmevrout.db
-|   |-- nsls2-egunfine.db
-|   |-- nsls2-inj-seqs.db
-|   |-- sequencedemo.db
-|   |-- sfp.db
-|   |-- vme-evg230-nsls2.db
-|   `-- vme-evg230.db
-|-- dbd
-|   |-- drvemSupport.dbd
-|   |-- evgInit.dbd
-|   |-- evgMrm.dbd
-|   |-- evrSupport.dbd
-|   |-- mrf.dbd
-|   |-- mrfCommon.dbd
-|   `-- mrmShared.dbd
-|-- documentation
-|   |-- Doxyfile
-|   |-- EVG_Block_Daigram.JPG
-|   |-- EVG_Timestamping.JPG
-|   |-- cPCI-EVG-2x0.pdf
-|   |-- cPCI-EVR-2x0_3-notes.txt
-|   |-- cPCI-EVR-2x0_3.pdf
-|   |-- demo
-|   |-- epics-201005.lyx
-|   |-- epics-201110.lyx
-|   |-- epics-201204.lyx
-|   |-- evg-actions.dia
-|   |-- evg-seq-usage.lyx
-|   |-- evg-seq.dia
-|   |-- evg-seq.jpeg
-|   |-- evg-states.dia
-|   |-- evg-usage.lyx
-|   |-- evr-usage.lyx
-|   |-- images
-|   `-- mainpage.h
-|-- evgMrmApp
-|   |-- Db
-|   |-- Makefile
-|   |-- docs
-|   |-- op
-|   `-- src
-|-- evrApp
-|   |-- Db
-|   |-- Makefile
-|   `-- src
-|-- evrMrmApp
-|   |-- Db
-|   |-- Makefile
-|   |-- op
-|   `-- src
-|-- evrtg.txt
-|-- include
-|   |-- devObj.h
-|   |-- evgAcTrig.h
-|   |-- evgDbus.h
-|   |-- evgEvtClk.h
-|   |-- evgInput.h
-|   |-- evgMrm.h
-|   |-- evgMxc.h
-|   |-- evgOutput.h
-|   |-- evgRegMap.h
-|   |-- evgSequencer
-|   |-- evgSoftEvt.h
-|   |-- evgTrigEvt.h
-|   |-- evr
-|   |-- evrGTIF.h
-|   |-- linkoptions.h
-|   |-- mrf
-|   |-- mrfBitOps.h
-|   |-- mrfCommon.h
-|   |-- mrfCommonIO.h
-|   |-- mrfFracSynth.h
-|   |-- mrfcsr.h
-|   |-- mrmDataBufTx.h
-|   `-- sfp.h
-|-- iocBoot
-|   |-- Makefile
-|   |-- iocevgmrm
-|   `-- iocevrmrm
-|-- lib
-|   |-- linux-x86
-|   `-- vxWorks-ppc604
-|-- mrfCommon
-|   |-- Makefile
-|   `-- src
-|-- mrmShared
-|   |-- Db
-|   |-- Makefile
-|   |-- linux
-|   `-- src
-|-- mrmtestApp
-|   |-- Db
-|   |-- Makefile
-|   `-- src
-`-- python
-	|-- mrfioc2
-	|-- nsls2.py
-	`-- test.py
-\end{lstlisting}
-\clearpage
-
-Compile이 완료된 MRF IOC 모듈은 아래 리스트에서 보여주는 것과 같다.
-\begin{lstlisting}[style=termstyle]
-vxworks@ctrlpc0:~/epics/R3.14.12.4/siteApps/mrfioc2/lib$ cd vxWorks-ppc604/
-vxworks@ctrlpc0:~/epics/R3.14.12.4/siteApps/mrfioc2/lib/vxWorks-ppc604$ ls
-libevgmrm.a  libevr.a  libevrMrm.a  libmrfCommon.a  libmrmShared.a
-
-vxworks@ctrlpc0:~/epics/R3.14.12.4/siteApps/mrfioc2/bin$ cd vxWorks-ppc604/
-vxworks@ctrlpc0:~/epics/R3.14.12.4/siteApps/mrfioc2/bin/vxWorks-ppc604$ ls
-evgMrm.munch  evrtest.munch  mrf.munch
-\end{lstlisting}
-
-MRF IOC 설치를 위한 의존성은 아래와 같다.
-\begin{itemize}
-	\item EPICS Base 버전: Base R3.14.8 이상 ~ R3.14.12.4, R3.15.x 버전 미만
-	\item devlib2: Version 2.5 이하 Changelog 확인 (2014년 11월 이후 버전, EPICS Base R3.15.1 이상 사용)
-	\item mrfioc2
-\end{itemize}
-
-
-\chapter{MRF IOC 모듈분석}
-MRF IOC에 대한 모듈 분석
 
 
 \clearpage
