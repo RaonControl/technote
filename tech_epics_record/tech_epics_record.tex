@@ -42,7 +42,15 @@ RAON accelerator에서 각 로컬 제어 시스템과 EPICS framework간의 inte
 \clearpage
 
 
-\chapter{ai, }
+\chapter{ai,ao}
+
+\chapter{bi,bo}
+
+\chapter{snmp}
+
+\chapter{motor}
+
+\chapter{asyn}
 
 \chapter{rdbpostgreSQL}
 
@@ -232,6 +240,87 @@ iocInit
 EPICS IOC는 ethernet based의 분산 제어 software framework로 불린다. 이는 ethenet으로 연결된 IOC는 항상 데이터 패킷을 발생 시키는데 해당 데이터 패킷이 얼마나 발생하는지 로컬 ethernet에 대한 패킷량을 계산하여 PV화 한다. 이는 네트워크 모니터링 용으로 사용 될 수 있으며, 향 후 IOC의 네트워크에 대한 건전성을 모니터링하는데 적용 할 수 있다.
 
 
+\chapter{Hardware에 따른 EPICS device/driver}
+\section{RTP}
+RTP hardware에 대한 IOC 구성은 해당 IOC 개발 문서를 참조하며, 본 절에서는 DB를 구성하는 방법을 간략하게 설명한다.
+
+아래 그림 \ref{fig:rtp_db}에서 처럼 RTP HW와 EPICS device support 모듈과 인터페이스 하기 위한 DB 작성을 보여준다. RTP HW는 상위 어플리케이션을 위하여 ethernet 기반의 통신(UDP,TCP)을 사용한다. 해당 RTP HW 카드에 따른 tcp socket 통신 프로토콜은 open되어 사용되며, IOC 개발 문서에 설명되었다. 해당 RTP device support 모듈은 크게 ai/ao, longin/longout, bi/bo 3가지 형태의 데이터 타입을 가질 수 있으며, 인터페이스를 위한 DB 작성을 아래와 같다.
+
+\begin{lstlisting}[style=termstyle]
+record(ai, RTP_AI_TEST) {
+field(SCAN, "1 second")
+field(PINI, "YES")
+field(DTYP, "rtpSyncReadAI")
+field(VAL, "0")
+field(INP, "@RTP(0,95)")
+}
+record(bi, RTP_BI_TEST) {
+field(DESC, "Bool value")
+field(SCAN, "1 second")
+field(PINI, "YES")
+field(DTYP, "rtpSyncReadBI")
+field(INP, "@RTP(0,485)")
+field(ZNAM, "OFF")
+field(ONAM, "ON")
+}
+record(ao, RTP_AO_TEST) {
+field(DESC, "AO Test")
+field(DTYP, "rtpSyncReadAO")
+field(OUT, "@RTP(0,97)")
+}
+record(bo, RTP_BO_TEST) {
+field(DESC, "RTP BO Test")
+field(DTYP, "rtpSyncReadBO")
+field(OUT, "@RTP(0,517)")
+field(ZNAM, "OFF")
+field(ONAM, "ON")
+}
+\end{lstlisting}
+
+상위에서 처럼 INP 또는 OUT에서 작성되는 방법은 "@RTP(cpu\_number, index\_number)" 이다. cpu node number는 RTP cpu node 설정 방법에 따라 redundant 구성 등에 의해 변경 될 수 있지만 일반적으로는 "0"을 갖는다. 또한 index number 역시 RTP 구성 등에 의해 Hardware index와 동일 하여야 한다. RTP Hardware Tag index와 관련하여는 RTP 문서를 참조한다. 해당 Hardware index는 RTP에서 제공한 NetArrays 소프트웨어 툴에서 확인 가능하다. 위에서 나오는 index number는 NetArrays를 통해 확인한 index number이며 구성에 따라 변경 될 수 있다.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.85\textwidth]{./images/rtp_db.eps}
+	\caption{RTP interface database}
+	\label{fig:rtp_db}
+\end{figure}
+
+RTP device support 모듈의 device type은 아래와 같이 "INST\_IO" 구조를 따른다.
+\begin{lstlisting}[style=termstyle]
+device(ai,INST_IO,devSyncRTPReadAI,  "rtpSyncReadAI")
+device(ao,INST_IO,devSyncRTPReadAO,  "rtpSyncReadAO")
+device(bi,INST_IO,devSyncRTPReadBI,  "rtpSyncReadBI")
+device(bo,INST_IO,devSyncRTPReadBO,  "rtpSyncReadBO")
+device(longin,INST_IO,devSyncRTPReadLI,  "rtpSyncReadLI")
+\end{lstlisting}
+
+
+st.cmd 실행 방법:
+아래와 같이 st.cmd 스크립트 내에 RTP Node Processor와의 connection을 위한 drvSyncRTPConfigure를 아래 파라미터 정보에 맞게 추가한다.
+
+\begin{lstlisting}[style=termstyle]
+#!../../bin/linux-x86_64/rtp
+
+< envPaths
+
+cd ${TOP}
+
+## Register all support components
+dbLoadDatabase "dbd/rtp.dbd"
+rtp_registerRecordDeviceDriver pdbbase
+
+#drvAsynIPPortConfigure("portName","hostInfo(e.g. IP:port protocol", priority, noAutoConnect)
+drvSyncRTPConfigure("RTPDevice", "89.89.80.30:50199 TCP", 0, 0)
+
+## Load record instances
+#dbLoadRecords("db/xxx.db","user=sileeHost")
+dbLoadRecords("db/RTPTest.vdb")
+#dbLoadRecords("db/RTPOneTest.vdb")
+
+cd ${TOP}/iocBoot/${IOC}
+iocInit
+\end{lstlisting}
 
 \clearpage
 \bibliographystyle{unsrtnat}
