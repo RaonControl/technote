@@ -9,7 +9,8 @@
 
 \usepackage{control}
 \usepackage[numbers]{natbib}
-
+\definecolor{babypink}{rgb}{0.96, 0.76, 0.76}
+\definecolor{blizzardblue}{rgb}{0.67, 0.9, 0.93}
 
 \begin{document}
 
@@ -36,7 +37,7 @@
 \maketitle
 
 \begin{abstract}
-미정
+Integrate IOC Maunal for beginner EPICS user
 \end{abstract}
 
 
@@ -143,13 +144,8 @@ aliveApp  configure  dbd            include  lib       start_epics
 bin       db         documentation  iocBoot  Makefile
 \end{lstlisting}
 기본적으로 app과 iocboot를 만든후에 기본적으로 생성되는 configure, app 그리고 iocBoot 디렉토리를 제외하고 bin, db 그리고 dbd 같이 컴파일후 추가되는 기본적 디렉토리와 이 밖에 필요에 의해 생성된 디렉토리들이 있다.
-내가 만든 IOC가 alive의 기능을 수행하게 하기 위해서는 alive IOC의 LIB, header, dbd, db 파일이 필요하다.
-\subsection{Header 파일의 위치}
-\begin{lstlisting}[style=termstyle]
-namsh@namsh:~/epics/R3.14.12.5/epicsLibs/synApps_5_8/support/alive-1-0/include$ ls
-aliveRecord.h
-\end{lstlisting}
-통상적으로 header 파일은 include 디렉토리에 들어있다.
+내가 만든 IOC가 alive의 기능을 수행하게 하기 위해서는 alive IOC의 LIB, dbd, db 파일이 필요하다.
+
 \subsection{LIB 파일의 위치}
 \begin{lstlisting}[style=termstyle]
 namsh@namsh:~/epics/R3.14.12.5/epicsLibs/synApps_5_8/support/alive-1-0/lib/linux-x86_64$ ls
@@ -180,11 +176,8 @@ alive.db
 \subsection{Changing src Makefile of integrateTest IOC}
 먼저 integrateTestApp/src 디렉토리의 Makefile을 수정한다.
 \begin{itemize}
-	\item Add the header file address
-\begin{lstlisting}[style=termstyle]
-USR_INCLUDES += -I${EPICS_SYNAPPS}/alive-1-0/include
-\end{lstlisting}
-item Add the dbd file address
+	
+\item Add the dbd file address
 \begin{lstlisting}[style=termstyle]
 USR_DBDFLAGS += -I${EPICS_SYNAPPS}/alive-1-0/aliveApp/src
 \end{lstlisting}
@@ -215,10 +208,6 @@ include $(TOP)/configure/CONFIG
 Add the dbd file address
 \begin{lstlisting}[style=termstyle]
 USR_DBDFLAGS += -I${EPICS_SYNAPPS}/alive-1-0/aliveApp/src
-\end{lstlisting}
-Add the header file address
-\begin{lstlisting}[style=termstyle]
-USR_INCLUDES += -I${EPICS_SYNAPPS}/alive-1-0/include
 \end{lstlisting}
 Add the LIB address
 \begin{lstlisting}[style=termstyle]
@@ -360,7 +349,7 @@ iocInit
 st.cmd까지 수정을 완료한 후 chmod 명령어를 이용하여 st.cmd를 실행가능 파일로 만든 후 실행해 준다.
 \section{Alternative way changing src Makefile}
 \subsection{Changing configure RELEASE file}
-2.1절에서는 src의 Makefile에 dbd, header 그리고 LIB의 주소를 적어 주었다. 다른 방법으로는
+2.1절에서는 src의 Makefile에 dbd 그리고 LIB의 주소를 적어 주었다. 다른 방법으로는
 src의 Makefile에 주소를 추가하지 않고 configure의 RELEASE 파일에 주소를 적음으로 IOC가 똑같이
 동작하게 만들수 있다.
 \begin{itemize}
@@ -518,7 +507,7 @@ include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
 \end{lstlisting}
-여기서 주의 할것은 dbd,lib 그리고 header 파일의 주소는 RELEASE 파일에 적어 주었기 때문에 dbd나 lib파일은 추가해주어도 주소는 추가하면 안된다는 것이다.
+여기서 주의 할것은 dbd 그리고 lib파일의 주소는 RELEASE 파일에 적어 주었기 때문에 dbd나 lib파일은 추가해주어도 주소는 추가하면 안된다는 것이다.
 \section{Alternative way changing Db Makefile without copying Db}
 Db 디렉토리의 Makefile 변경에서 db파일을 복사하지 않고 db를 쓰는 간단한 방법도 있다.
 \begin{lstlisting}[style=termstyle]
@@ -562,15 +551,15 @@ configure  edl          lib       README              RELEASE_SITE
 db         include      LICENSE   README_devIocStats  testIocAdminApp
 dbd        iocAdmin     Makefile  README_iocAdmin     testIocStatsApp
 \end{lstlisting}
-devIocStats는 alive와 달리 좀더 복잡한 구조로 되어있는것 처럼 보인다. 그러나 devIocStats를 integrate 시키기 위해서는 alive때와 같이 db, dbd, lib, header가 필요하므로 이 파일들만 잘 handling하면 된다.
-\subsection{Header, dbd 파일의 위치}
+devIocStats는 alive와 달리 좀더 복잡한 구조로 되어있는것 처럼 보인다. 그러나 devIocStats를 integrate 시키기 위해서는 alive때와 같이 db, dbd 그리고 lib 파일이 필요하므로 이 파일들만 잘 handling하면 된다.
+\subsection{dbd 파일의 위치}
 \begin{lstlisting}[style=termstyle]
 namsh@namsh:~/epics/R3.14.12.5/epicsLibs/synApps_5_8/support/devIocStats-3-1-13/devIocStats$ ls
 devIocStatsAnalog.c  devIocStatsString.c  devIocStatsWaveform.c  O.Common
 devIocStats.dbd      devIocStatsSub.c     devVxStats.dbd         O.linux-x86_64
 devIocStats.h        devIocStatsTest.c    Makefile               os
 \end{lstlisting}
-devIocStats에서는 devIocStats 디렉토리안에 IOC에 필요한 header와 dbd 파일이 들어있기 때문에 이곳의 주소를 써준다.
+devIocStats에서는 devIocStats 디렉토리안에 IOC에 필요한 dbd 파일이 들어있기 때문에 이곳의 주소를 써준다.
 \subsection{db 파일의 위치}
 \begin{lstlisting}[style=termstyle]
 namsh@namsh:~/epics/R3.14.12.5/epicsLibs/synApps_5_8/support/devIocStats-3-1-13/db$ ls
@@ -587,11 +576,7 @@ libdevIocStats.a  libdevIocStats.so
 \section{Changing src Makefile of integrateTest}
 \subsection{Changing src Makefile of integrateTest}
 \begin{itemize}
-	\item Add the header file address
-	\begin{lstlisting}[style=termstyle]
-USR_INCLUDES += -I${EPICS_SYNAPPS}/devIocStats-3-1-13/include/os/Linux
-USR_INCLUDES += -I${EPICS_SYNAPPS}/devIocStats-3-1-13/devIocStats
-\end{lstlisting}
+
 	\item Add the dbd file address
 	\begin{lstlisting}[style=termstyle]
 USR_DBDFLAGS += -I${EPICS_SYNAPPS}/devIocStats-3-1-13/dbd
@@ -625,11 +610,6 @@ alive_DIR += ${EPICS_SYNAPPS}/alive-1-0/lib/$(T_A)
 Add the dbd file address
 \begin{lstlisting}[style=termstyle]
 USR_DBDFLAGS += -I${EPICS_SYNAPPS}/devIocStats-3-1-13/dbd
-\end{lstlisting}
-Add the header file address
-\begin{lstlisting}[style=termstyle]
-USR_INCLUDES += -I${EPICS_SYNAPPS}/devIocStats-3-1-13/include/os/Linux
-USR_INCLUDES += -I${EPICS_SYNAPPS}/devIocStats-3-1-13/devIocStats
 \end{lstlisting}
 Add the LIB address
 \begin{lstlisting}[style=termstyle]
@@ -793,7 +773,7 @@ iocInit
 \end{lstlisting}
 \section{Alternative way changing src Makefile}
 \subsection{Changing configure RELEASE file}
-위에서는 src의 Makefile에 dbd, header 그리고 LIB의 주소를 적어 주었다. 다른 방법으로는 alive때와 같이
+위에서는 src의 Makefile에 dbd 그리고 LIB의 주소를 적어 주었다. 다른 방법으로는 alive때와 같이
 src의 Makefile에 주소를 추가하지 않고 configure의 RELEASE 파일에 주소를 적음으로 IOC가 똑같이
 동작하게 만들수 있다.
 \begin{itemize}
@@ -841,7 +821,7 @@ devIocStats_DIR += ${EPICS_SYNAPPS}/devIocStats-3-1-13/lib/$(T_A)
 CMD_DBDFLAGS += -I${EPICS_SYNAPPS}/devIocStats-3-1-13/dbd
 \end{lstlisting}
 	여기서 주의할 것은 LIB 파일의 주소를 적을때는 Makefile에 주소와 똑같이 적으면 되지만 dbd 파일의 주소를 
-	적을때는  USER DBDFLAGS 대신 위와같이 CMD DBDFLAGS로 바꿔주어야 한다.
+	적을때는 USER\_DBDFLAGS 대신 위와같이 CMD\_DBDFLAGS로 바꿔주어야 한다.
 	\item Method 2
 	\begin{lstlisting}[style=termstyle]
 	# RELEASE - Location of external support modules
@@ -952,7 +932,7 @@ include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
 \end{lstlisting}
-여기서 주의 할것은 dbd,lib 그리고 header 파일의 주소는 RELEASE 파일에 적어 주었기 때문에 dbd나 lib파일은 추가해주어도 주소는 추가하면 안된다는 것이다.
+여기서 주의 할것은 dbd 그리고 lib 파일의 주소는 RELEASE 파일에 적어 주었기 때문에 dbd나 lib파일은 추가해주어도 주소는 추가하면 안된다는 것이다.
 src의 Makefile변경 이후 부분은 위의 나머지 부분과 같다.
 \section{Alternative way changing Db Makefile without copying Db}
 Db 디렉토리의 Makefile 변경에서 db파일을 복사하지 않고 db를 쓰는 간단한 방법도 있다.
@@ -1203,4 +1183,5 @@ IOCTEST:ST_SCRIPT
 aliveEx:alive
 epics> 
 \end{lstlisting}
+Manual에서 사용한 App은 https://github.com/RaonControl/siteApps에서 다운로드 가능하다.
 \end{document}
