@@ -1533,7 +1533,7 @@ WIENER-CRATE-MIB::fanNominalSpeed.0 = INTEGER: 2500 RPM
 \end{itemize}
 
 
-\begin{figure}[!h]
+\begin{figure}[h!]
   \centering
   \subbottom[WIENER Crate Fanspeed 2000]
   	    {
@@ -1573,7 +1573,7 @@ APC사 PDU 7921의 OPI는 장비의 Power Supply, Load, Outlet의 상태를 모�
  Wiener사의 VME64x 6023 Crate의 OPI는 그림 \ref{fig:wienerui}와 같이 Crate의 전원, 채널, 팬, 온도 센서의 상태를 모니터링하고 Power Supply와 VME의 System, 하드웨어의 reset, 팬 스피드, 온도 센서를 제어하도록 구성한다.
 
 
- \begin{figure}[!h]
+ \begin{figure}[h!]
    \centering
    \subbottom[APC PDU UI]
    	    {
@@ -1605,7 +1605,7 @@ Script는 그림\ref{fig:stability}와 같이 구성된다. 이는 특정 시간
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.89\textwidth]{./images/stability.eps}
+  \includegraphics[width=0.7\textwidth]{./images/stability.eps}
   \caption{안정성 테스트 Script 순서도}
   \label{fig:stability}   
 \end{figure}
@@ -1639,7 +1639,7 @@ New : WIENER:CRATE3_FanNominalSpeed_W 2500
 \subsection{Raspberry Pi를 활용한 모니터링}
 스크립트가 실행될 때 변경되는 PV 값이 실제 Crate의 팬 스피드에 영향을 미치는지 확인하기 위해 Wiener사에서 제공하는 웹페이지와 Raspberry Pi의 카메라 모듈을 활용하여 그림 \ref{fig:rpimonitoring}과 같이 Crate의 패널을 모니터링한다.
 
-\begin{figure}[!h]
+\begin{figure}[h!]
   \centering
   \subbottom[Raspberry Pi Camera Module]
   	    {
@@ -1664,7 +1664,7 @@ Monitoring using Raspberry Pi Camera
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.68\textwidth]{./images/javapage.eps}
+  \includegraphics[width=0.4\textwidth]{./images/javapage.eps}
   \caption{R.pi 카메라 모듈 모니터링 페이지}
   \label{fig:javapage}   
 \end{figure}
@@ -1830,6 +1830,193 @@ $ \sharp $ & IOC Run & IOC issue & IOC Running time\\ \hline
 \end{figure}
 
 따라서 같은 형태로 SNMPv2c로 Read, v3으로 Write하는 PDU Outlet 8번과 v2c로 Read하는 Wiener사 Crate의 팬 온도와 전원상태와 비교해 Crate의 팬 스피드에서만 발생하는 이 문제는 SNMPv3를 지원한 지 얼마 안 된 Wiener사의 SNMP 문제인지, IOC의 문제인지 추가적인 확인이 필요하다. 또한, IOC의 장기적인 안정성 테스트도 요구된다.
+
+
+
+
+
+\clearpage
+\appendix
+\addappheadtotoc
+\renewcommand*\printchaptername{\Large\bfseries\appendixname~}
+\chapter{Record Reference Manual}
+\section{snmpRecord}
+이 레코드는 EPICS의 dbcommon.dbd에 정의된 기본 필드를 바탕으로 생성되어 레코드의 알람과 단위 등이 지원된다. 이는 SNMP의 String 타입을 제외한 모든 타입의 장비의 정보 값을 읽고, Integer 타입의 정보를 쓰는데 사용된다. snmpRecord는 SNMP 명령어 사용을 위해 기존의 필드 외 SNMP 명령어 사용에 필요한 필드를 추가한다. 이는 표 \ref{table:snmprecord}과 같으며 다음과 같은 목적을 가진다. HOST는 장비(Agent)의 주소로 IP 주소나 노드의 이름에 관한 필드이다. COMM은 v2c사용 시 Community String이며, v3 사용 시에 Username을 설정하는 필드이다. OID 필드는 읽거나 쓰고 싶은 장비의 정보 객체를 OID표기법이나 이름으로 설정한다. AUTH, PRIV는 v3 사용 시 암호화와 인증 비밀번호를 설정하는 필드이다. VERS는 레코드가 사용할 SNMP의 버전 설정 필드로 SNMPv2 사용 시 SNMP\_VERSION\_2c, v3 사용 시에는 SNMP\_VERSION\_3로 설정해야한다. OVAL은 레코드에 저장되어 있는 값으로 새로 쓰려는 값과 OVAL의 값이 같으면 설정은 변경되지 않는다. VAL는 최종적으로 PV가 가지는 장비의 정보 값이다.
+
+
+\begin{table}[h!]
+\begin{center}
+\small 
+\begin{tabulary}{\textwidth}{C|C|C}
+Field & Type & Description\\ \hline
+HOST & String & Device Host  \\ \hline
+COMM & String & Community string / Username  \\ \hline
+OIDS & String & OID Name  \\ \hline
+AUTH & String & Auth Password  \\ \hline
+PRIV & String & Priv Password  \\ \hline
+VERS & String & SNMP version (v2c/3) \\ \hline
+VAL & Double & Value  \\ \hline
+OVAL & Double & Old Value  \\ 
+\end{tabulary}
+\caption{안정성 테스트 결과(60s/1,200~3,600rpm/IP 변경)}
+  \label{table:snmprecord} 
+\end{center}
+\end{table} 
+
+이를 바탕으로 APC사의 PDU Outlet Read/Write에 대한 레코드를 작성하면 아래와 같다. 
+
+{\scriptsize
+\begin{lstlisting}[style=termstyle]
+record(snmp, "${A}:${P}_Outlet1_R") {
+    field(DESC, "PDU outlet1 control")
+    field(DTYP, "SNMP Read")
+    field(SCAN, "5 second")
+    field(VERS, "SNMP_VERSION_2c")
+    field(HOST, "10.1.5.142}")
+    field(COMM, "public")
+    field(OIDS, "${PO}sPDUOutletCtl.1")
+}
+
+record(snmp, "${A}:${P}_Outlet1_W") {
+    field(DESC, "PDU outlet1 control")
+    field(DTYP, "SNMP Write")
+    field(SCAN, "5 second")
+    field(VERS, "SNMP_VERSION_3)
+    field(AUTH, "PASSWORD")
+    field(PRIV, "PASSWORD")
+    field(HOST, "10.1.5.142")
+    field(COMM, "admin")
+    field(OIDS, "${PO}sPDUOutletCtl.1")
+}
+\end{lstlisting}
+}
+
+\section{snmpstrRecord}
+snmpstrRecord는 snmpRecord와 마찬가지로 EPICCS의 기본 레코드를 바탕으로 생성되어 SNMP의 String과 BITS 타입의 데이터를 처리하는 레코드로 표 \ref{table:snmpstrrecord}과 같다. 이는 Sting, BITS 타입의 데이터를 처리하기 때문에 알람 파라미터를 사용하지 않으며, 장비의 정보를 읽는 것만 가능하도록 생성되었다. 필드에 대한 정보는 OVAL, VAL필드를 제외한 snmpRecord와 동일하다. 
+
+\begin{table}[h!]
+\begin{center}
+\small 
+\begin{tabulary}{\textwidth}{C|C|C}
+Field & Type & Description\\ \hline
+HOST & String & Device Host  \\ \hline
+COMM & String & Community string / Username  \\ \hline
+OIDS & String & OID Name  \\ \hline
+AUTH & String & Auth Password  \\ \hline
+PRIV & String & Priv Password  \\ \hline
+VERS & String & SNMP version (v2c) \\ \hline
+VAL & String & Value  \\ 
+\end{tabulary}
+\caption{안정성 테스트 결과(60s/1,200~3,600rpm/IP 변경)}
+  \label{table:snmpstrrecord} 
+\end{center}
+\end{table} 
+
+레코드의 사용 예는 아래와 같다.
+
+{\scriptsize
+\begin{lstlisting}[style=termstyle]
+record(snmpstr, "${W}:${C}_PS_Status") {
+  field(DESC, "WIENER Crate P/S Status") 
+  field(DTYP, "SNMP Read")
+  field(SCAN, "5 second")
+  field(VERS, "SNMP_VERSION_2c")
+  field(HOST, "10.1.5.123}")
+  field(COMM, "public")
+  field(OIDS, "${WI}sysStatus.0")
+}
+\end{lstlisting}
+}
+
+\clearpage
+\chapter{안정성 테스트}
+EPICS IOC와 Wiener사 Crate의 SNMPv3에 대한 안정성 테스를 위해 사용된 Bash Shell Script는 다음과 같다.
+
+{\scriptsize
+\begin{lstlisting}[style=termstyle]
+#!/bin/bash
+
+x=1
+while [ $x ]; do
+
+#++
+for i in {1200..3600..100};do
+echo ""
+echo "COUNT : $x"
+echo ""
+x=$(( $x + 1 ))
+
+stat=`caget APC:PDU2_Outlet8_R`
+echo "***************************************************************"
+caget SNMPIOC:TIMESTAMP
+echo "---------------------------------------------------------------"
+echo "snmpget -------------------------------------------------------"
+snmpget -v 1 -c public 10.1.5.123 WIENER-CRATE-MIB::sysMainSwitch.0  WIENER-CRATE-MIB::sysStatus.0  WIENER-CRATE-MIB::fanAirTemperature.0 WIENER-CRATE-MIB::fanNominalSpeed.0
+snmpget -v 1 -c public 10.1.5.142 PowerNet-MIB::sPDUOutletCtl.8
+echo "---------------------------------------------------------------"
+echo "caget ---------------------------------------------------------"
+caget WIENER:CRATE3_MainPower_R WIENER:CRATE3_PS_Status WIENER:CRATE3_FanairTemp WIENER:CRATE3_FanNominalSpeed_R WIENER:CRATE3_FanNominalSpeed_W APC:PDU2_Outlet8_R APC:PDU2_Outlet8_W 
+echo "caput ---------------------------------------------------------"
+
+case "$stat" in
+"APC:PDU2_Outlet8_R             1")
+caput APC:PDU2_Outlet8_W 2;;
+"APC:PDU2_Outlet8_R             2")
+caput APC:PDU2_Outlet8_W 1;;
+*)
+echo "error";;
+esac
+
+caput WIENER:CRATE3_FanNominalSpeed_W $i
+sleep 60
+done
+
+#--
+for i in {3500..1300..100};do
+echo ""
+echo "COUNT : $x"
+echo ""
+x=$(( $x + 1 ))
+
+stat=`caget APC:PDU2_Outlet8_R`
+echo "***************************************************************"
+caget SNMPIOC:TIMESTAMP
+echo "---------------------------------------------------------------"
+echo "snmpget -------------------------------------------------------"
+snmpget -v 1 -c public 10.1.5.123 WIENER-CRATE-MIB::sysMainSwitch.0  WIENER-CRATE-MIB::sysStatus.0  WIENER-CRATE-MIB::fanAirTemperature.0 WIENER-CRATE-MIB::fanNominalSpeed.0
+snmpget -v 1 -c public 10.1.5.142 PowerNet-MIB::sPDUOutletCtl.8
+echo "---------------------------------------------------------------"
+echo "caget ---------------------------------------------------------"
+caget WIENER:CRATE3_MainPower_R WIENER:CRATE3_PS_Status WIENER:CRATE3_FanairTemp WIENER:CRATE3_FanNominalSpeed_R WIENER:CRATE3_FanNominalSpeed_W APC:PDU2_Outlet8_R APC:PDU2_Outlet8_W 
+echo "caput ---------------------------------------------------------"
+
+case "$stat" in
+"APC:PDU2_Outlet8_R             1")
+caput APC:PDU2_Outlet8_W 2;;
+"APC:PDU2_Outlet8_R             2")
+caput APC:PDU2_Outlet8_W 1;;
+*)
+echo "error";;
+esac
+
+caput WIENER:CRATE3_FanNominalSpeed_W $i
+sleep 60
+done
+done
+done
+\end{lstlisting}
+}
+
+\hfill
+
+이는 Crate의 fan tray를 100단위로 1200에서 3600까지 올렸다, 내리고 온도와 전원상태를 모니터링 한다. 또한 APC사의 PDU Outlet 8번의 전원을 On/Off 하면서 IOC의 동작을 확인한다. 
+
+
+
+
+
+
+
 
 
 
