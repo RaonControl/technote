@@ -202,7 +202,37 @@ record(snmpstr, "${A}:${P}_Outlet8_Name") {
 
 
 \chapter{Issue}
+\begin{enumerate}[1)]
+\item {scan rate} \par
+하나의 DB에서 두 버전의 SNMP를 사용할 때, SNMP 버전별 응답시간의 차이로 인해 IOC 내에서 아래와 같이 dbScan warning 메세지를 받을 수 있다. 현재 scan rate를 5초로 권장하며, 이 부분은 보완할 예정이다.
 
+
+{\scriptsize
+\begin{verbatim}
+dbScan warning from '2 second' scan thread:
+	Scan processing averages 2.27 seconds (2.22 .. 2.37).
+	Over-runs have now happened 10 times in a row.
+	To fix this, move some records to a slower scan rate.
+
+dbScan warning from '2 second' scan thread:
+	Scan processing averages 2.26 seconds (2.20 .. 2.37).
+	Over-runs have now happened 17 times in a row.
+	To fix this, move some records to a slower scan rate.
+
+dbScan warning from '2 second' scan thread:
+	Scan processing averages 2.25 seconds (2.17 .. 2.37).
+	Over-runs have now happened 30 times in a row.
+	To fix this, move some records to a slower scan rate.
+
+dbScan warning from '2 second' scan thread:
+	Scan processing averages 2.28 seconds (2.17 .. 2.42).
+	Over-runs have now happened 55 times in a row.
+	To fix this, move some records to a slower scan rate.
+\end{verbatim}
+}
+
+
+\end{enumerate}
 
 \clearpage
 
