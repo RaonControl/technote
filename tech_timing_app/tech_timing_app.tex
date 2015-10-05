@@ -8,12 +8,18 @@
 %  , draft
 ]{memoir}
 
+\usepackage{geometry}
+\geometry{a4paper, margin=0.5in}
 \usepackage{control}
+\usepackage{multicol}
 \usepackage[numbers]{natbib}
+\usepackage{booktabs}
+\usepackage{verbatim}
+\usepackage{framed}
+\usepackage{xcolor}
 
 
 \begin{document}
-
 \newcommand{\technumber}{
   RAON Control-Document Series\\
   Revision : v1.0,   Release : 2015-10-12 fixed date}
@@ -37,17 +43,50 @@
 RAON is a particle accelerator to research the interaction between the nucleus forming a rare isotope as Korean heavy-ion accelerator. RAON accelerator consists of a number of facilities and equipments as a large-scaled experimental device operating under the distributed environment. For synchronization control between these experimental devices, timing system of the RAON uses the VME-based EVG/EVR system. This paper is intended to test high-speed device control with timing event signal. To test the high-speed performance of the control logic with the minimized event signal delay, we are planing to establish the step motor controller testbed applying the FPGA chip. The testbed controller will be configured with Zynq 7000 series of Xilinx FPGA chip. Zynq as SoC (System on Chip) is divided into PS (Processing System) with PL (Programmable Logic). PS with the dual-core ARM cpu is performing the high-level control logic at run-time on linux operating system. PL with the low-level FPGA I/O signal interfaces with the step motor controller directly with the event signal received from timing system.
 
 This paper describes the content and performance evaluation obtaining from the step motor control through the various synchronized event signal received from the timing system.
-
 \end{abstract}
 
-Timing system of the RAON uses the VME-based EVG/EVR system.
+\begin{multicols}{2}
+	
+	
+\chapter{Introduction}
+The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in South Korea, which is to produce a variety of stable ion and rare isotope beams to support various researches for the basic science and applied research applications. To produce the isotopes to fulfill the requirements we have planed the several modes of operation scheme which require fine-tuned synchronous controls, asynchronous controls, or both among the accelerator complexes. For synchronized control under the distributed environment, timing system of the RAON uses the VME-based EVG/EVR system. 
+
+EVG/EVR에 대한 시스템 구성은 아래와 같다.
 
 
+
+\chapter{Event Generator / Receiver}
+\section{특성}
+Channel Archiver\cite{archiver}는 초기 EPICS CA 프로토콜의 PV 데이터를 저장하는 EPICS extension utilities 중 하나로 개발 되었으며 다년간 EPICS community에서 활발하게 사용된 어플리케이션이다. 기본 구성은 PV 데이터에 대한 데이터 블럭(일종의 meta data)의 정보를 담고 있는 index file이 존재하며 해당 index 파일의 정보를 통하여 데이터 블럭에 접근하여 데이터를 획득한다. 파일 I/O에 대한 성능은 60,000 samples/sec을 보이며, RDB Archiver에 비해 높은 성능을 보이지만 여전히 대용량 데이터를 저장하기 위한 구조에는 개선의 여지가 있으며 현재 Channel Archiver에 대한 개발은 더이상 진행되지 않는 상태이다.
+\section{이슈 사항}
+Channel Archiver\cite{archiver}는 구조적으로 index 파일을 사용한다. 이 경우 저장을 위한 PV list가 많거나 sampling rate이 높은 PV가 오랜시간 데이터를 저장할 경우 index 파일의 크기가 2GByte를 초과 할 경우 index 파일을 조작하는 모듈에 성능 부하가 발생하여 데이터 저장 성능이 급속히 떨어진다. 또한, 해당 시스템의 임의적인 재부팅, 또는 Archive Engine의 이상으로 Engine을 강제 종료시 특정 데이터 블럭과 index 파일간의 mismatch가 발생하며 그 경우 해당 데이터의 블럭을 읽을 수 없게 되는 문제점 등이 있다.
+\begin{itemize}
+	\item Index file의 크기 (2GByte 초과시 파일 입출력 성능 저하)
+	\item Index file과 Data block간의 mismatch
+\end{itemize}
+
+\end{multicols}
+
+\chapter{Application : ZYNQ  }
+
+\chapter{Stepper Motor Testbed}
+
+\chapter{EPICS Record}
+
+
+	
+	
+\hfil\break
 
 
 \clearpage
-\bibliographystyle{unsrtnat}
-\bibliography{./refs}
+\vspace*{0.5cm}
+\begin{thebibliography}{9}   % Use for  1-9  references
+\bibitem{TSHOO:NIMB} K.~Tshoo,{ et. al},``Experimental systems overview of the Rare Isotope Science Project in Korea'',
+	
+\end{thebibliography}
+
+
 
 \end{document}
 
