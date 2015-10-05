@@ -49,23 +49,51 @@ This paper describes the content and performance evaluation obtaining from the s
 	
 	
 \chapter{Introduction}
-The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in South Korea, which is to produce a variety of stable ion and rare isotope beams to support various researches for the basic science and applied research applications. To produce the isotopes to fulfill the requirements we have planed the several modes of operation scheme which require fine-tuned synchronous controls, asynchronous controls, or both among the accelerator complexes. For synchronized control under the distributed environment, timing system of the RAON uses the VME-based EVG/EVR system. 
+The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in South Korea, which is to produce a variety of stable ion and rare isotope beams to support various researches for the basic science and applied research applications. To produce the isotopes to fulfill the requirements we have planed the several modes of operation scheme which require fine-tuned synchronous controls, asynchronous controls, or both among the accelerator complexes. RAON, which is a large experimental facility, consists of many experimental devices and additional facilities. For synchronized control under the distributed environment, timing system of the RAON uses the VME-based EVG/EVR system. 
+이러한 많은 실험 장치들을 제어하기 위한 제어 시스템들은 넓은 범위로 분산되어 구성되어 있으며 이러한 분산 환경에서의 많은 제어시스템들을 전체의 하나의 제어시스템으로 운영하기 위하여 RAON control system은 정밀한 타임 동기화가 필요하다. RAON 제어시스템은 정밀한 타이밍 동기화를 위하여 EVG/EVR 시스템을 사용한다. 
 
-EVG/EVR에 대한 시스템 구성은 아래와 같다.
+\chapter{Timing System}
+타이밍 시스템은 타이밍 모듈과 네트워크로 구성되어 있다. 타이밍 모듈은 MRF 사의 EVG, EVR 제품을 사용하며 폼펙터는 VME이다. 이 모듈들은 VME crate에 설치되며 VME 모듈을 제어하기 위해서 VME controller인 Emerson 사의 MVME6100을 사용한다. MVME6100에는 VxWorks 6.9를 OS로 사용한다.
+EPICS의 모듈 중의 하나인 mrfIoc2를 사용하여 EVG와 EVR을 제어한다. 네트워크는 광케이블로 구성한다. 
+\section{Event Generator / Receiver}
+EVG/EVR Timing System에 대한 특징은 아래와 같다.
 
-
-
-\chapter{Event Generator / Receiver}
-\section{특성}
-Channel Archiver\cite{archiver}는 초기 EPICS CA 프로토콜의 PV 데이터를 저장하는 EPICS extension utilities 중 하나로 개발 되었으며 다년간 EPICS community에서 활발하게 사용된 어플리케이션이다. 기본 구성은 PV 데이터에 대한 데이터 블럭(일종의 meta data)의 정보를 담고 있는 index file이 존재하며 해당 index 파일의 정보를 통하여 데이터 블럭에 접근하여 데이터를 획득한다. 파일 I/O에 대한 성능은 60,000 samples/sec을 보이며, RDB Archiver에 비해 높은 성능을 보이지만 여전히 대용량 데이터를 저장하기 위한 구조에는 개선의 여지가 있으며 현재 Channel Archiver에 대한 개발은 더이상 진행되지 않는 상태이다.
-\section{이슈 사항}
-Channel Archiver\cite{archiver}는 구조적으로 index 파일을 사용한다. 이 경우 저장을 위한 PV list가 많거나 sampling rate이 높은 PV가 오랜시간 데이터를 저장할 경우 index 파일의 크기가 2GByte를 초과 할 경우 index 파일을 조작하는 모듈에 성능 부하가 발생하여 데이터 저장 성능이 급속히 떨어진다. 또한, 해당 시스템의 임의적인 재부팅, 또는 Archive Engine의 이상으로 Engine을 강제 종료시 특정 데이터 블럭과 index 파일간의 mismatch가 발생하며 그 경우 해당 데이터의 블럭을 읽을 수 없게 되는 문제점 등이 있다.
 \begin{itemize}
-	\item Index file의 크기 (2GByte 초과시 파일 입출력 성능 저하)
-	\item Index file과 Data block간의 mismatch
+	\item Event driven system, 255 event codes
+	\item 외부 RF reference clock을 이용한 event 신호 생성
+	\item 50 ~ 125MHz Event clock rate
+	\item Events generated
+	\begin{itemize}
+		\item From external HW inputs
+		\item Two sequencers (up to 2048 events/sequencer)
+		\item Multi counters
+	\end{itemize}
+	\item Cascaded Event Generators
+	\item Different Clock Synchronization
+\end{itemize}
+EVG/EVR Timing System은 크게 VME 또는 cPCI interface 상에서 동작하며, RAON에서는 VME interface 상에서 운영되는 플랫폼 구조를 채택하였다. Timing System을 구성하는 항목은 크게 아래와 같다.
+\begin{itemize}
+	\item Hardware 구성 항목
+	\begin{itemize}
+		\item GPS 수신 장치
+		\item SRS Clock source
+		\item EVG/EVR/Fanout 보드
+		\item MVME 6100/MVME 3100 보드 
+		\item VME form factor		
+	\end{itemize}
+	\item Software 구성항목
+	\begin{itemize}
+		\item Workbench 3.3, vxWorks 개발 툴
+		\item vxWorks 6.9 Realtime Operating System
+		\item RTEMS Realtime Operating System
+		\item MRFIOC2  
+		\item EPICS		
+	\end{itemize}
 \end{itemize}
 
-\end{multicols}
+상위에 언급된 Hardware 구성은 SMA connector로 연결된다. Hardware 구성에 대한 내용은 다음 장에서 상세하게 다룬다. 소프트웨어 구성은 EVG/EVR에 대한 Event code 설정 등에 대한 interface 및 제어를 위하여 MRF2IOC가 개발되어 사용된다. 이는 실시간 환경구성을 위하여 MVME6100 및 MVME3100 보드 상에서 vxWorks 또는 RTEMS라는 실시간 운영체제 상에서 구동 된다.
+
+
 
 \chapter{Application : ZYNQ  }
 
@@ -73,7 +101,7 @@ Channel Archiver\cite{archiver}는 구조적으로 index 파일을 사용한다.
 
 \chapter{EPICS Record}
 
-
+\end{multicols}
 	
 	
 \hfil\break
@@ -81,9 +109,10 @@ Channel Archiver\cite{archiver}는 구조적으로 index 파일을 사용한다.
 
 \clearpage
 \vspace*{0.5cm}
+\renewcommand{\bibname}{References}
 \begin{thebibliography}{9}   % Use for  1-9  references
 \bibitem{TSHOO:NIMB} K.~Tshoo,{ et. al},``Experimental systems overview of the Rare Isotope Science Project in Korea'',
-	
+
 \end{thebibliography}
 
 
