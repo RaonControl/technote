@@ -101,8 +101,7 @@ Fig.~\ref{timing:rack} shows hardware configuration of the test timing system.
 Referring to the configuration of Fig.~\ref{timing:rack}, GPS receiver synchronizes with rubidium clock and EVG to 1PPS. Signal generator generates RAON reference clock(81.25 MHz, RF master oscillator) to EVG. The two signals of EVG are synchronized by locking the phase. The synchronized signal of EVG is generated and distributed to EVR according to event code of MRFIOC on VME system.
 
 \subsection{Software Configuration}
-To operate the timing system 
-Software of the timing module consist of:
+Software to operate the timing system consist of:
 \begin{Itemize}
 	\item Workbench 3.3, vxWorks IDE
 	\item vxWorks 6.9 Realtime Operating System
@@ -110,8 +109,6 @@ Software of the timing module consist of:
 	\item MRFIOC2/SRSIOC 
 	\item Network Time Protocol (NTP)
 \end{Itemize}
-
-
 
 \section{Application : ZYNQ  }
 %본 문서에는 Xilinx의 FPGA Chip 중 Zynq 사용을 위한 내용을 기술한다. Zynq의 특징은 앞서 설명한 FPGA의 특징과 ARM CPU를 내장한 embedded 특징 모두 가지는 하나의 SoC(System on Chip) 이다.  따라서 Zynq Chip에는 기존 FPGA에 가지는 장점에 embedded 형태의 운영체제를 가질 수 있는 장점이 있다. 또한 이 둘간의 interface는 AXI Bus interface를 통한 메모리 맵을 통하여 데이터 통신이 가능하다. 따라서 고속 신호처리를 위하여는 FPGA I/O를 low level(hardware) 단에서 처리를 하며, 상위 레벨과의 인터페이스 및 주요 제어로직은 CPU 모듈에서 처리 할 수 있는 설계가 가능하다. 이는 가속기 제어 operation sequence에 따른 timing event의 external trigger를 입력으로 받아 고속의 신호를 처리하여야 하는 application에 활용 할 수 있다. 또한 MPS(Machine Protection System)와 같은 고속의 application에 적용할 수 있으리라 판단된다.Zynq는 ARM 계열의 CPU를 가지고 있으며 여기에 linux 운영체제를 쉽게 올릴 수 있는 petalinux softeware tool을 제공한다. 
