@@ -110,35 +110,34 @@ Software to operate the timing system consist of:
 	\item Network Time Protocol (NTP)
 \end{Itemize}
 
-\section{Application : ZYNQ  }
+\section{Fast Stepper Motor Testbed using timing signal}
+
+\subsection{System on Chip: FPGA - Zynq}
+Zynq\cite{xilix}\cite{zynq} as SoC is divided into Processing System (PS,dual-core ARM cpu) with  Programmable Logic (PL, FPGA). Communication between PS and PL is through the AXI interface with the ABMA bus.
 %본 문서에는 Xilinx의 FPGA Chip 중 Zynq 사용을 위한 내용을 기술한다. Zynq의 특징은 앞서 설명한 FPGA의 특징과 ARM CPU를 내장한 embedded 특징 모두 가지는 하나의 SoC(System on Chip) 이다.  따라서 Zynq Chip에는 기존 FPGA에 가지는 장점에 embedded 형태의 운영체제를 가질 수 있는 장점이 있다. 또한 이 둘간의 interface는 AXI Bus interface를 통한 메모리 맵을 통하여 데이터 통신이 가능하다. 따라서 고속 신호처리를 위하여는 FPGA I/O를 low level(hardware) 단에서 처리를 하며, 상위 레벨과의 인터페이스 및 주요 제어로직은 CPU 모듈에서 처리 할 수 있는 설계가 가능하다. 이는 가속기 제어 operation sequence에 따른 timing event의 external trigger를 입력으로 받아 고속의 신호를 처리하여야 하는 application에 활용 할 수 있다. 또한 MPS(Machine Protection System)와 같은 고속의 application에 적용할 수 있으리라 판단된다.Zynq는 ARM 계열의 CPU를 가지고 있으며 여기에 linux 운영체제를 쉽게 올릴 수 있는 petalinux softeware tool을 제공한다. 
 
 \section{Stepper Motor Testbed}
-
-\section{EPICS Interface}
-
-\begin{figure*}[!tbh]
-    \centering
-    \includegraphics*[width=\textwidth]{JACpic2v3}
-
-    \caption{Example of a full-width figure showing the JACoW Team at their annual
-             meeting in 2012. This figure has a multi-line caption that has to
-             be justified rather than centered.}
-    \label{l2ea4-f2}
-\end{figure*}
-
-\subsection{Title and Author List}
-
+\subsection{ZC706}
 The title should use \SI{14}{pt} bold uppercase letters and be centered on the page.
 Individual letters may be lowercase to avoid misinterpretation (e.g., mW, MW).
 To include a funding support statement, put an asterisk after the title and
 the support text at the bottom of the first column on page~1---in Word,
 use a text box; in \LaTeX, use $\backslash$\texttt{thanks}.
 
-The names of authors, their organizations/affiliations and mailing addresses
-should be grouped by affiliation and listed in \SI{12}{pt} upper- and lowercase letters.
-The name of the submitting or primary author should be first, followed by
-the co-authors, alphabetically by affiliation.
+\section{EPICS Interface}
+\subsection{Title and Author List}
+The title should use \SI{14}{pt} bold uppercase letters and be centered on the page.
+Individual letters may be lowercase to avoid misinterpretation (e.g., mW, MW).
+To include a funding support statement, put an asterisk after the title and
+the support text at the bottom of the first column on page~1---in Word,
+use a text box; in \LaTeX, use $\backslash$\texttt{thanks}.
+\begin{figure*}[!tbh]
+    \centering
+    \includegraphics*[width=\textwidth]{motor-testbed}
+    \caption{Fast motor testbed adopted zynq device using timing event signal}
+    \label{stepper}
+\end{figure*}
+
 
 
 \subsection{Section Headings}
@@ -357,11 +356,6 @@ This work is supported by the Rare Isotope Science Project funded by Ministry of
 	\raggedend
 \fi
 
-\section{appendix}
-Any appendix should be in a separate section directly preceding
-the \SEC{References} section. If there is no \SEC{References} section,
-this should be the last section of the paper.
-
 \iffalse  % only for "biblatex"
 	\newpage
 	\printbibliography
@@ -384,6 +378,24 @@ this should be the last section of the paper.
 	\url{http://www.mrf.fi}%
 %	last visit 27 March 2014.\newline \mbox{ }
 	\hfill\textcolor{red}{\{no hyperlink, no period after URL\}}
+
+
+\bibitem{xilix}
+Xilinx-FPGA website:
+%\menu[,]{for Authors,Help,Using \LaTeX}
+\url{http://www.xilinx.com}
+%	last visit 27 March 2014.\newline \mbox{ }
+
+\bibitem{zynq}
+Zynq-Book website:
+%\menu[,]{for Authors,Help,Using \LaTeX}
+\url{http://www.zynqbook.com}
+
+
+\bibitem{analog}
+Analog Devices website:
+%\menu[,]{for Authors,Help,Using \LaTeX}
+\url{http://www.analog.com}
 
 \bibitem{exampl-ref}
 	A.N. Other,
