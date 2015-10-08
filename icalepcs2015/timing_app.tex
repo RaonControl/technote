@@ -17,6 +17,10 @@
  {\usepackage[utf8]{inputenc}}           % switch to utf8
 
 \usepackage[USenglish]{babel}
+%\usepackage{control}
+\RequirePackage{kotex}
+
+
 
 \ifboolexpr{bool{jacowbiblatex}}%        % if BibLaTeX is used
  {%
@@ -40,11 +44,11 @@
 
 \begin{document}
 
+
 \title{Application using timing system of RAON accelerator\thanks{Work supported by ...}}
 
 \author{S. Lee\thanks{silee7103@ibs.re.kr}, CW. Son\thanks{scwook@ibs.re.kr}, HJ. Jang\thanks{lkcom@ibs.re.kr}, IBS, Daejeon, South Korea\\
        }
-
 \maketitle
 
 %
@@ -56,10 +60,10 @@
 
 
 \section{Introduction}
-The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in South Korea, which is to produce a variety of stable ion and rare isotope beams to support various researches for the basic science and applied research applications. To produce the isotopes to fulfill the requirements we have planed the several modes of operation scheme which require fine-tuned synchronous controls, asynchronous controls, or both among the accelerator complexes. RAON, which is a large experimental facility, consists of many experimental devices and additional facilities. For synchronized control under the distributed environment, timing system of the RAON uses the VME-based EVG/EVR system.
+The RAON is a new heavy ion accelerator under construction in South Korea, which is to produce a variety of stable ion and rare isotope beams to support various researches for the basic science and applied research applications.\cite{TSHOO:NIMB} To produce the isotopes to fulfill the requirements we have planed the several modes of operation scheme which require fine-tuned synchronous controls, asynchronous controls, or both among the accelerator complexes. RAON, which is a large experimental facility, consists of many experimental devices and additional facilities. For synchronized control under the distributed environment, timing system of the RAON uses the VME-based EVG/EVR system.
 
 \section{Timing System}
-The timing system uses the Event Generator(EVG)/Event Receiver (EVR) system of the Micro-Research Finland Oy company and VME form factor. The timing system\cite{mrf} consists of an EVG which converts timing events and signals to an optical signal distributed through Fan-Out units to an array of EVRs. The EVRs decode the optical signal and produce hardware and software output signals based on the timing events. The VME controller installed in VME crate uses MVME6100 or 3100 of Emerson company. The VME controllers use real-time operating system, VxWorks 6.9 for a fast response. Those controllers control FPGA-based EVG/EVR boards using mfrioc2 of EPICS IOCs on VxWorks.
+The timing system uses the Event Generator(EVG)/Event Receiver (EVR)\cite{mrf} system of the Micro-Research Finland Oy company and VME form factor. The timing system consists of an EVG which converts timing events and signals to an optical signal distributed through Fan-Out units to an array of EVRs. The EVRs decode the optical signal and produce hardware and software output signals based on the timing events. The VME controller installed in VME crate uses MVME6100 or 3100 of Emerson company. The VME controllers use real-time operating system, VxWorks 6.9 for a fast response. Those controllers control FPGA-based EVG/EVR boards using mfrioc2 of EPICS IOCs on VxWorks.
 \hfil\break
 The characteristics of MRF timing system are :
 \begin{Itemize}
@@ -111,163 +115,58 @@ Software to operate the timing system consist of:
 \end{Itemize}
 
 \section{Fast Stepper Motor Testbed using timing signal}
-%그림2의 구성은 Timing signal의 입력을 이용한 fast stepper motor testbed의 전체 구성을 보여준다. 그림2의 내용을 설명하면, Timing system    
- 
-
-
+Configuration of Fig.~\ref{stepper} shows the overall of a fast stepper motor testbed operating by the input of the timing signal. The EVG of the timing system receives two input signals, GPS and RF reference clock. The two signals of EVG are synchronized by locking phase. EPICS software module, mrfioc2, on real-time OS (vxWorks) of VME controller registers event codes. The synchronized events of EVG are distributed through optical fiber links to EVGs.The EVRs received some events from EVG decode those events and trigger TTL level signals to ZC706 evaluation board. The PL of zynq which is received from external TTL signal triggers signal to motor controller according to the configured motor's operation parameters. The setting of the parameter values for the motor control is performed on the EPICS interface of the zynq PS. PS is equipped with the EPICS software module on the cross-compiled linux OS of the ARM processor. The interface between PS and PL uses the AXI interface of AMBA. The ARM Advanced Microcontroller Bus Architecture (AMBA)\cite{amba-bus} is an open-standard, on-chip interconnect specification for the connection and management of functional blocks in system-on-a-chip (SoC) designs. It should be also developed the linux device driver for the AXI interface between both area. The types of motor which can be supported to low voltage drive board of the Analog Device\cite{analog} are brushless DC, PMSM, brushed DC or stepper motor. 
 
 \subsection{System on Chip: FPGA - Zynq}
-Zynq\cite{xilix,zynq} as SoC is divided into Processing System (PS,dual-core ARM cpu) with  Programmable Logic (PL, FPGA). Communication between PS and PL is through the AXI interface with the ABMA bus.
-%본 문서에는 Xilinx의 FPGA Chip 중 Zynq 사용을 위한 내용을 기술한다. Zynq의 특징은 앞서 설명한 FPGA의 특징과 ARM CPU를 내장한 embedded 특징 모두 가지는 하나의 SoC(System on Chip) 이다.  따라서 Zynq Chip에는 기존 FPGA에 가지는 장점에 embedded 형태의 운영체제를 가질 수 있는 장점이 있다. 또한 이 둘간의 interface는 AXI Bus interface를 통한 메모리 맵을 통하여 데이터 통신이 가능하다. 따라서 고속 신호처리를 위하여는 FPGA I/O를 low level(hardware) 단에서 처리를 하며, 상위 레벨과의 인터페이스 및 주요 제어로직은 CPU 모듈에서 처리 할 수 있는 설계가 가능하다. 이는 가속기 제어 operation sequence에 따른 timing event의 external trigger를 입력으로 받아 고속의 신호를 처리하여야 하는 application에 활용 할 수 있다. 또한 MPS(Machine Protection System)와 같은 고속의 application에 적용할 수 있으리라 판단된다.Zynq는 ARM 계열의 CPU를 가지고 있으며 여기에 linux 운영체제를 쉽게 올릴 수 있는 petalinux softeware tool을 제공한다. 
+Zynq\cite{xilix,zynq} as SoC is divided into Processing System (PS,dual-core ARM cpu) with  Programmable Logic (PL, FPGA). Communication between PS and PL is through the AXI interface of ABMA.
 
-\subsection{ZC706}
-The title should use \SI{14}{pt} bold uppercase letters and be centered on the page.
-Individual letters may be lowercase to avoid misinterpretation (e.g., mW, MW).
-To include a funding support statement, put an asterisk after the title and
-the support text at the bottom of the first column on page~1---in Word,
-use a text box; in \LaTeX, use $\backslash$\texttt{thanks}.
+\subsection{ZC706 Evaluation Board of Xilinx}
+The ZC706 evaluation board for All Programmable SoC (AP SoC) provides a hardware environment for developing and evaluating designs targeting the Zynq®-7000 AP SoC.\cite{zc706-doc} The ZC706 board has the SMA port which is the programmable user clock for the TTL out signal of the EVR timing board.
 
-\subsection{Linux Kernel on ARM processor}
+\subsection{Linux on Zynq PS (ARM processor)}
+To operate linux OS on the ARM processor of the zynq PS there consists of:
+\begin{Itemize}
+	\item ARM Cross Compile Tool Chain (arm-linux-gnueabihf)
+	\item Linux Kernel Source (Ubuntu-based Linaro)
+	\item Bootloader (BOOT.BIN: FSBL.elf, U-Boot.elf, Zynq.bif, FPGA Bitstrem)
+	\item Board Support Package (Linux Device Tree)
+	\item Root File System (Busybox)
+\end{Itemize}
+Linaro is a not-for-profit engineering organization that works on free and open-source software such as the Linux kernel, the GNU Compiler Collection (GCC), power management, graphics and multimedia interfaces for the ARM family of instruction sets and implementations thereof as well as for the Heterogeneous System Architecture.\cite{linaro}   
+The linaro kernel source is the ubuntu-based kernel source including a lot of device driver such as zynq device tree.
+
+
 \subsection{Linux Device Driver}
 
-\subsection{EPICS Interface}
+\subsection{Controller for Motor Drive}
+
+\subsection{Interface}
+\subsubsection{FPGA Interface}
+\subsubsection{EPICS Interface} 
+
 The title should use \SI{14}{pt} bold uppercase letters and be centered on the page.
 Individual letters may be lowercase to avoid misinterpretation (e.g., mW, MW).
 To include a funding support statement, put an asterisk after the title and
 the support text at the bottom of the first column on page~1---in Word,
 use a text box; in \LaTeX, use $\backslash$\texttt{thanks}.
-
-
-
 
 
 \begin{figure*}[!tbh]
     \centering
-    \includegraphics*[width=\textwidth,height=0.6\textwidth]{motor-testbed}
+    \includegraphics*[width=\textwidth,height=0.7\textwidth]{motor-testbed}
     \caption{Fast motor testbed adopted zynq device using timing event signal}
     \label{stepper}
 \end{figure*}
 
 
+\section{Summary}
 
-\subsection{Section Headings}
-
-Section headings should not be numbered. They should
-use  \SI{12}{pt}  bold  uppercase  letters  and  be  centered  in  the
-column. All section headings should appear directly above
-the text---there should never be a column break between a heading and the
-following paragraph.
-
-\subsection{Subsection Headings}
-
-Subsection  headings  should  not  be  numbered.
-They should use \SI{12}{pt} italic letters and be left aligned in the column.
-Subsection headings use \emph{T}itle \emph{C}ase (or \emph{I}nitial \emph{C}aps)
-and should appear directly above the text---there should never be a column break
-between a heading and the following paragraph.
-
-\subsubsection{Third-level Headings} are created with the \LaTeX\ command \verb|\subsubsection|.
-In the Word templates authors must bold the text themselves; this
-heading should be used sparingly. See Table~\ref{style-tab} for its
-style details.
-
-\subsection{Paragraph Text}
-
-Paragraphs should use \SI{10}{pt} font and be justified (touch each side) in
-the column. The beginning of each paragraph should be indented
-approximately \SI{3}{mm} (\SI{0.13}{in}). The last line of a paragraph should not be
-printed by itself at the beginning of a column nor should the first line of
-a paragraph be printed by itself at the end of a column.
-
-\subsection{Figures, Tables and Equations}
-
-Place figures and tables as close to their place of mention as
-possible. Lettering in figures and tables should be large enough to
-reproduce clearly. Use of non-approved fonts in figures can lead to
-problems when the files are processed. \LaTeX\ users should be sure to use
-non-bitmapped versions of Computer Modern fonts in equations (Type\,1 PostScript
-or OpenType fonts are required, Their use is described in the JACoW help
-pages~\cite{jacow-help}).
-
-Each figure and table must be numbered in ascending order (1, 2, 3, etc.) throughout
-the paper. Figure captions (\SI{10}{pt} font) are placed below figures, and table captions are placed above tables. Single-line captions are centered in the column, while captions that span more than one line should be justified. The \LaTeX\ template uses the ‘booktabs’ package to
-format tables.
-
-A simple way to introduce figures into a Word document is to place them inside a table that has no borders. This is done in Word as described below.
-
-\textit{Note: If the figure spans both columns, do all steps. If
-the figure is contained in a single column, start at step 5.}
-
-\begin{Enumerate}
-\item	Insert a continuous section break.
-\item	Insert two empty lines (makes later editing easier).
-\item	Insert another continuous section break.
-\item	Click between the two section breaks and Page Layout $\rightarrow$
-        Columns $\rightarrow$ Single.
-\item	Insert $\rightarrow$ Table select a one-column, two-row table.
-\item	Paste the figure in the first row of the table and adjust the size as appropriate.
-\item	Paste/Type the caption in the second row and apply the appropriate figure caption style.
-\item	Table $\rightarrow$ Table properties $\rightarrow$ Borders and
-        Shading $\rightarrow$ None.
-\item	Table $\rightarrow$ Table properties $\rightarrow$ Alignment $\rightarrow$ Center.
-\item	Table $\rightarrow$ Table properties $\rightarrow$ Text wrapping $\rightarrow$ None.
-\item	Remove blank lines from in and around the table.
-\item	If necessary play with the cell spacing and other parameters to improve appearance.
-\end{Enumerate}
-
-If a displayed equation needs a number (i.\,e., it will be referenced), place it flush with the right margin of the column (see Eq.~\ref{eq:units}). The equation itself should be indented (centered, if possible). Units should be written using the roman (standard) font,
-not the italic font:
-
-\begin{equation}\label{eq:units}
-    C_B=\frac{q^3}{3\epsilon_{0} mc}=\SI{3.54}{\micro eV/T}
-\end{equation}
-
-\subsection{References}
-
-All bibliographical and web references should be numbered and listed at the
-end of the paper in a section called \SEC{References}. When citing a
-reference in the text, place the corresponding reference number in square
-brackets~\cite{exampl-ref}. The reference citations in the text should be numbered
-in ascending order.
-
-A URL may be included as part of a reference, but
-its hyperlink should NOT be added. Multiple citations should appear in
-the same square bracket~\cite{jacow-help, exampl-ref2, exampl-ref3} or
-with ranges, e.g., \cite{jacow-help}--\cite{exampl-ref3} or \cite{jacow-help, exampl-ref, exampl-ref2, exampl-ref3, exampl-last}.
-
-Examples of correctly formatted references can be found at the JACoW website (http://JACoW.org). Once there, click on the ‘for Authors’ link at the top and then on the ‘Formatting
-Citations’ link in the left-hand column \cite{jacow-help}.
-
-\subsection{Footnotes}
-
-Footnotes on the title and author lines may be used for acknowledgments,
-affiliations and e-mail addresses. A non-numeric sequence of characters (*, \#,
-\dag, \ddag) should be used.
-Word users---DO NOT use Word's footnote feature (\textbf{Insert}, \textbf{Footnote})
-to insert footnotes, as this will create formatting problems. Instead, insert
-the title or author footnotes manually in a text box at the bottom of the first column with a
-line at the top of the text box to separate the footnotes from the rest of
-the paper's text.  The easiest way to do this is to copy the text box from
-the JACoW template and paste it into your own document.
-These “pseudo footnotes” in the text box should only
-appear at the bottom of the first column on the first page.
-
-Any other footnote in the body of the paper should use the normal numeric
-sequencing and appear as footnote\footnote{This text should appear
-in the column where it was referenced.} in the same column where they are used.
-
-\subsection{Acronyms}
-
-Acronyms should be defined the first time they appear.
-
-\section{styles}
-
-Table~\ref{style-tab} summarizes the fonts and spacings used in the styles of
+Table~\ref{app-conf} summarizes the fonts and spacings used in the styles of
 a JACoW template (these are implemented in the \LaTeX\ class file).
 \begin{table}[h!t]
     \setlength\tabcolsep{3.8pt}
-    \caption{Summary of Styles}
-    \label{style-tab}
+    \caption{Configuration of Application using Timing Signal}
+    \label{app-conf}
     \begin{tabular}{@{}llcc@{}}
         \toprule
         \textbf{Style} & \textbf{Font}               & \textbf{Space}  & \textbf{Space} \\
@@ -308,48 +207,7 @@ a JACoW template (these are implemented in the \LaTeX\ class file).
     \end{tabular}
 \end{table}
 
-\section{page numbers}
-
-\textbf{DO NOT include any page numbers}. They will be added
-when the final proceedings are produced.
-
-\section{templates}
-
-Templates and examples can be retrieved through web
-browsers such as Firefox, Chrome and Internet Explorer by saving to disk.
-
-Template documents for the recommended word processing software are
-available from the JACoW website (\url{http://JACoW.org}) and exist for
-\LaTeX, Microsoft Word (Mac and PC) and OpenOffice for US letter and A4 paper sizes.
-
-Use the correct template for your paper size and version of Word.
-Do not transport Microsoft Word documents across platforms, e.g.,
-Mac~$\leftrightarrow$~PC. When saving a Word 2010 file (PC), be sure
-to click `Embed fonts' in the Save options. Fonts are embedded by default
-when printing to PDF on Mac OSX.
-
-Please see the information and help files for authors on the JACoW.org website
-for instructions  on  how to install templates in your Microsoft templates folder.
-
-\section{checklist for electronic publication}
-
-\begin{Itemize}
-    \item  Use only Times or Times New Roman (standard, bold or italic) and Symbol
-           fonts for text---\SI{10}{pt} minimum except references, which can be \SI{9}{pt} or \SI{10}{pt}.
-    \item  Figures should use Times or Times New Roman (standard, bold or italic) and
-           Symbol fonts when possible---\SI{6}{pt} minimum.
-    \item  Check that citations to references appear in sequential order and
-           that all references are cited~\cite{exampl-last}.
-    \item  Check that the PDF file prints correctly.
-    \item  Check that there are no page numbers.
-    \item  Check that the margins on the printed version are within \SI{\pm1}{mm}
-           of the specifications.
-    \item  \LaTeX\ users can check their margins by invoking the
-           \texttt{boxit} option.
-\end{Itemize}
-
 \section{Conclusion}
-
 Any conclusions should be in a separate section directly preceding
 the \SEC{Acknowledgment}, \SEC{Appendix}, or \SEC{References} sections, in that
 order.
@@ -402,10 +260,27 @@ Zynq-Book website:
 \url{http://www.zynqbook.com}
 
 
+\bibitem{amba-bus}
+Advanced Microcontroller Bus Architecture website:
+%\menu[,]{for Authors,Help,Using \LaTeX}
+\url{http://https://en.wikipedia.org/wiki/Advanced_Microcontroller_Bus_Architecture}
+
+
 \bibitem{analog}
 Analog Devices website:
 %\menu[,]{for Authors,Help,Using \LaTeX}
 \url{http://www.analog.com}
+
+\bibitem{zc706-doc}
+ZC706 Evaluation Board Document:ug954-zc706-eval-board-xc7z045-ap-soc.pdf
+%\menu[,]{for Authors,Help,Using \LaTeX}
+\url{http://www.xilinx.com/support/documentation/boards_and_kits/zc706/ug954-zc706-eval-board-xc7z045-ap-soc.pdf}
+
+\bibitem{linaro}
+Linaro :
+%\menu[,]{for Authors,Help,Using \LaTeX}
+\url{https://en.wikipedia.org/wiki/Linaro}
+
 
 \bibitem{exampl-ref}
 	A.N. Other,
