@@ -134,16 +134,36 @@ The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in S
 
 \section*{Timing System of RAON}
 \begin{mdframed}[roundcorner=10pt]
-
 \begin{itemize}
-\item Integration of many different subsystems : \\ 
-   RF system, beam diagnostics, power supply, vacuum control, beam line control, and machine protection
-\item An exclusive operation two and more accelerator systems for two facilities : \\
-   In-flight Fragmentations (IF) and Isotope On-Line (ISOL)
-\item C.W. and pulsed beam operation
-\item Beam off latency $<$ 50 $\mu$secs
-\item Automation of most of subsystems and manual control of beam line elements
-\item EPICS integration
+\item Characteristics of MRF Timing System :
+   \begin{itemize}
+   	\item[-] Event Driven System, to 256 event codes
+   	\item[-] External RF Reference Clock
+   	\item[-] 50 $\sim$ 120 MHz Frequency
+   	\item[-] Multi Counters
+   	\item[-] Event Cascaded
+   	\item[-] Different Clock Synchronization
+   \end{itemize}
+   
+\item Hardware Configurations :
+   \begin{itemize}
+   	\item[-] XLi GPS Time System
+   	\item[-] Rubidium Frequency Standard Clock Source (FS725)
+   	\item[-] Event Trigger System (EVG/EVR, Fan-out Repeater)
+   	\item[-] MVME 6100 / MVME 3100 Controller
+   	\item[-] SMA 100a RF Signal Generator
+   	\item[-] VME Wiener Crate
+   \end{itemize}
+\item Software Configurations :
+   \begin{itemize}
+   	\item[-] Workbench 3.3, VxWorks IDE
+   	\item[-] VxWorks 6.9 Real-time OS (on MVME 6100, EVG)
+   	\item[-] RTEMS Real-time OS (on MVME 3100, EVR)
+   	\item[-] EPICS framework (R3.14.15.2)
+   	\item[-] MRFIOC2 / SRSIOC
+   	\item[-] Network Time Protocol (NTP)
+   \end{itemize}
+   
 \end{itemize}
 \end{mdframed}
 
@@ -162,13 +182,14 @@ The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in S
 \item GPS receiver synchronizes with RB clock and EVG to 1PPS
 \item Master OSC. generates reference RF (81.25 MHz) to EVG
 \item Two signals of EVG are synchronized by locking phase
-\item Synchronized signal of EVG is generated and distributed to EVR according to event code of MRFIOC on VME system
+\item Synchronized signal of EVG is generated and distributed to EVR according to event code of MRFIOC2 on VME system
 \end{itemize}
 \end{mdframed}
 
 
 \subsection*{The Control Unit}
 \begin{mdframed}[roundcorner=10pt]
+
 \begin{itemize}
 \item VME platform.
 \item Consists of a SBC running with RTOS, EVR and I/O board.
@@ -323,39 +344,60 @@ and National Research Foundation (NRF) of KOREA.
 \bibitem{mrf}
 Micro-Research Finland Oy: \texttt{http://www.mrf.fi}%
 
-%\bibitem{lsis}
-%LSIS~ PLC solutions, \texttt{http://www.lsis.co.kr/ls/\\ %product/product\_cate02.asp?cate01=A03\&cate02=001}
+\bibitem{amba-bus}
+Advanced Microcontroller Bus Architecture:\texttt{http://en.wikipedia.org/wiki/Advanced\_Microcontroller\_Bus\_Architecture}%
 
-%\bibitem{MRF}
-%Event system by Micro-Research Finland Oy, \\ \texttt{http://www.mrf.fi}
+\bibitem{analog}
+Analog Devices website:
+\texttt{http://www.analog.com}
 
-%\bibitem{LIBERABPM}
-%BPM phase \& position processor, \texttt{http://www.i-tech.si}
+\bibitem{xilix}
+Xilinx-FPGA website:
+\texttt{http://www.xilinx.com}
+%	last visit 27 March 2014.\newline \mbox{ }
 
-%\bibitem{WR}
-%M. Lipinski, J. Serrano, T. Wlostowski, and C. Prados, ``Reliability in a White Rabbit Network'',
-%ICALEPCS'11, WEMMU007 (2011).
+\bibitem{zynq}
+Zynq-Book Document website:
+\texttt{http://www.zynqbook.com}
+
+\bibitem{zc706-doc}
+ZC706 Evaluation Board Document:
+\texttt{http://www.xilinx.com/support/documentation/boards\_and\_kits/zc706/ug954-zc706-eval-boardxc7z045-ap-soc.pdf}%
+\bibitem{linaro}
+Linaro Document website :
+\texttt{https://en.wikipedia.org/wiki/Linaro}
+
+\bibitem{u-boot}
+U-Boot Document website :
+\texttt{http://www.denx.de/wiki/U-Boot}
+
+\bibitem{vivado}
+Xilinx Vivado Document website :
+\texttt{http://www.xilinx.com/products/design-tools/vivado.html}
+
+\bibitem{boot-bin}
+Boot Image Document website :
+\texttt{http://www.wiki.xilinx.com/Prepare+boot+image}
+
+\bibitem{busybox}
+Busybox Document website :
+\texttt{http://www.busybox.net/}
+
+\bibitem{iio}
+Industrial I/O Document website :
+\texttt{https://wiki.analog.com/resources/tools-software/linux-software/libiio}
+
+\bibitem{epics}
+EPICS website :
+\texttt{http://www.aps.anl.gov/epics/}
 
 %\bibitem{XAL}
 %J. Galambos, {\it et. al.}, ``SNS Application Programming Environment'', EPAC 2002, Paris, France (2002).
 
-%\bibitem{OPENXAL}
-%Open XAL project, \texttt{http://xaldev.sourceforge.net}
-
 %\bibitem{esstechnote0005}
 %G. Trahern, ``ESS Naming Convention'', ESS AD Technical Note.
-
-
 \end{thebibliography}
-
-
-
-
 \end{multicols}
-
-
-
-
 %\vspace{13mm}
 
 %\begin{minipage}[b]{1\linewidth}
