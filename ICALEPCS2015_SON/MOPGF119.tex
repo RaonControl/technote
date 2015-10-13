@@ -78,7 +78,7 @@ The control system performs the interlocks for the vacuum system of the ECR ion 
 
 \section{Vacuum control system}
 Vacuum control system of the ECR ion source consists of several turbo molecular pumps and controllers. They are installed at each voltage platforms. TC 353 turbo pump controller is installed at the ground platform and TC 2403 is installed at the 50kV platform. Both are made by OSAKA vacuum. TD 20 manufactured by LAYBOLD vacuum company is installed at 80kV platform. Each controller communicates with serial communication module (1734-232ASC) of AB PLC through serial cable.   
-An AB PLC CPU 1756-L71 is used to control entire system of the ECR ion source and is installed at ground platform control rack of area ‘A’ (Fig 2). As can be seen from the above figure, four slots of the control rack are emptied to iWe performed communication test among AB PLC and the OSAKA turbo pump controller (TC353) as non-handshake method, the vacuum gauge controller (XGS600). TC353 comes with local and remote capabilities but we can’t select these modes at the same time during the serial communication mode. TC353 and XGS600 are coupled with each other to control the vacuum system. We used Logix5000 software to send the command message and to receive the return message with each controller through RS-232 protocol. We completed communication test successfully to set each value of the parameters and to operate vacuum device.  stall MODBUS communication module to integrate on the EPICS framework after local control test.
+An AB PLC CPU 1756-L71 is used to control entire system of the ECR ion source and is installed at ground platform control rack of area ‘A’ (Fig 2). As can be seen from the Fig 2, four slots of the control rack are emptied to install MODBUS communication module to integrate on the EPICS framework after local control test. We performed communication test among the AB PLC and the OSAKA turbo pump controller (TC353) as non-handshake method, the vacuum gauge controller (XGS600). TC353 comes with local and remote capabilities but we can’t select these modes at the same time during the serial communication mode. TC353 and XGS600 are coupled with each other to control the vacuum system. We used Logix5000 software to send the command message and to receive the return message with each controller through RS-232 protocol. We completed communication test successfully to set each value of the parameters and to operate vacuum device.  
 The electric wiring with vacuum components for IO control is proceeding after communication test. Presently, PLC modules are installed at each rack as shown in Table 1.
 The ladder logic programming for sequence control of the PLC is developed with Logix5000 software using Window based PC. The RSLinx software is used for setting network environment of the AB PLC. The ladder logic program will be designed independently to protect vacuum devices of the ECR ion source. The interlock program designed by PLC could perform protection for the vacuum system even when upper control system is shut down as system fail.
 
@@ -119,7 +119,7 @@ The ladder logic programming for sequence control of the PLC is developed with L
 \label{l2ea4-t1}
 \end{table}
 
-We configured demo vacuum control system like the vacuum system of the ECR ion source to test serial communication for turbo pump controller and vacuum gauge controller as below Fig 3. Because ECR experiment group are performing test for developing the ECR ion source manually. 
+We configured demo vacuum control system like the vacuum system of the ECR ion source to test serial communication for turbo pump controller and vacuum gauge controller as Fig 3. Because ECR experiment group are performing test for developing the ECR ion source manually. 
 We performed communication test among AB PLC and the OSAKA turbo pump controller (TC353) as non-handshake method, the vacuum gauge controller (XGS600). TC353 comes with local and remote capabilities but we can’t select these modes at the same time during the serial communica tion mode. TC353 and XGS600 are coupled with each other to control the vacuum system. We used Logix5000 software to send the command message and to receive the return message with each controller through RS-232 protocol. We completed communication test successfully to set each value of the parameters and to operate vacuum device.  
 
 \begin{figure}[!htb]
@@ -139,7 +139,7 @@ We performed communication test among AB PLC and the OSAKA turbo pump controller
 
 
 \section{Summary}
-We completed control test to operate vacuum pump and g auges through demo vacuum control system for the ECR ion source vacuum control. We will modify the vacuum control system of the ECR ion source to operate the system automatically through hard wiring between devices and PLC modules that are operated currently manually. %
+We completed control test to operate vacuum pump and gauges through demo vacuum control system for the ECR ion source vacuum control. We will modify the vacuum control system of the ECR ion source to operate the system automatically through hard wiring between devices and PLC modules that are operated currently manually. %
 % this setting when the default (\flushend)
 % => "balance two column" shows bad results
 %
