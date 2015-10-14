@@ -167,6 +167,18 @@ The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in S
 \end{itemize}
 \end{mdframed}
 
+\subsection*{VME-based EVG/EVR Configuration}
+\begin{mdframed}[roundcorner=10pt]
+	
+	\begin{itemize}
+		\item VME platform.
+		\item Consists of a SBC running with RTOS, EVR and I/O board.
+		\item EPICS I/O Controller controls the PLC and subsystem.
+		\item Ethernet connection with time stamps given by EVR.
+		\item PLC is the front-end interface to the subsystems.
+	\end{itemize}
+\end{mdframed}
+
 
 \subsection*{Timing Network}
 \begin{mdframed}[roundcorner=10pt]
@@ -183,19 +195,6 @@ The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in S
 \item Master OSC. generates reference RF (81.25 MHz) to EVG
 \item Two signals of EVG are synchronized by locking phase
 \item Synchronized signal of EVG is generated and distributed to EVR according to event code of MRFIOC2 on VME system
-\end{itemize}
-\end{mdframed}
-
-
-\subsection*{The Control Unit}
-\begin{mdframed}[roundcorner=10pt]
-
-\begin{itemize}
-\item VME platform.
-\item Consists of a SBC running with RTOS, EVR and I/O board.
-\item EPICS I/O Controller controls the PLC and subsystem.
-\item Ethernet connection with time stamps given by EVR.
-\item PLC is the front-end interface to the subsystems.
 \end{itemize}
 \end{mdframed}
 
@@ -234,51 +233,7 @@ The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in S
 \end{mdframed}
 
 
-\subsection*{Database}
-\begin{mdframed}[roundcorner=10pt]
-\begin{itemize}
-\item Data Archieving : PV, HW/SW configuration, A/D signals, Logging.
-\item Documentaion and version control.
-\item DAQ and pre-processing : BPM and RF related data. 
-\item Use open-source based programs : Channel Archiever with PostgreSQL.
-\item Develope an archiving framework dedicated to RAON.
-\end{itemize}
-\end{mdframed}
-
-\subsection*{User Interface / High Level Application}
-\begin{mdframed}[roundcorner=10pt]
-\begin{itemize}
-\item Intuitive, Comprehensive.
-\item Applying existing EPICS CA Clients : EDM, MEDM, StripTool, CSS.
-\item Developing an UI envrionment dedicated to RAON using existing tools :
-\begin{itemize}
-\item[-] C/C++  : EPICS Qt
-\item[-] JAVA   : JCA 
-\item[-] Python : Cothread
-\item[-] LabView : CaLab
-\end{itemize}
-\item SNS, CSNS, ESS, GANIL, TRIUMF, and FRIB use/plan to use the XAL~\cite{XAL}.
-\item Consider to use XAL and join OpenXAL~\cite{OPENXAL} project.
-\end{itemize}
-\end{mdframed}
-
-%\columnbreak
-
-%Since XAL~\cite{XAL} has proved its usability and stability at Spallation Neutron Source (SNS) for several years,
-%many recent accelerator projects such as CSNS, ESS, GANIL, TRIUMF, and FRIB, adopt
-%this framework for building their own high level programming infrastructure.
-%Moreover, the RAON control system demands the capabilities provided by XAL from the beginning of
-%beam commissioning to the actual operation.
-%Thus, the OpenXAL~\cite{OPENXAL}, an open source version of development framework,
-%is selected as a high level application solution of the RAON control system.
-%Using the object-oriented feature of Java,
-%a hierarchical structure of the accelerator components will be modeled.
-%Since there are many works to do, however, the international co-work is necessary.
-
-
-\section*{Status}
-
-\subsection*{The control unit for timing system}
+\subsection*{Controller / Low Voltage Drive Board for Driving Motor}
 \begin{mdframed}[roundcorner=10pt]
 \begin{figure}[H]
 \centering
