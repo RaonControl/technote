@@ -135,7 +135,7 @@ The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in S
 \section*{Timing System of RAON}
 \begin{mdframed}[roundcorner=10pt]
 \begin{itemize}
-\item Characteristics of MRF Timing System :
+\item Characteristics of MRF Timing System\cite{mrf}:
    \begin{itemize}
    	\item[-] Event Driven System, to 256 event codes
    	\item[-] External RF Reference Clock
@@ -144,8 +144,21 @@ The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in S
    	\item[-] Event Cascaded
    	\item[-] Different Clock Synchronization
    \end{itemize}
-   
-\item Hardware Configurations :
+  
+\end{itemize}
+\end{mdframed}
+
+\subsection*{Timing System Prototype}
+\begin{mdframed}[roundcorner=10pt]
+ \vspace{4mm}
+ \begin{figure}[H]
+  \centering
+%  \includegraphics[width=1\columnwidth]{./images/timing_test.eps}
+  \includegraphics[width=25cm,height=23cm]{./images/timing_test.eps}
+ \end{figure}
+	  
+\begin{itemize}
+      \item Hardware Configurations :
    \begin{itemize}
    	\item[-] XLi GPS Time System
    	\item[-] Rubidium Frequency Standard Clock Source (FS725)
@@ -154,7 +167,7 @@ The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in S
    	\item[-] SMA 100a RF Signal Generator
    	\item[-] VME Wiener Crate
    \end{itemize}
-\item Software Configurations :
+   \item Software Configurations :
    \begin{itemize}
    	\item[-] Workbench 3.3, VxWorks IDE
    	\item[-] VxWorks 6.9 Real-time OS (on MVME 6100, EVG)
@@ -163,29 +176,18 @@ The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in S
    	\item[-] MRFIOC2 / SRSIOC
    	\item[-] Network Time Protocol (NTP)
    \end{itemize}
-   
 \end{itemize}
 \end{mdframed}
 
-\subsection*{VME-based EVG/EVR Configuration}
-\begin{mdframed}[roundcorner=10pt]
-	
-	\begin{itemize}
-		\item VME platform.
-		\item Consists of a SBC running with RTOS, EVR and I/O board.
-		\item EPICS I/O Controller controls the PLC and subsystem.
-		\item Ethernet connection with time stamps given by EVR.
-		\item PLC is the front-end interface to the subsystems.
-	\end{itemize}
-\end{mdframed}
-
+\columnbreak
 
 \subsection*{Timing Network}
 \begin{mdframed}[roundcorner=10pt]
 \vspace{2mm}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=1\columnwidth]{./images/Timing_network.eps}
+%  \includegraphics[width=1\columnwidth]{./images/Timing_network.eps}
+  \includegraphics[width=25cm, height=12cm]{./images/Timing_network.eps}
   %\caption{Overall architecture of the RAON control system}
   \label{fig:architecture}
 \end{figure}
@@ -198,42 +200,44 @@ The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in S
 \end{itemize}
 \end{mdframed}
 
-\columnbreak
-
 \section*{Application using Timing Signal}
 %\subsection*{Fast Stepper Motor Control Testbed}
 \begin{mdframed}[roundcorner=10pt]
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=1\textwidth]{./images/WEPGF124f3.eps}
+%		\includegraphics[width=1\textwidth]{./images/WEPGF124f3.eps}
+		\includegraphics[width=25cm,height=23cm]{./images/WEPGF124f3.eps}
 	\end{figure}
-%\end{mdframed}
-%\begin{mdframed}[roundcorner=10pt]
 \begin{itemize}
-\item Timing system requires :
-  \begin{itemize}
-  \item[-] low latency, jitter in fs level.
-  \item[-] deterministic operation.
-  \item[-] high speed signal processing.
-  \item[-] identifying a bunch.
-%for RF phase and machine control, and low level RF feedback.
-\end{itemize}
-\item We will use :
-  \begin{itemize}
-  \item[-] MRF EVG/EVR hardwares~\cite{MRF}
-  \item[-] Libera BPM products~\cite{LIBERABPM}
-  \end{itemize}
-
-\item We are considering to :
-  \begin{itemize}
-  \item[-] use White Rabit for timing system \cite{WR}.
-  \item[-] develope homemade BPM with domestic company.
-  \end{itemize}
+  	\item System on Chip: FPGA - Zynq\cite{xilix,zynq}
+  	\begin{itemize}
+		\item Zynq as SoC is divided into PS and PL
+  		\item[-] Interface between PS and PL is through the AXI of AMBA\cite{amba-bus}
+  	\end{itemize}
+  	\item ZC706 Evaluation Board\cite{zc706-doc}
+  	\item Linux on Zynq PS (ARM Processor)
+  	\begin{itemize}
+  		\item[-] ARM Cross Compile Tool Chain (arm-linuxgnueabihf)
+  		\item[-] Linux Kernel Source (Linaro)\cite{linaro}
+  		\item[-] Bootloader (BOOT.BIN: FSBL.elf, U-Boot.elf, uImage, Zynq.bif, User.bit)\cite{boot-bin,u-boot}
+  		\item[-] Board Support Package (Linux Device Tree)
+  		\item[-] Root File System (Busybox)\cite{busybox}
+  	\end{itemize}
+  	\item Linux Device Driver
+  	\begin{itemize}
+  		\item[-] Industrial IO linux device driver of Analog Devices\cite{analog}
+  		\item[-] Libiio library\cite{iio}
+  	\end{itemize}  	
+  	\item Software Interface
+  	\begin{itemize}
+  		\item[-] EPICS Base R3.14.15.2 : IOC developed using Libiio
+  		\item[-] FPGA VerilogHDL by Vivado\cite{vivado} (Used the HDL code of Analog Devices)
+  	\end{itemize}  	
 \end{itemize}
 \end{mdframed}
 
 
-\subsection*{Controller / Low Voltage Drive Board for Driving Motor}
+\subsection*{Controller / Low Voltage Drive Board}
 \begin{mdframed}[roundcorner=10pt]
 \begin{figure}[H]
 \centering
@@ -242,44 +246,38 @@ The RAON\cite{TSHOO:NIMB} is a new heavy ion accelerator under construction in S
 \label{fig:timing_prototype}
 \end{figure}
 \begin{itemize}
-\item Two test VME crates consisting of EVG, EVR, and MVME6100 with VxWorks 6.9.
-\item Connected via EPICS channel access using fiber cables for event network.
-\item Test : jitter, delay time, latency.
-\item It will be used to test injector and superconducting LINAC system.
-\item The international bidding for prototyping is under way in parallel.
+\item Controller and Low Voltage Drive Board of Analog Devices
+\item Controller communicates with ZC706 via FMC Connector
+\item FMC Connection: XADC, Digital I/O, 2xGB Ethernet
+\item XADC and digital I/O signals to LVDB
+\item PWM Signal Generation through MOSFET Gate Drivers
+\item External Power: 12 $\sim$24 DC to LVDB
+\end{itemize}
+\end{mdframed}
+
+\subsection*{Test Stepper Mortor}
+\begin{mdframed}[roundcorner=10pt]
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=25cm,height=15cm]{./images/hw_conf.eps}
+\end{figure}
+\begin{itemize}
+\item Not fully implemented, still is developing FPGA code to receive the timing EVR input signal
+\item Left shows to drive stepper motor using EPICS interface
+\item Right shows the connection for timing signal between EVR and ZC706
 \end{itemize}
 \end{mdframed}
 
 
-
-\subsection*{The vacuum control system}
+\section*{Summary}
 
 \begin{mdframed}[roundcorner=10pt]
-\begin{itemize}
-\item A testbed for the vacuum control system is being developed with a domestic company.
-\item The vacuum system controlled by PLC will be integrated with EPICS and be used for the test facilities.
-\end{itemize}
+	\begin{figure}[H]
+		\centering
+%		\includegraphics[width=25cm, height=22cm]{./images/conf_table.eps}
+		\includegraphics[width=1\textwidth]{./images/conf_table.eps}
+	\end{figure}
 \end{mdframed}
-
-\subsection*{Naming convention}
-\begin{mdframed}[roundcorner=10pt]
-\begin{itemize}
-\item Important for the system integration
-\item Should be comprehensive to user and maintainer.
-\end{itemize}
-%The naming convention is important for the system integration with EPICS,
-%because it is related not only to the user comprehension but also
-%to the issues on network and hardware I/O and data management.
-A primitive naming convention study is done and shown as following:
-%and the structure is followed by EPICS style~\cite{esstechnote0005}.
-\begin{displaymath}
-\textrm{DDDDIII-SSSS:TTTT.XXXX},
-\end{displaymath}
-where DDDDIII is a device identifier, SSSS is a system name, TTTT is the signal name
-followed by the EPICS DB convention, and XXXX is the signal suffix.
-This naming convention is not fixed but being improved upon the user's request.
-\end{mdframed}
-
 
 
 \section*{Conclusion}
@@ -292,7 +290,7 @@ This work is supported by the Rare Isotope Science Project funded by
 Ministry of Science, ICT and Future Planning (MSIP) 
 and National Research Foundation (NRF) of KOREA.
 
-\begin{thebibliography}{9}   % Use for  1-9  references
+\begin{thebibliography}{13}   % Use for  1-9  references
 %\begin{thebibliography}{99} % Use for 10-99 references
 
 \bibitem{TSHOO:NIMB} Y.~K.~Kwon, {\it et. al},``Status of Rare Isotope Science Project in Korea'', Few-Body Syst 54, 961-966, (2013).
@@ -300,52 +298,52 @@ and National Research Foundation (NRF) of KOREA.
 \bibitem{mrf}
 Micro-Research Finland Oy: \texttt{http://www.mrf.fi}%
 
-\bibitem{amba-bus}
-Advanced Microcontroller Bus Architecture:\texttt{http://en.wikipedia.org/wiki/Advanced\_Microcontroller\_Bus\_Architecture}%
-
-\bibitem{analog}
-Analog Devices website:
-\texttt{http://www.analog.com}
 
 \bibitem{xilix}
 Xilinx-FPGA website:
 \texttt{http://www.xilinx.com}
-%	last visit 27 March 2014.\newline \mbox{ }
 
 \bibitem{zynq}
 Zynq-Book Document website:
 \texttt{http://www.zynqbook.com}
 
+\bibitem{amba-bus}
+Advanced ~Microcontroller ~Bus~ Architecture\\ \texttt{~http://en.wikipedia.org/wiki/\\Advanced\_Microcontroller\_Bus\_Architecture}%
+
 \bibitem{zc706-doc}
-ZC706 Evaluation Board Document:
-\texttt{http://www.xilinx.com/support/documentation/boards\_and\_kits/zc706/ug954-zc706-eval-boardxc7z045-ap-soc.pdf}%
+ZC706 ~Evaluation ~Board ~Document:\\
+\texttt{http://www.xilinx.com/support/documentation/boards\_and\_kits\\/zc706/ug954-zc706-eval-boardxc7z045-ap-soc.pdf}%
+
 \bibitem{linaro}
-Linaro Document website :
+Linaro Document website:\\
 \texttt{https://en.wikipedia.org/wiki/Linaro}
+
+
+\bibitem{boot-bin}
+Boot ~Image ~Document ~website:\\
+\texttt{http://www.wiki.xilinx.com/Prepare+boot+image}
 
 \bibitem{u-boot}
 U-Boot Document website :
 \texttt{http://www.denx.de/wiki/U-Boot}
 
-\bibitem{vivado}
-Xilinx Vivado Document website :
-\texttt{http://www.xilinx.com/products/design-tools/vivado.html}
-
-\bibitem{boot-bin}
-Boot Image Document website :
-\texttt{http://www.wiki.xilinx.com/Prepare+boot+image}
 
 \bibitem{busybox}
 Busybox Document website :
 \texttt{http://www.busybox.net/}
 
-\bibitem{iio}
-Industrial I/O Document website :
-\texttt{https://wiki.analog.com/resources/tools-software/linux-software/libiio}
+\bibitem{analog}
+Analog Devices website:
+\texttt{http://www.analog.com}
 
-\bibitem{epics}
-EPICS website :
-\texttt{http://www.aps.anl.gov/epics/}
+\bibitem{iio}
+Industrial ~I/O ~Document ~website:\\
+\texttt{https://wiki.analog.com/resources/tools-software\\/linux-software/libiio}
+
+
+\bibitem{vivado}
+Xilinx Vivado Document website:\\
+\texttt{http://www.xilinx.com/products/design-tools/vivado.html}
 
 %\bibitem{XAL}
 %J. Galambos, {\it et. al.}, ``SNS Application Programming Environment'', EPAC 2002, Paris, France (2002).
