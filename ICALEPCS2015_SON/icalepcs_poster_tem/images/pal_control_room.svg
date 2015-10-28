@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="297mm"
+   height="210mm"
+   id="svg3649"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="pal_control_room.svg">
+  <defs
+     id="defs3651">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 372.04724 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="1052.3622 : 372.04724 : 1"
+       inkscape:persp3d-origin="526.18109 : 248.03149 : 1"
+       id="perspective3658" />
+    <inkscape:perspective
+       id="perspective3749"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3823"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3921"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3977"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+  </defs>
+  <sodipodi:namedview
+     inkscape:document-units="mm"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.43415836"
+     inkscape:cx="516.82588"
+     inkscape:cy="154.86593"
+     inkscape:current-layer="layer1"
+     id="namedview3653"
+     showgrid="false"
+     inkscape:window-width="1272"
+     inkscape:window-height="1000"
+     inkscape:window-x="1280"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     showguides="true"
+     inkscape:guide-bbox="true">
+    <sodipodi:guide
+       orientation="1,0"
+       position="-209.60094,215.35921"
+       id="guide4041" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata3655">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <image
+       y="87.266716"
+       x="9.6862946"
+       id="image3751"
+       height="428.07751"
+       width="570.77002"
+       xlink:href="file:///home/jhlee/Documents/tex/presentation/risp/risp_2012_fall_workshop_2012_11_15/pictures/pal_control_center.jpg"
+       transform="matrix(0.99965661,-0.02620406,0.02620406,0.99965661,0,0)" />
+    <image
+       y="22.520222"
+       x="608.9826"
+       id="image3923"
+       height="316.4603"
+       width="421.94705"
+       xlink:href="file:///home/jhlee/Documents/tex/presentation/risp/risp_2012_fall_workshop_2012_11_15/pictures/pal_control_room.jpg" />
+    <image
+       y="390.12268"
+       x="607.74658"
+       id="image3979"
+       height="317.3873"
+       width="423.18311"
+       xlink:href="file:///home/jhlee/Documents/tex/presentation/risp/risp_2012_fall_workshop_2012_11_15/pictures/pal_control_room2.jpg" />
+    <text
+       xml:space="preserve"
+       style="font-size:22.57296944px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Droid Serif;-inkscape-font-specification:Droid Serif"
+       x="26.148611"
+       y="629.16937"
+       id="text4029"><tspan
+         sodipodi:role="line"
+         x="26.148611"
+         y="629.16937"
+         id="tspan4035">all raw signals from all equipments of an accelerator </tspan><tspan
+         sodipodi:role="line"
+         x="26.148611"
+         y="657.38556"
+         id="tspan4033">all logic signals from the raw signals</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:32px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Droid Serif;-inkscape-font-specification:Droid Serif"
+       x="25.336378"
+       y="589.77295"
+       id="text4037"><tspan
+         sodipodi:role="line"
+         id="tspan4039"
+         x="25.336378"
+         y="589.77295"
+         style="font-weight:bold;-inkscape-font-specification:Andale Mono Bold;fill:#800000">Read, Write (change), and Record</tspan></text>
+  </g>
+</svg>
