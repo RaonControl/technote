@@ -11,6 +11,8 @@
 \usepackage{control}
 \usepackage[numbers]{natbib}
 
+\definecolor{babypink}{rgb}{0.96, 0.76, 0.76}
+\definecolor{blizzardblue}{rgb}{0.67, 0.9, 0.93}
 
 \begin{document}
 
@@ -47,6 +49,138 @@ RAON accelerator에서 각 로컬 제어 시스템과 EPICS framework간의 inte
 \chapter{bi,bo}
 
 \chapter{snmp}
+SNMP(Simple Network Management protocol : 간이 망 관리 프로토콜)는 IP 네트워크상의 장치 및 장비들을 관리하고 모니티링하기 위한 인터넷 표준 프로코톨이다. 이는 네트워크 기반의 장비들의 효율적인 관리와 제어 시스템의 일관성, 최적화 기술의 습득 그리고 유지보수의 관점에서 도움이 될 것이다.
+SNMP에 관한 간략한 정보는 아래와 같다.
+
+\begin{itemize}
+\item 인증과 암호화에 따른 차이를 가진 v1/2c/3의 세 가지 버전 지원
+\item 관리되어야 할 장비에 대한 정보인 MIB (Management Information Base)가 필요
+\item MIB 내 객체들은 고유 식별자 (Object Identfiers : OID)를 가짐 
+\end{itemize}
+
+SNMP는 MIB내 OID객체 데이터에 따라 INTEGER, unsigned INTEGER, TIMETICKS, IPADDRESS, OBJID, STRING, HEX STRING, DECIMAL STRING, BITS, unsigned int64, signed int64, float, double의 다양한 데이터 타입을 제공한다. 이는 기존의 EPICS가 제공하는 레코드 타입으로 표현할 수 있지만, 중이온가속기 제어 환경에 맞춘 독자적인 레코드 생성 및 이를 이용한 다양한 SNMP 데이터 처리를 위해 snmp, snmpstr Record가 개발되었다.
+
+\section{레코드 구성 및 사용방법}
+snmp, snmpstr support 모듈의 device type은 Listing \ref{list:lst1}과 같이 \textquotedblleft INST\_IO \textquotedblright 구조를 따른다.
+\begin{lstlisting}[style=termstyle, escapechar=^, caption=snmpDevSoft.dbd파일, label={list:lst1}]]
+include "snmpRecord.dbd"
+include "snmpstrRecord.dbd"
+
+device(snmp,INST_IO,devSNMPRead,"SNMP Read")
+device(snmp,INST_IO,devSNMPWrite,"SNMP Write")
+device(snmpstr,INST_IO,devSNMPRead_str,"SNMP Read")
+\end{lstlisting}
+
+또한, SNMP 사용을 위한 정보는 Listing \ref{list:lst2}와 같이 필드로 구성되어있다. 각 필드에 대한 자세한 설명은 다음 절을 참조바란다.
+\begin{lstlisting}[style=termstyle, escapechar=^, caption=snmp·snmpstr 레코드의 일부, label={list:lst2}]]
+typedef struct snmpRecord {
+	char		host[81];	/* IP Address */
+	char		comm[81];	/* Community */
+	char		oids[81];	/* OID Name */
+	char		auth[81];	/* auth password */
+	char		priv[81];	/* priv password */
+	char		vers[81];	/* SNMP Version */
+	epicsFloat64	val;	/* Current Value */
+
+{...}
+} snmpRecord;
+
+typedef struct snmpstrRecord {
+	char		host[81];	/* IP Address */
+	char		comm[81];	/* Community */
+	char		oids[81];	/* OID Name */
+	char		auth[81];	/* auth password */
+	char		priv[81];	/* priv password */
+	char		vers[81];	/* SNMP Version */
+	char		val[40];	/* Current Value */
+{...}
+} snmpstrRecord;
+\end{lstlisting}
+
+\subsection{- snmpRecord}
+이 레코드는 EPICS의 dbcommon.dbd에 정의된 기본 필드를 바탕으로 생성되어 레코드의 알람과 단위 등이 지원된다. 이는 SNMP의 String 타입을 제외한 모든 타입의 장비의 정보 값을 읽고, Integer 타입의 정보를 쓰는데 사용된다. snmpRecord는 SNMP 명령어 사용을 위해 기존의 필드 외 SNMP 명령어 사용에 필요한 필드를 추가한다. 이는 표 \ref{table:snmprecord}과 같으며 다음과 같은 목적을 가진다. HOST는 장비(Agent)의 주소로 IP 주소나 노드의 이름에 관한 필드이다. COMM은 v2c사용 시 Community String이며, v3 사용 시에 Username을 설정하는 필드이다. OID 필드는 읽거나 쓰고 싶은 장비의 정보 객체를 OID표기법이나 이름으로 설정한다. AUTH, PRIV는 v3 사용 시 암호화와 인증 비밀번호를 설정하는 필드이다. VERS는 레코드가 사용할 SNMP의 버전 설정 필드로 SNMPv2 사용 시 SNM과\_VERSION\_2c, v3 사용 시에는 SNMP\_VERSION\_3로 설정해야한다. OVAL은 레코드에 저장되어 있는 값으로 새로 쓰려는 값과 OVAL의 값이 같으면 설정은 변경되지 않는다. VAL는 최종적으로 PV가 가지는 장비의 정보 값이다.
+
+\begin{table}[!h]
+\begin{center}
+\begin{tabular}{cccc}\hline
+Field & Type & Description & Remark\\ \hline
+HOST & String & Host Address \\ \hline
+COMM & String & Community string (v2c) / Username (v3) \\ \hline
+OIDS & String & OID Name \\ \hline
+AUTH & String & Auth Key for strong authentication \\ \hline
+PRIV & String & Priv Key for data encryption\\ \hline
+VERS & String & SNMP Version & SNMPv2c/v3	 \\ \hline
+OVAL & Double & Old Value \\ \hline
+VAL & Double & Value \\ \hline
+\end{tabular}
+\caption{fields of snmpRecord}
+\label{table:snmprecord} 
+\end{center}
+\end{table} 
+
+APC사 Power Distribution Unit의 아웃렛 모니터링과 제어를 위한 snmp레코드 사용의 예는 다음과 같다.
+
+{\scriptsize
+\begin{verbatim}
+record(snmp, "${A}:${P}_Outlet8_R") {
+    field(DESC, "PDU outlet8 control")
+    field(DTYP, "SNMP Read")
+    field(SCAN, "5 second")
+    field(VERS, "${V2C}")
+    field(HOST, "${HOST}")
+    field(COMM, "${COM}")
+    field(OIDS, "${PO}sPDUOutletCtl.8")
+}
+record(snmp, "${A}:${P}_Outlet8_W") {
+    field(DESC, "PDU outlet8 control")
+    field(DTYP, "SNMP Write")
+    field(SCAN, "5 second")
+    field(VERS, "${V3}")
+    field(AUTH, "${AUTH_P}")
+    field(PRIV, "${PRIV_P}")
+    field(HOST, "${HOST}")
+    field(COMM, "${USER}")
+    field(OIDS, "${PO}sPDUOutletCtl.8")
+}
+\end{verbatim}
+}
+
+\subsection{- snmpstrRecord}
+snmpstrRecord는 Sting, BITS 타입의 데이터를 처리하기 때문에 알람 파라미터를 사용하지 않으며, 장비의 정보를 읽는 것만 가능하도록 생성되었다. 추후 Write를 지원할 예정이다. 필드에 대한 정보는 표 \ref{table:snmpstrrecord}와 같으며, OVAL, VAL 필드를 제외하고는 snmpRecord와 같다. 
+
+\begin{table}[!h]
+\begin{center}
+\begin{tabular}{cccc}\hline
+Field & Type & Description & Remark\\ \hline
+HOST & String & Host Address \\ \hline
+COMM & String & Community string (v2c) / Username (v3) \\ \hline
+OIDS & String & OID Name \\ \hline
+AUTH & String & Auth Key for strong authentication \\ \hline
+PRIV & String & Priv Key for data encryption\\ \hline
+VERS & String & SNMP Version & SNMPv2c	 \\ \hline
+VAL & String & Value \\ \hline
+\end{tabular}
+\caption{fields of snmpstrRecord}
+\label{table:snmpstrrecord} 
+\end{center}
+\end{table} 
+
+아래는 APC PDU Outlet의 이름을 모니터링하는 snmpstr레코드의 사용 예이다. 
+
+{\scriptsize
+\begin{verbatim}
+record(snmpstr, "${A}:${P}_Outlet8_Name") {
+    field(DESC, "PDU outlet8 Name")
+    field(DTYP, "SNMP Read")
+    field(SCAN, "5 second")
+    field(VERS, "${V2C}")
+    field(HOST, "${HOST}")
+    field(COMM, "${COM}")
+    field(OIDS, "${PO}sPDUOutletCtlName.8")
+}
+\end{verbatim}
+}
+
 
 \chapter{motor}
 
