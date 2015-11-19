@@ -1,0 +1,115 @@
+%\documentclass[11pt,a4paper]{article}
+\documentclass[11pt
+  , a4paper
+  , article
+  , oneside
+%  , twoside
+%  , draft
+]{memoir}
+
+\usepackage{control}
+\usepackage[numbers]{natbib}
+
+
+\begin{document}
+
+\newcommand{\technumber}{
+  RAON Control-Document Series\\
+  Revision : v0.1,   Release : a fixed date}
+\title{\textbf{\textbf{RAON Signal Archiver in Cooperation with EPICS Collaboration}}}
+
+
+\author{Seung Hee Nam\thanks{namsh@ibs.re.kr} \\
+  Control Group \\
+  Rare Isotope Science Project\\
+  Institute for Basic Science\\
+  Daejeon, South Korea
+}
+
+\date{\today}
+
+\renewcommand{\maketitlehooka}{\begin{flushright}\textsf{\technumber}\end{flushright}}
+%\renewcommand{\maketitlehookb}{\centering\textsf{\subtitle}}
+%\renewcommand{\maketitlehookc}{C}
+%\renewcommand{\maketitlehookd}{D}
+
+\maketitle
+
+\begin{abstract}
+RAON control system uses the EPICS middle-ware as the software framework of the control system. The every local machines of the RAON will be integrated based on the EPICS framework. The method of the data storing based on the EPICS framework is classified in three ways largely. One is the classic channel archiver of the file-based approach, another is the channel archiver using the relational database approach and the other is the archive appliance complementing the disadvantages of the first and the second approach. The problem of the first mentioned approach, “classic channel archiver”, has been being related to the 
+index file of the meta-data indexing the real data block. That of the second mentioned approach, “relational database channel archiver”, has been being issued about the performance of the file I/O. In recent, the solution, “archive appliance”, compensating for these problems was developed by the Stanford Linear Accelerator Center (SLAC) national laboratory of the United States. 
+\end{abstract}
+
+\chapter{서론}
+\section{연구목적 및 필요성}
+\section{연구의 내용}
+
+\chapter{중이온가속기와 제어 시스템}
+\section{중이온가속기}
+\section{Experimental Physics and Industrial Control System : EPICS}
+\section{Control System Studio : CSS}
+\section{중이온 가속기 제어 시스템의 구성}
+\section{EPICS 개발 환경}
+
+\chapter{File System 및 Storage System }
+\section{RAM File System : ramfs}
+\subsection{ramfs 설정 및 사용}
+\subsection{ramfs benchmark}
+https://wiki.debian.org/ramfs\\
+매우 간단한 파일시스템이다. 보통 모든 파일은 메모리 안에 캐시로 존재하고
+\section{Extended File System : ext}
+\subsection{ext 설정 및 사용}
+\subsection{ext benchmark}
+https://ko.wikipedia.org/wiki/Ext3\\
+https://ko.wikipedia.org/wiki/Ext4
+\section{Network Attached Storage : NAS}
+\subsection{NAS 설정 및 사용}
+\subsection{NAS benchmark}
+\subsection{gluster/nfs}
+\section{Storage Area Network : SAN}
+\subsection{SAN 설정 및 사용}
+\subsection{SAN benchmark}
+\subsection{Luctre/General Parallel File System : GPFS}
+\begin{lstlisting}[style=termstyle]
+https://build.hpdd.intel.com/job/lustre-manual/lastSuccessfulBuild/artifact/lustre_manual.xhtml
+\end{lstlisting}
+
+\chapter{EPICS Archiver}
+\section{EPICS와 Archiver의 융합 필요성 및 계획}
+\section{EPICS Archiver 융합 제어시스템 연구 및 개발}
+\section{Classic channel Archiver}
+\subsection{실험목적}
+\subsection{실험방법}
+\subsection{실험결과}
+\section{RDB Archiver}
+\subsection{실험목적}
+\subsection{실험방법}
+\subsection{실험결과}
+\section{Archiver Appliance}
+\subsection{실험목적}
+\subsection{실험방법}
+\subsection{실험결과}
+\subsection{Archiver Appliance의 일반적 운용}
+왜?AA를 써야하는가?다른것은 없는가? - CCA,RDBA등이 있다 - 왜 CCA,RDBA를 쓰지않는가? - 이슈화된 문제점이 있다 - 어떤 문제점이 있는가? - cca:index 모듈 성능저하 및 부하로인한 저장성능 악화,engine 강제 종료시 특정 데이터 블러과 index의 mismatch, RDBA:내부동장메카니즘이 까다로워 성능에 제약,분산환경운용어려움,입출력파일IO성능낮음 - 문제를 해결할방법은 없는가? - AA:확장성 부하분산 데이터 추출속도단축된 새로운 아카이빙 시스템 - 이시스템이 정말 안정성이나 속도면에서 유리한가? - 테스트 - 테스트 결과 이 시스템이 다른 시스템보다 좋은가? \\
+
+\section{STS}
+\subsection{메모리}
+\subsection{CF Card}
+\section{MTS}
+\section{LTS}
+\subsection{NAS}
+\subsection{SAN}
+\section{Archiver Appliance Full Install}
+\section{풀 인스톨 시스템에서의 스토리지 시스템 리뷰}
+왜?아카이브 어플라이언스 커스터마이징이 필요한가? - 우리에게 맞춘 커스터 마이징된 AA가 없다 - 왜 커스터 마이징된 AA를 써야하는가? - AA를 epics와 같이 쓰기위해서? - 왜 epics와 같이 써야되는가? - 제어프레임웍인 epics와 연동을 해서 제어환경의 통일성을 가지기 위해서 - 제어환경이 어떻게 되는가 - epics,debian등등 - 어떤부분이 커스터 마이징되야하는가? - 커스터마이징,테스트 - 우리환경 내에서 AA가 잘 돌아가는가? - \\
+
+\chapter{결론}
+\clearpage
+
+\begin{center}
+	\label{appx:a}\LARGE\textbf{APPENDIX}
+\end{center}
+
+Pi - ioc, 이미지, 대량생산, case 3d printing, 설치, 어디에, 얼마나\\
+이외 실험준비한 모든것들
+\end{document}
